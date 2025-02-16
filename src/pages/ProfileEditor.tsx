@@ -64,7 +64,10 @@ export default function ProfileEditor() {
         .single();
 
       if (settings?.links) {
-        setLinks(settings.links);
+        setLinks((settings.links as any[]).map(link => ({
+          ...link,
+          icon: "link"
+        })));
       }
     };
 
@@ -146,11 +149,11 @@ export default function ProfileEditor() {
 
       if (profileError) throw profileError;
 
-      // Update links - Cast links array to match Json type
+      // Update links
       const { error: linksError } = await supabase
         .from('profile_settings')
         .update({ 
-          links: links as unknown as Json 
+          links: links.map(({ icon, ...rest }) => rest)
         })
         .eq('id', session.user.id);
 

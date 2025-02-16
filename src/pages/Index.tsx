@@ -87,6 +87,7 @@ const Index = () => {
   const [isDark, setIsDark] = useState(false);
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [username, setUsername] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -109,8 +110,18 @@ const Index = () => {
 
   useEffect(() => {
     if (session?.user) {
-      // Fetch user's profile settings
-      const fetchProfileSettings = async () => {
+      // Fetch user's profile settings and username
+      const fetchProfileData = async () => {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profile) {
+          setUsername(profile.username);
+        }
+
         const { data, error } = await supabase
           .from('profile_settings')
           .select('*')
@@ -125,12 +136,16 @@ const Index = () => {
         if (data) {
           setTheme(THEMES.find(t => t.id === data.theme_id) || THEMES[0]);
           setIsDark(data.is_dark_mode);
-          // Convert the JSON links to the correct type
-          setLinks((data.links || []) as Link[]);
+          // Convert the JSON links to the correct type with proper icon mapping
+          const fetchedLinks = (data.links || []).map((link: any) => ({
+            ...link,
+            icon: <Link2 className="w-5 h-5" />
+          }));
+          setLinks(fetchedLinks);
         }
       };
 
-      fetchProfileSettings();
+      fetchProfileData();
     } else {
       // Set demo links for non-authenticated users
       setLinks([
@@ -171,6 +186,25 @@ const Index = () => {
       toast({
         title: "Error signing out",
         description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleShareProfile = async () => {
+    if (!username) return;
+    
+    try {
+      const profileUrl = `${window.location.origin}/${username}`;
+      await navigator.clipboard.writeText(profileUrl);
+      toast({
+        title: "Link copied!",
+        description: "Your profile link has been copied to clipboard",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to copy link to clipboard",
         variant: "destructive",
       });
     }
@@ -294,7 +328,10 @@ const Index = () => {
             transition={{ delay: 0.5 }}
             className="mt-8 text-center"
           >
-            <button className="inline-flex items-center justify-center space-x-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <button 
+              onClick={handleShareProfile}
+              className="inline-flex items-center justify-center space-x-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
               <Share2 className="w-4 h-4" />
               <span>Share Profile</span>
             </button>
