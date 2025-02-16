@@ -125,7 +125,8 @@ const Index = () => {
         if (data) {
           setTheme(THEMES.find(t => t.id === data.theme_id) || THEMES[0]);
           setIsDark(data.is_dark_mode);
-          setLinks(data.links || []);
+          // Convert the JSON links to the correct type
+          setLinks((data.links || []) as Link[]);
         }
       };
 

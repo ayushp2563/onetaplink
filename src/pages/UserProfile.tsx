@@ -52,7 +52,13 @@ export default function UserProfile() {
           .single();
 
         if (settingsError) throw settingsError;
-        setSettings(settings);
+        
+        // Convert the JSON links to the correct type
+        const typedSettings: ProfileSettings = {
+          ...settings,
+          links: (settings.links || []) as ProfileSettings['links']
+        };
+        setSettings(typedSettings);
       } catch (error) {
         console.error('Error loading profile:', error);
         navigate('/404');

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -100,20 +99,17 @@ export default function ProfileEditor() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("No session");
 
-      // Check username uniqueness
+      // Check username uniqueness using count instead of single()
       if (username) {
-        const { data: existingUser, error: checkError } = await supabase
+        const { count, error: checkError } = await supabase
           .from('profiles')
-          .select('id')
+          .select('*', { count: 'exact', head: true })
           .eq('username', username)
-          .neq('id', session.user.id)
-          .single();
+          .neq('id', session.user.id);
 
-        if (existingUser) {
+        if (checkError) throw checkError;
+        if (count && count > 0) {
           throw new Error("Username already taken");
-        }
-        if (checkError && checkError.code !== 'PGRST116') {
-          throw checkError;
         }
       }
 
@@ -150,10 +146,12 @@ export default function ProfileEditor() {
 
       if (profileError) throw profileError;
 
-      // Update links
+      // Update links - Cast links array to match Json type
       const { error: linksError } = await supabase
         .from('profile_settings')
-        .update({ links })
+        .update({ 
+          links: links as unknown as Json 
+        })
         .eq('id', session.user.id);
 
       if (linksError) throw linksError;
