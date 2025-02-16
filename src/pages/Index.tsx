@@ -223,10 +223,15 @@ const Index = () => {
           </div>
           
           {session ? (
-            <Button variant="ghost" onClick={handleSignOut} className="text-muted-foreground">
-              <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
-            </Button>
+            <div className="flex items-center space-x-4">
+              <Button variant="outline" onClick={() => navigate('/edit-profile')}>
+                Edit Profile
+              </Button>
+              <Button variant="ghost" onClick={handleSignOut} className="text-muted-foreground">
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
+            </div>
           ) : (
             <Button variant="ghost" onClick={() => navigate('/auth')} className="text-muted-foreground">
               Sign In
