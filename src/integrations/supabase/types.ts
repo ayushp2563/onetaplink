@@ -9,7 +9,71 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      profile_settings: {
+        Row: {
+          background_style: string | null
+          created_at: string
+          id: string
+          is_dark_mode: boolean | null
+          links: Json | null
+          theme_id: string
+          updated_at: string
+        }
+        Insert: {
+          background_style?: string | null
+          created_at?: string
+          id: string
+          is_dark_mode?: boolean | null
+          links?: Json | null
+          theme_id?: string
+          updated_at?: string
+        }
+        Update: {
+          background_style?: string | null
+          created_at?: string
+          id?: string
+          is_dark_mode?: boolean | null
+          links?: Json | null
+          theme_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_settings_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
