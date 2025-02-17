@@ -112,36 +112,49 @@ const Index = () => {
     if (session?.user) {
       // Fetch user's profile settings and username
       const fetchProfileData = async () => {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('username')
-          .eq('id', session.user.id)
-          .single();
+        try {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('username')
+            .eq('id', session.user.id)
+            .single();
 
-        if (profile) {
-          setUsername(profile.username);
-        }
+          if (profileError) {
+            console.error('Error fetching profile:', profileError);
+            return;
+          }
 
-        const { data, error } = await supabase
-          .from('profile_settings')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
+          if (profile?.username) {
+            setUsername(profile.username);
+          }
 
-        if (error) {
-          console.error('Error fetching profile settings:', error);
-          return;
-        }
+          const { data: settings, error: settingsError } = await supabase
+            .from('profile_settings')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
 
-        if (data) {
-          setTheme(THEMES.find(t => t.id === data.theme_id) || THEMES[0]);
-          setIsDark(data.is_dark_mode);
-          // Convert the JSON links to the correct type with proper icon mapping
-          const fetchedLinks = (data.links || []).map((link: any) => ({
-            ...link,
-            icon: <Link2 className="w-5 h-5" />
-          }));
-          setLinks(fetchedLinks);
+          if (settingsError) {
+            console.error('Error fetching profile settings:', settingsError);
+            return;
+          }
+
+          if (settings) {
+            setTheme(THEMES.find(t => t.id === settings.theme_id) || THEMES[0]);
+            setIsDark(settings.is_dark_mode);
+            
+            // Ensure links is an array before mapping
+            const linksArray = Array.isArray(settings.links) ? settings.links : [];
+            const fetchedLinks = linksArray.map((link: any) => ({
+              id: link.id,
+              title: link.title,
+              url: link.url,
+              icon: <Link2 className="w-5 h-5" />
+            }));
+            setLinks(fetchedLinks);
+          }
+        } catch (error) {
+          console.error('Error in fetchProfileData:', error);
         }
       };
 
@@ -192,7 +205,14 @@ const Index = () => {
   };
 
   const handleShareProfile = async () => {
-    if (!username) return;
+    if (!username) {
+      toast({
+        title: "Error",
+        description: "Username not found. Please set up your profile first.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     try {
       const profileUrl = `${window.location.origin}/${username}`;
