@@ -3,8 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Link2, ChevronRight, ArrowLeft } from "lucide-react";
+import { Link2, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface Profile {
@@ -20,11 +19,34 @@ interface ProfileSettings {
     id: string;
     title: string;
     url: string;
-    icon?: string;
   }>;
   theme_id: string;
   is_dark_mode: boolean;
 }
+
+interface Theme {
+  id: string;
+  background: string;
+}
+
+const THEMES: { [key: string]: Theme } = {
+  elegant: {
+    id: "elegant",
+    background: "bg-gradient-to-b from-purple-50 to-purple-100 dark:from-purple-950 dark:to-slate-950",
+  },
+  nature: {
+    id: "nature",
+    background: "bg-gradient-to-b from-green-50 to-emerald-100 dark:from-green-950 dark:to-slate-950",
+  },
+  ocean: {
+    id: "ocean",
+    background: "bg-gradient-to-b from-blue-50 to-cyan-100 dark:from-blue-950 dark:to-slate-950",
+  },
+  sunset: {
+    id: "sunset",
+    background: "bg-gradient-to-b from-orange-50 to-red-100 dark:from-orange-950 dark:to-slate-950",
+  },
+};
 
 export default function UserProfile() {
   const { username } = useParams<{ username: string }>();
@@ -53,12 +75,18 @@ export default function UserProfile() {
 
         if (settingsError) throw settingsError;
         
-        // Convert the JSON links to the correct type
         const typedSettings: ProfileSettings = {
           ...settings,
           links: (settings.links || []) as ProfileSettings['links']
         };
         setSettings(typedSettings);
+
+        // Apply theme
+        if (settings.is_dark_mode) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
       } catch (error) {
         console.error('Error loading profile:', error);
         navigate('/404');
@@ -68,6 +96,11 @@ export default function UserProfile() {
     };
 
     loadProfile();
+
+    // Cleanup function to reset theme when leaving the profile page
+    return () => {
+      document.documentElement.classList.remove('dark');
+    };
   }, [username, navigate]);
 
   if (loading) {
@@ -80,18 +113,11 @@ export default function UserProfile() {
 
   if (!profile || !settings) return null;
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted">
-      <div className="container max-w-2xl px-4 py-8 mx-auto">
-        <Button
-          variant="ghost"
-          className="mb-8"
-          onClick={() => navigate("/")}
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
-        </Button>
+  const theme = THEMES[settings.theme_id] || THEMES.elegant;
 
+  return (
+    <div className={`min-h-screen ${theme.background}`}>
+      <div className="container max-w-2xl px-4 py-8 mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
