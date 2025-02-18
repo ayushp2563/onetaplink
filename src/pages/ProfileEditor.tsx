@@ -164,7 +164,8 @@ export default function ProfileEditor() {
         description: "Profile updated successfully",
       });
 
-      navigate(`/${username}`);
+      // Redirect to dashboard after successful update
+      navigate('/dashboard');
     } catch (error: any) {
       toast({
         title: "Error",
