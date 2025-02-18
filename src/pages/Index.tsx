@@ -201,31 +201,60 @@ const Index = () => {
     }
   };
 
-  const handleShareProfile = async () => {
-    if (!username) {
-      toast({
-        title: "Error",
-        description: "Username not found. Please set up your profile first.",
-        variant: "destructive",
-      });
-      return;
-    }
+  // const handleShareProfile = async () => {
+  //   if (!username) {
+  //     toast({
+  //       title: "Error",
+  //       description: "Username not found. Please set up your profile first.",
+  //       variant: "destructive",
+  //     });
+  //     return;
+  //   }
     
-    try {
-      const profileUrl = `${window.location.origin}/${username}`;
-      await navigator.clipboard.writeText(profileUrl);
-      toast({
-        title: "Link copied!",
-        description: "Your profile link has been copied to clipboard",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to copy link to clipboard",
-        variant: "destructive",
-      });
-    }
-  };
+  //   try {
+  //     const profileUrl = `${window.location.origin}/${username}`;
+  //     await navigator.clipboard.writeText(profileUrl);
+  //     toast({
+  //       title: "Link copied!",
+  //       description: "Your profile link has been copied to clipboard",
+  //     });
+  //   } catch (error) {
+  //     toast({
+  //       title: "Error",
+  //       description: "Failed to copy link to clipboard",
+  //       variant: "destructive",
+  //     });
+  //   }
+  // };
+
+  const handleShareProfile = async () => {
+  if (!username || typeof username !== "string" || username.trim() === "") {
+    toast({
+      title: "Error",
+      description: "Username not found. Please set up your profile first.",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  try {
+    const sanitizedUsername = encodeURIComponent(username.trim());
+    const profileUrl = `${window.location.origin}/${sanitizedUsername}`;
+
+    await navigator.clipboard.writeText(profileUrl);
+    toast({
+      title: "Link copied!",
+      description: "Your profile link has been copied to clipboard",
+    });
+  } catch (error) {
+    toast({
+      title: "Error",
+      description: "Failed to copy link to clipboard",
+      variant: "destructive",
+    });
+  }
+};
+
 
   const container = {
     hidden: { opacity: 0 },
