@@ -94,6 +94,9 @@ const Index = () => {
     // Check active session and subscribe to auth changes
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      if (!session) {
+        navigate('/auth');
+      }
       setLoading(false);
     });
 
@@ -101,11 +104,14 @@ const Index = () => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      if (!session) {
+        navigate('/auth');
+      }
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     if (session?.user) {
@@ -166,9 +172,6 @@ const Index = () => {
       };
 
       fetchProfileData();
-    } else {
-      // Set demo links for non-authenticated users and redirect to auth
-      navigate('/auth');
     }
   }, [session, navigate]);
 
