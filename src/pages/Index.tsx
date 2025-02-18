@@ -1,4 +1,3 @@
-
 import { Link2, Share2, ChevronRight, Moon, Sun, Github, Linkedin, Twitter, Mail, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -115,17 +114,25 @@ const Index = () => {
         try {
           const { data: profile, error: profileError } = await supabase
             .from('profiles')
-            .select('username')
+            .select('username, full_name')
             .eq('id', session.user.id)
             .single();
 
           if (profileError) {
             console.error('Error fetching profile:', profileError);
-            return;
+            // If profile doesn't exist, redirect to edit profile
+            if (profileError.code === 'PGRST116') {
+              navigate('/edit-profile');
+              return;
+            }
           }
 
           if (profile?.username) {
             setUsername(profile.username);
+          } else {
+            // If no username is set, redirect to edit profile
+            navigate('/edit-profile');
+            return;
           }
 
           const { data: settings, error: settingsError } = await supabase
@@ -160,23 +167,10 @@ const Index = () => {
 
       fetchProfileData();
     } else {
-      // Set demo links for non-authenticated users
-      setLinks([
-        {
-          id: "1",
-          title: "Create Your Profile",
-          url: "/auth",
-          icon: <Link2 className="w-5 h-5" />,
-        },
-        {
-          id: "2",
-          title: "GitHub",
-          url: "https://github.com",
-          icon: <Github className="w-5 h-5" />,
-        },
-      ]);
+      // Set demo links for non-authenticated users and redirect to auth
+      navigate('/auth');
     }
-  }, [session]);
+  }, [session, navigate]);
 
   useEffect(() => {
     if (isDark) {
@@ -280,7 +274,7 @@ const Index = () => {
           {session ? (
             <div className="flex items-center space-x-4">
               <Button variant="outline" onClick={() => navigate('/edit-profile')}>
-                Edit Profile
+                {username ? 'Edit Profile' : 'Create Profile'}
               </Button>
               <Button variant="ghost" onClick={handleSignOut} className="text-muted-foreground">
                 <LogOut className="w-4 h-4 mr-2" />

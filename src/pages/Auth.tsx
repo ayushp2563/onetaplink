@@ -39,6 +39,9 @@ export default function Auth() {
         title: "Success!",
         description: "Check your email for the confirmation link.",
       });
+
+      // Redirect to dashboard after successful signup
+      navigate("/dashboard");
       
     } catch (error: any) {
       toast({
@@ -61,7 +64,9 @@ export default function Auth() {
       });
 
       if (error) throw error;
-      navigate("/");
+
+      // Redirect to dashboard after successful signin
+      navigate("/dashboard");
     } catch (error: any) {
       toast({
         title: "Error",
