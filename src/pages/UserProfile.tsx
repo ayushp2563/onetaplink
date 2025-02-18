@@ -70,7 +70,7 @@ export default function UserProfile() {
           return;
         }
 
-        console.log("Fetching profile for username:", username);
+        //console.log("Fetching profile for username:", username);
         
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
@@ -91,8 +91,8 @@ export default function UserProfile() {
           return;
         }
 
-        console.log("Profile found:", profile);
-        setProfile(profile);
+        // console.log("Profile found:", profile);
+        // setProfile(profile);
 
         const { data: settings, error: settingsError } = await supabase
           .from('profile_settings')
@@ -106,7 +106,7 @@ export default function UserProfile() {
           return;
         }
 
-        console.log("Settings found:", settings);
+        //console.log("Settings found:", settings);
         
         const typedSettings: ProfileSettings = {
           ...settings,
