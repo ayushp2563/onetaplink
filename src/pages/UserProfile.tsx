@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Link2, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Profile {
   username: string;
@@ -53,18 +54,44 @@ export default function UserProfile() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [settings, setSettings] = useState<ProfileSettings | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     const loadProfile = async () => {
       try {
+        setLoading(true);
+        setError(null);
+
+        if (!username) {
+          setError("Username is required");
+          navigate('/404');
+          return;
+        }
+
+        console.log("Fetching profile for username:", username);
+        
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('*')
           .eq('username', username)
           .single();
 
-        if (profileError) throw profileError;
+        if (profileError) {
+          console.error("Profile error:", profileError);
+          setError("Profile not found");
+          navigate('/404');
+          return;
+        }
+
+        if (!profile) {
+          setError("Profile not found");
+          navigate('/404');
+          return;
+        }
+
+        console.log("Profile found:", profile);
         setProfile(profile);
 
         const { data: settings, error: settingsError } = await supabase
@@ -73,7 +100,13 @@ export default function UserProfile() {
           .eq('id', profile.id)
           .single();
 
-        if (settingsError) throw settingsError;
+        if (settingsError) {
+          console.error("Settings error:", settingsError);
+          setError("Error loading profile settings");
+          return;
+        }
+
+        console.log("Settings found:", settings);
         
         const typedSettings: ProfileSettings = {
           ...settings,
@@ -87,8 +120,14 @@ export default function UserProfile() {
         } else {
           document.documentElement.classList.remove('dark');
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error loading profile:', error);
+        setError(error.message);
+        toast({
+          title: "Error",
+          description: "Failed to load profile",
+          variant: "destructive",
+        });
         navigate('/404');
       } finally {
         setLoading(false);
@@ -101,7 +140,7 @@ export default function UserProfile() {
     return () => {
       document.documentElement.classList.remove('dark');
     };
-  }, [username, navigate]);
+  }, [username, navigate, toast]);
 
   if (loading) {
     return (
@@ -111,7 +150,22 @@ export default function UserProfile() {
     );
   }
 
-  if (!profile || !settings) return null;
+  if (error || !profile || !settings) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Profile Not Found</h1>
+          <p className="text-muted-foreground mb-4">{error || "This profile does not exist"}</p>
+          <button
+            onClick={() => navigate('/')}
+            className="text-primary hover:underline"
+          >
+            Return Home
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const theme = THEMES[settings.theme_id] || THEMES.elegant;
 
