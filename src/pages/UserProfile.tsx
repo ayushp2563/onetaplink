@@ -65,52 +65,75 @@ export default function UserProfile() {
         setError(null);
 
         if (!username) {
+          console.error("No username provided in URL");
           setError("Username is required");
           navigate('/404');
           return;
         }
 
-        //console.log("Fetching profile for username:", username);
+        console.log("Fetching profile for username:", username);
         
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('*')
           .eq('username', username)
-          .single();
+          .maybeSingle();
+
+        console.log("Profile fetch result:", { profile, profileError });
 
         if (profileError) {
           console.error("Profile error:", profileError);
-          setError("Profile not found");
-          navigate('/404');
+          setError("Failed to load profile");
+          toast({
+            title: "Error",
+            description: "Failed to load profile: " + profileError.message,
+            variant: "destructive",
+          });
           return;
         }
 
         if (!profile) {
+          console.log("No profile found for username:", username);
           setError("Profile not found");
-          navigate('/404');
+          toast({
+            title: "Not Found",
+            description: "This profile does not exist",
+            variant: "destructive",
+          });
           return;
         }
 
-        // console.log("Profile found:", profile);
-        // setProfile(profile);
+        setProfile(profile);
 
         const { data: settings, error: settingsError } = await supabase
           .from('profile_settings')
           .select('*')
           .eq('id', profile.id)
-          .single();
+          .maybeSingle();
+
+        console.log("Settings fetch result:", { settings, settingsError });
 
         if (settingsError) {
           console.error("Settings error:", settingsError);
           setError("Error loading profile settings");
+          toast({
+            title: "Error",
+            description: "Failed to load profile settings",
+            variant: "destructive",
+          });
           return;
         }
 
-        //console.log("Settings found:", settings);
+        if (!settings) {
+          console.error("No settings found for profile:", profile.id);
+          setError("Profile settings not found");
+          return;
+        }
         
         const typedSettings: ProfileSettings = {
-          ...settings,
-          links: (settings.links || []) as ProfileSettings['links']
+          links: (settings.links || []) as ProfileSettings['links'],
+          theme_id: settings.theme_id || 'elegant',
+          is_dark_mode: settings.is_dark_mode || false
         };
         setSettings(typedSettings);
 
@@ -128,7 +151,6 @@ export default function UserProfile() {
           description: "Failed to load profile",
           variant: "destructive",
         });
-        navigate('/404');
       } finally {
         setLoading(false);
       }
