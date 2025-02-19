@@ -120,9 +120,9 @@ export default function UserProfile() {
         } else {
           document.documentElement.classList.remove('dark');
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Error loading profile:', error);
-        setError(error.message);
+        setError((error as Error).message);
         toast({
           title: "Error",
           description: "Failed to load profile",

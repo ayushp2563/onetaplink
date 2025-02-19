@@ -43,10 +43,10 @@ export default function Auth() {
       // Redirect to dashboard after successful signup
       navigate("/dashboard");
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.message,
+        description: (error as Error).message,
         variant: "destructive",
       });
     } finally {
@@ -67,7 +67,7 @@ export default function Auth() {
 
       // Redirect to dashboard after successful signin
       navigate("/dashboard");
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
         description: error.message,

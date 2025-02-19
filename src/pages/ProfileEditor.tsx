@@ -44,7 +44,7 @@ export default function ProfileEditor() {
       if (error) {
         toast({
           title: "Error loading profile",
-          description: error.message,
+          description: (error as Error).message,
           variant: "destructive",
         });
         return;
@@ -64,7 +64,7 @@ export default function ProfileEditor() {
         .single();
 
       if (settings?.links) {
-        setLinks((settings.links as any[]).map(link => ({
+        setLinks((settings.links as Link[]).map(link => ({
           ...link,
           icon: "link"
         })));
@@ -166,7 +166,7 @@ export default function ProfileEditor() {
 
       // Redirect to dashboard after successful update
       navigate('/dashboard');
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
         description: error.message,
