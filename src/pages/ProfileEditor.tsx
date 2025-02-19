@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,7 +45,7 @@ export default function ProfileEditor() {
       if (error) {
         toast({
           title: "Error loading profile",
-          description: (error as Error).message,
+          description: error instanceof Error ? error.message : "Failed to load profile",
           variant: "destructive",
         });
         return;
@@ -64,10 +65,15 @@ export default function ProfileEditor() {
         .single();
 
       if (settings?.links) {
-        setLinks((settings.links as Link[]).map(link => ({
-          ...link,
+        // Type assertion and validation
+        const linksData = settings.links as any[];
+        const validLinks = linksData.map(link => ({
+          id: link.id || crypto.randomUUID(),
+          title: link.title || "",
+          url: link.url || "",
           icon: "link"
-        })));
+        }));
+        setLinks(validLinks);
       }
     };
 
@@ -166,10 +172,10 @@ export default function ProfileEditor() {
 
       // Redirect to dashboard after successful update
       navigate('/dashboard');
-    } catch (error: unknown) {
+    } catch (error) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
     } finally {
