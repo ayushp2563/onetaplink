@@ -13,6 +13,7 @@ export type Database = {
         Row: {
           background_style: string | null
           created_at: string
+          font_style: string | null
           id: string
           is_dark_mode: boolean | null
           links: Json | null
@@ -22,6 +23,7 @@ export type Database = {
         Insert: {
           background_style?: string | null
           created_at?: string
+          font_style?: string | null
           id: string
           is_dark_mode?: boolean | null
           links?: Json | null
@@ -31,6 +33,7 @@ export type Database = {
         Update: {
           background_style?: string | null
           created_at?: string
+          font_style?: string | null
           id?: string
           is_dark_mode?: boolean | null
           links?: Json | null
