@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +23,10 @@ interface ProfileSettings {
   }>;
   theme_id: string;
   is_dark_mode: boolean;
+  background_style?: {
+    id: string;
+    url: string;
+  } | null;
 }
 
 interface Theme {
@@ -134,6 +139,16 @@ export default function UserProfile() {
           theme_id: settings.theme_id || 'elegant',
           is_dark_mode: settings.is_dark_mode || false
         };
+
+        // Parse background style if available
+        if (settings.background_style) {
+          try {
+            typedSettings.background_style = JSON.parse(settings.background_style);
+          } catch (e) {
+            console.error("Failed to parse background style:", e);
+          }
+        }
+
         setSettings(typedSettings);
 
         // Apply theme
@@ -189,63 +204,81 @@ export default function UserProfile() {
   }
 
   const theme = THEMES[settings?.theme_id || 'elegant'] || THEMES.elegant;
+  
+  // Determine if we should use a background image or theme gradient
+  const hasBackgroundImage = settings.background_style && settings.background_style.id !== "none" && settings.background_style.url;
+  
+  // Prepare background style based on settings
+  const backgroundStyle = hasBackgroundImage
+    ? { 
+        backgroundImage: `url(${settings.background_style?.url})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }
+    : {};
 
   return (
-    <div className={`min-h-screen ${theme.background}`}>
-      <div className="container max-w-2xl px-4 py-8 mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <Avatar className="w-24 h-24 mx-auto mb-4">
-            <AvatarImage src={profile.avatar_url} />
-            <AvatarFallback>{profile.full_name?.charAt(0) || "?"}</AvatarFallback>
-          </Avatar>
-          <h1 className="text-2xl font-bold mb-2">{profile.full_name}</h1>
-          <p className="text-muted-foreground mb-4">@{profile.username}</p>
-          {profile.bio && (
-            <p className="text-muted-foreground max-w-md mx-auto">{profile.bio}</p>
-          )}
-        </motion.div>
+    <div 
+      className={`min-h-screen ${!hasBackgroundImage ? theme.background : ''}`}
+      style={backgroundStyle}
+    >
+      <div className={`min-h-screen ${hasBackgroundImage ? 'bg-black/30 backdrop-blur-sm' : ''}`}>
+        <div className="container max-w-2xl px-4 py-8 mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-12"
+          >
+            <Avatar className="w-24 h-24 mx-auto mb-4">
+              <AvatarImage src={profile.avatar_url} />
+              <AvatarFallback>{profile.full_name?.charAt(0) || "?"}</AvatarFallback>
+            </Avatar>
+            <h1 className="text-2xl font-bold mb-2">{profile.full_name}</h1>
+            <p className="text-muted-foreground mb-4">@{profile.username}</p>
+            {profile.bio && (
+              <p className="text-muted-foreground max-w-md mx-auto">{profile.bio}</p>
+            )}
+          </motion.div>
 
-        <motion.div
-          variants={{
-            hidden: { opacity: 0 },
-            show: {
-              opacity: 1,
-              transition: { staggerChildren: 0.1 },
-            },
-          }}
-          initial="hidden"
-          animate="show"
-          className="space-y-4"
-        >
-          {settings?.links?.map((link) => (
-            <motion.div
-              key={link.id}
-              variants={{
-                hidden: { opacity: 0, y: 20 },
-                show: { opacity: 1, y: 0 },
-              }}
-            >
-              <a
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block p-4 rounded-lg bg-card hover:bg-accent/50 transition-colors"
+          <motion.div
+            variants={{
+              hidden: { opacity: 0 },
+              show: {
+                opacity: 1,
+                transition: { staggerChildren: 0.1 },
+              },
+            }}
+            initial="hidden"
+            animate="show"
+            className="space-y-4"
+          >
+            {settings?.links?.map((link) => (
+              <motion.div
+                key={link.id}
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  show: { opacity: 1, y: 0 },
+                }}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Link2 className="w-5 h-5 text-primary" />
-                    <span className="font-medium">{link.title}</span>
+                <a
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block p-4 rounded-lg bg-card hover:bg-accent/50 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Link2 className="w-5 h-5 text-primary" />
+                      <span className="font-medium">{link.title}</span>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
                   </div>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                </div>
-              </a>
-            </motion.div>
-          ))}
-        </motion.div>
+                </a>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
       </div>
     </div>
   );

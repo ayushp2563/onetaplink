@@ -8,10 +8,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Link2, ArrowLeft, Upload } from "lucide-react";
+import { Link2, ArrowLeft, Upload, CheckCircle } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Link {
   id: string;
@@ -25,6 +26,13 @@ interface Theme {
   name: string;
   background: string;
   description: string;
+}
+
+interface BackgroundImage {
+  id: string;
+  name: string;
+  url: string;
+  theme: string;
 }
 
 // Available themes
@@ -55,6 +63,46 @@ const THEMES: Theme[] = [
   }
 ];
 
+// Background image options
+const BACKGROUND_IMAGES: BackgroundImage[] = [
+  {
+    id: "none",
+    name: "None (Use Theme)",
+    url: "",
+    theme: "all"
+  },
+  {
+    id: "abstract-purple",
+    name: "Abstract Purple",
+    url: "https://images.unsplash.com/photo-1518770660439-4636190af475",
+    theme: "elegant"
+  },
+  {
+    id: "nature-green",
+    name: "Forest Path",
+    url: "https://images.unsplash.com/photo-1500673922987-e212871fec22",
+    theme: "nature"
+  },
+  {
+    id: "ocean-blue",
+    name: "Ocean Wave",
+    url: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
+    theme: "ocean"
+  },
+  {
+    id: "sunset-warm",
+    name: "Sunset Glow",
+    url: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7",
+    theme: "sunset"
+  },
+  {
+    id: "custom",
+    name: "Custom URL",
+    url: "",
+    theme: "all"
+  }
+];
+
 export default function ProfileEditor() {
   const [loading, setLoading] = useState(false);
   const [bio, setBio] = useState("");
@@ -65,6 +113,9 @@ export default function ProfileEditor() {
   const [fullName, setFullName] = useState("");
   const [themeId, setThemeId] = useState("elegant");
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [backgroundImageId, setBackgroundImageId] = useState("none");
+  const [customBackgroundUrl, setCustomBackgroundUrl] = useState("");
+  const [activeTab, setActiveTab] = useState("theme");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -100,7 +151,7 @@ export default function ProfileEditor() {
 
       const { data: settings } = await supabase
         .from('profile_settings')
-        .select('links, theme_id, is_dark_mode')
+        .select('links, theme_id, is_dark_mode, background_style')
         .eq('id', session.user.id)
         .single();
 
@@ -109,17 +160,36 @@ export default function ProfileEditor() {
         setThemeId(settings.theme_id || "elegant");
         setIsDarkMode(settings.is_dark_mode || false);
         
+        // Handle background image
+        if (settings.background_style) {
+          try {
+            const bgStyle = JSON.parse(settings.background_style);
+            setBackgroundImageId(bgStyle.id || "none");
+            if (bgStyle.id === "custom" && bgStyle.url) {
+              setCustomBackgroundUrl(bgStyle.url);
+            }
+          } catch (e) {
+            console.error("Failed to parse background style:", e);
+          }
+        }
+        
         // Handle links
         if (settings.links) {
-          // Type assertion and validation
-          const linksData = settings.links as any[];
-          const validLinks = linksData.map(link => ({
-            id: link.id || crypto.randomUUID(),
-            title: link.title || "",
-            url: link.url || "",
-            icon: "link"
-          }));
-          setLinks(validLinks);
+          try {
+            // Type assertion and validation
+            const linksData = settings.links as any[];
+            if (Array.isArray(linksData)) {
+              const validLinks = linksData.map(link => ({
+                id: link.id || crypto.randomUUID(),
+                title: link.title || "",
+                url: link.url || "",
+                icon: "link"
+              }));
+              setLinks(validLinks);
+            }
+          } catch (e) {
+            console.error("Failed to parse links:", e);
+          }
         }
       }
     };
@@ -146,6 +216,25 @@ export default function ProfileEditor() {
 
   const handleRemoveLink = (id: string) => {
     setLinks(links.filter(link => link.id !== id));
+  };
+
+  const getBackgroundStyle = () => {
+    if (backgroundImageId === "none") {
+      return null;
+    }
+    
+    if (backgroundImageId === "custom") {
+      return {
+        id: "custom",
+        url: customBackgroundUrl
+      };
+    }
+    
+    const selectedImage = BACKGROUND_IMAGES.find(img => img.id === backgroundImageId);
+    return {
+      id: selectedImage?.id,
+      url: selectedImage?.url
+    };
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -202,6 +291,9 @@ export default function ProfileEditor() {
 
       if (profileError) throw profileError;
 
+      // Prepare background style
+      const backgroundStyle = getBackgroundStyle();
+      
       // Update links and theme settings
       const { error: settingsError } = await supabase
         .from('profile_settings')
@@ -209,6 +301,7 @@ export default function ProfileEditor() {
           links: links.map(({ icon, ...rest }) => rest),
           theme_id: themeId,
           is_dark_mode: isDarkMode,
+          background_style: backgroundStyle ? JSON.stringify(backgroundStyle) : null,
           updated_at: new Date().toISOString(),
         })
         .eq('id', session.user.id);
@@ -232,6 +325,11 @@ export default function ProfileEditor() {
       setLoading(false);
     }
   };
+
+  // Filter background images based on selected theme
+  const filteredBackgroundImages = BACKGROUND_IMAGES.filter(img => 
+    img.theme === "all" || img.theme === themeId
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted p-4">
@@ -302,7 +400,7 @@ export default function ProfileEditor() {
                   className="min-h-[100px]"
                 />
 
-                {/* Theme Selection Section */}
+                {/* Appearance Settings */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Appearance</h3>
                   
@@ -315,32 +413,86 @@ export default function ProfileEditor() {
                     <Label htmlFor="dark-mode">Dark Mode</Label>
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="theme-select">Select Theme</Label>
-                    <RadioGroup 
-                      value={themeId} 
-                      onValueChange={setThemeId} 
-                      className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2"
-                    >
-                      {THEMES.map((theme) => (
-                        <div key={theme.id} className="flex items-start space-x-2">
-                          <RadioGroupItem value={theme.id} id={theme.id} />
-                          <div className="grid gap-1.5">
-                            <Label htmlFor={theme.id} className="font-medium">
-                              {theme.name}
-                            </Label>
-                            <div 
-                              className={`w-full h-12 rounded-md ${theme.background}`}
-                              aria-hidden="true"
-                            />
-                            <p className="text-sm text-muted-foreground">
-                              {theme.description}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </RadioGroup>
-                  </div>
+                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                    <TabsList className="w-full grid grid-cols-2">
+                      <TabsTrigger value="theme">Theme</TabsTrigger>
+                      <TabsTrigger value="background">Background</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="theme">
+                      <div className="space-y-2">
+                        <Label>Select Theme</Label>
+                        <RadioGroup 
+                          value={themeId} 
+                          onValueChange={setThemeId} 
+                          className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2"
+                        >
+                          {THEMES.map((theme) => (
+                            <div key={theme.id} className="flex items-start space-x-2">
+                              <RadioGroupItem value={theme.id} id={theme.id} />
+                              <div className="grid gap-1.5">
+                                <Label htmlFor={theme.id} className="font-medium">
+                                  {theme.name}
+                                </Label>
+                                <div 
+                                  className={`w-full h-12 rounded-md ${theme.background}`}
+                                  aria-hidden="true"
+                                />
+                                <p className="text-sm text-muted-foreground">
+                                  {theme.description}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </RadioGroup>
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="background">
+                      <div className="space-y-2">
+                        <Label>Select Background Image</Label>
+                        <RadioGroup 
+                          value={backgroundImageId} 
+                          onValueChange={setBackgroundImageId} 
+                          className="grid grid-cols-1 gap-4 mt-2"
+                        >
+                          {filteredBackgroundImages.map((image) => (
+                            <div key={image.id} className="flex items-start space-x-2">
+                              <RadioGroupItem value={image.id} id={`bg-${image.id}`} />
+                              <div className="grid gap-1.5 w-full">
+                                <Label htmlFor={`bg-${image.id}`} className="font-medium">
+                                  {image.name}
+                                </Label>
+                                {image.id !== "none" && image.id !== "custom" && (
+                                  <div 
+                                    className="w-full h-24 rounded-md bg-cover bg-center"
+                                    style={{ backgroundImage: `url(${image.url})` }}
+                                    aria-hidden="true"
+                                  />
+                                )}
+                                {image.id === "custom" && (
+                                  <div className="mt-2">
+                                    <Input
+                                      placeholder="Enter image URL"
+                                      value={customBackgroundUrl}
+                                      onChange={(e) => setCustomBackgroundUrl(e.target.value)}
+                                    />
+                                    {customBackgroundUrl && (
+                                      <div 
+                                        className="w-full h-24 rounded-md bg-cover bg-center mt-2"
+                                        style={{ backgroundImage: `url(${customBackgroundUrl})` }}
+                                        aria-hidden="true"
+                                      />
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </RadioGroup>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
                 </div>
 
                 <div className="space-y-4">
