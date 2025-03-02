@@ -218,12 +218,15 @@ export default function UserProfile() {
       }
     : {};
 
+  // Add text shadow for better visibility on any background
+  const textShadowClass = hasBackgroundImage ? "text-shadow" : "";
+
   return (
     <div 
       className={`min-h-screen ${!hasBackgroundImage ? theme.background : ''}`}
       style={backgroundStyle}
     >
-      <div className={`min-h-screen ${hasBackgroundImage ? 'bg-black/30 backdrop-blur-sm' : ''}`}>
+      <div className={`min-h-screen ${hasBackgroundImage ? 'bg-black/40 backdrop-blur-sm' : ''}`}>
         <div className="container max-w-2xl px-4 py-8 mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -234,10 +237,10 @@ export default function UserProfile() {
               <AvatarImage src={profile.avatar_url} />
               <AvatarFallback>{profile.full_name?.charAt(0) || "?"}</AvatarFallback>
             </Avatar>
-            <h1 className="text-2xl font-bold mb-2">{profile.full_name}</h1>
-            <p className="text-muted-foreground mb-4">@{profile.username}</p>
+            <h1 className={`text-2xl font-bold mb-2 text-white ${textShadowClass}`}>{profile.full_name}</h1>
+            <p className={`text-white/80 mb-4 ${textShadowClass}`}>@{profile.username}</p>
             {profile.bio && (
-              <p className="text-muted-foreground max-w-md mx-auto">{profile.bio}</p>
+              <p className={`text-white/90 max-w-md mx-auto ${textShadowClass}`}>{profile.bio}</p>
             )}
           </motion.div>
 
@@ -265,14 +268,14 @@ export default function UserProfile() {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block p-4 rounded-lg bg-card hover:bg-accent/50 transition-colors"
+                  className="block p-4 rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-md transition-colors"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <Link2 className="w-5 h-5 text-primary" />
-                      <span className="font-medium">{link.title}</span>
+                      <Link2 className="w-5 h-5 text-white" />
+                      <span className="font-medium text-white">{link.title}</span>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                    <ChevronRight className="w-5 h-5 text-white/70" />
                   </div>
                 </a>
               </motion.div>

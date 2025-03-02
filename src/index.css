@@ -61,6 +61,11 @@
   }
 }
 
+/* Add text shadow utility class for better text visibility on image backgrounds */
+.text-shadow {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 0.6);
+}
+
 .glass-card {
   @apply bg-white/10 dark:bg-white/5 backdrop-blur-lg border border-white/20 shadow-lg;
 }
