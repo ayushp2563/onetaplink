@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +34,13 @@ interface BackgroundImage {
   theme: string;
 }
 
+interface FontStyle {
+  id: string;
+  name: string;
+  class: string;
+  description: string;
+}
+
 // Available themes
 const THEMES: Theme[] = [
   {
@@ -60,6 +66,34 @@ const THEMES: Theme[] = [
     name: "Sunset",
     background: "bg-gradient-to-b from-orange-50 to-red-100 dark:from-orange-950 dark:to-slate-950",
     description: "Warm orange to red gradient"
+  }
+];
+
+// Font style options
+const FONT_STYLES: FontStyle[] = [
+  {
+    id: "sans",
+    name: "Sans-Serif",
+    class: "font-sans",
+    description: "Clean and modern look"
+  },
+  {
+    id: "serif",
+    name: "Serif",
+    class: "font-serif",
+    description: "Elegant and traditional"
+  },
+  {
+    id: "mono",
+    name: "Monospace",
+    class: "font-mono",
+    description: "Technical and precise"
+  },
+  {
+    id: "display",
+    name: "Display",
+    class: "font-display",
+    description: "Bold and attention-grabbing"
   }
 ];
 
@@ -116,6 +150,7 @@ export default function ProfileEditor() {
   const [backgroundImageId, setBackgroundImageId] = useState("none");
   const [customBackgroundUrl, setCustomBackgroundUrl] = useState("");
   const [activeTab, setActiveTab] = useState("theme");
+  const [fontStyle, setFontStyle] = useState("sans");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -151,16 +186,15 @@ export default function ProfileEditor() {
 
       const { data: settings } = await supabase
         .from('profile_settings')
-        .select('links, theme_id, is_dark_mode, background_style')
+        .select('links, theme_id, is_dark_mode, background_style, font_style')
         .eq('id', session.user.id)
         .single();
 
       if (settings) {
-        // Load theme settings
         setThemeId(settings.theme_id || "elegant");
         setIsDarkMode(settings.is_dark_mode || false);
+        setFontStyle(settings.font_style || "sans");
         
-        // Handle background image
         if (settings.background_style) {
           try {
             const bgStyle = JSON.parse(settings.background_style);
@@ -173,10 +207,8 @@ export default function ProfileEditor() {
           }
         }
         
-        // Handle links
         if (settings.links) {
           try {
-            // Type assertion and validation
             const linksData = settings.links as any[];
             if (Array.isArray(linksData)) {
               const validLinks = linksData.map(link => ({
@@ -244,7 +276,6 @@ export default function ProfileEditor() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("No session");
 
-      // Check username uniqueness using count instead of single()
       if (username) {
         const { count, error: checkError } = await supabase
           .from('profiles')
@@ -258,7 +289,6 @@ export default function ProfileEditor() {
         }
       }
 
-      // Upload avatar if changed
       let avatar_url = avatarUrl;
       if (avatar) {
         const fileExt = avatar.name.split('.').pop();
@@ -277,7 +307,6 @@ export default function ProfileEditor() {
         avatar_url = publicUrl;
       }
 
-      // Update profile
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
@@ -291,10 +320,8 @@ export default function ProfileEditor() {
 
       if (profileError) throw profileError;
 
-      // Prepare background style
       const backgroundStyle = getBackgroundStyle();
       
-      // Update links and theme settings
       const { error: settingsError } = await supabase
         .from('profile_settings')
         .update({ 
@@ -302,6 +329,7 @@ export default function ProfileEditor() {
           theme_id: themeId,
           is_dark_mode: isDarkMode,
           background_style: backgroundStyle ? JSON.stringify(backgroundStyle) : null,
+          font_style: fontStyle,
           updated_at: new Date().toISOString(),
         })
         .eq('id', session.user.id);
@@ -313,7 +341,6 @@ export default function ProfileEditor() {
         description: "Profile updated successfully",
       });
 
-      // Redirect to dashboard after successful update
       navigate('/dashboard');
     } catch (error) {
       toast({
@@ -326,10 +353,13 @@ export default function ProfileEditor() {
     }
   };
 
-  // Filter background images based on selected theme
   const filteredBackgroundImages = BACKGROUND_IMAGES.filter(img => 
     img.theme === "all" || img.theme === themeId
   );
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--font-current', `var(--font-${fontStyle})`);
+  }, [fontStyle]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted p-4">
@@ -400,7 +430,6 @@ export default function ProfileEditor() {
                   className="min-h-[100px]"
                 />
 
-                {/* Appearance Settings */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Appearance</h3>
                   
@@ -414,9 +443,10 @@ export default function ProfileEditor() {
                   </div>
                   
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="w-full grid grid-cols-2">
+                    <TabsList className="w-full grid grid-cols-3">
                       <TabsTrigger value="theme">Theme</TabsTrigger>
                       <TabsTrigger value="background">Background</TabsTrigger>
+                      <TabsTrigger value="font">Font</TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="theme">
@@ -486,6 +516,34 @@ export default function ProfileEditor() {
                                     )}
                                   </div>
                                 )}
+                              </div>
+                            </div>
+                          ))}
+                        </RadioGroup>
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="font">
+                      <div className="space-y-2">
+                        <Label>Select Font Style</Label>
+                        <RadioGroup 
+                          value={fontStyle} 
+                          onValueChange={setFontStyle} 
+                          className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2"
+                        >
+                          {FONT_STYLES.map((font) => (
+                            <div key={font.id} className="flex items-start space-x-2">
+                              <RadioGroupItem value={font.id} id={`font-${font.id}`} />
+                              <div className="grid gap-1.5">
+                                <Label
+                                  htmlFor={`font-${font.id}`} 
+                                  className={`font-medium ${font.class}`}
+                                >
+                                  {font.name}
+                                </Label>
+                                <p className={`text-sm text-muted-foreground ${font.class}`}>
+                                  {font.description}
+                                </p>
                               </div>
                             </div>
                           ))}

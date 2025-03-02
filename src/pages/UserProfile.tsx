@@ -23,6 +23,7 @@ interface ProfileSettings {
   }>;
   theme_id: string;
   is_dark_mode: boolean;
+  font_style?: string;
   background_style?: {
     id: string;
     url: string;
@@ -137,7 +138,8 @@ export default function UserProfile() {
         const typedSettings: ProfileSettings = {
           links: (settings.links || []) as ProfileSettings['links'],
           theme_id: settings.theme_id || 'elegant',
-          is_dark_mode: settings.is_dark_mode || false
+          is_dark_mode: settings.is_dark_mode || false,
+          font_style: settings.font_style || 'sans'
         };
 
         // Parse background style if available
@@ -151,12 +153,15 @@ export default function UserProfile() {
 
         setSettings(typedSettings);
 
-        // Apply theme
+        // Apply theme and font style
         if (settings.is_dark_mode) {
           document.documentElement.classList.add('dark');
         } else {
           document.documentElement.classList.remove('dark');
         }
+
+        // Apply font style
+        document.documentElement.style.setProperty('--font-current', `var(--font-${typedSettings.font_style || 'sans'})`);
       } catch (error: unknown) {
         console.error('Error loading profile:', error);
         setError((error as Error).message);
@@ -175,6 +180,7 @@ export default function UserProfile() {
     // Cleanup function to reset theme when leaving the profile page
     return () => {
       document.documentElement.classList.remove('dark');
+      document.documentElement.style.removeProperty('--font-current');
     };
   }, [username, navigate, toast]);
 

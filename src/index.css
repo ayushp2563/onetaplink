@@ -27,6 +27,13 @@
     --input: 240 5.9% 90%;
     --ring: 142.1 76.2% 36.3%;
     --radius: 0.75rem;
+    
+    /* Font variables */
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-serif: 'Playfair Display', serif;
+    --font-mono: 'Roboto Mono', monospace;
+    --font-display: 'Montserrat', sans-serif;
+    --font-current: var(--font-sans);
   }
 
   .dark {
@@ -58,6 +65,7 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+    font-family: var(--font-current);
   }
 }
 
@@ -101,4 +109,21 @@
 .theme-sunset {
   --primary: 12 76.2% 61.3%;
   --primary-foreground: 210 40% 98%;
+}
+
+/* Font family classes */
+.font-sans {
+  font-family: var(--font-sans);
+}
+
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+.font-display {
+  font-family: var(--font-display);
 }

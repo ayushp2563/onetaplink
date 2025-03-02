@@ -87,11 +87,13 @@ const Index = () => {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState("");
+  const [hasProfile, setHasProfile] = useState(false);
+  const [showDemo, setShowDemo] = useState(false);
+  const [fontStyle, setFontStyle] = useState("sans");
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check active session and subscribe to auth changes
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (!session) {
@@ -115,7 +117,6 @@ const Index = () => {
 
   useEffect(() => {
     if (session?.user) {
-      // Fetch user's profile settings and username
       const fetchProfileData = async () => {
         try {
           const { data: profile, error: profileError } = await supabase
@@ -126,18 +127,22 @@ const Index = () => {
 
           if (profileError) {
             console.error('Error fetching profile:', profileError);
-            // If profile doesn't exist, redirect to edit profile
             if (profileError.code === 'PGRST116') {
-              navigate('/edit-profile');
+              setShowDemo(true);
+              setHasProfile(false);
+              setLinks(DEMO_LINKS);
               return;
             }
           }
 
           if (profile?.username) {
             setUsername(profile.username);
+            setHasProfile(true);
+            setShowDemo(false);
           } else {
-            // If no username is set, redirect to edit profile
-            navigate('/edit-profile');
+            setShowDemo(true);
+            setHasProfile(false);
+            setLinks(DEMO_LINKS);
             return;
           }
 
@@ -149,14 +154,15 @@ const Index = () => {
 
           if (settingsError) {
             console.error('Error fetching profile settings:', settingsError);
+            setLinks(DEMO_LINKS);
             return;
           }
 
           if (settings) {
             setTheme(THEMES.find(t => t.id === settings.theme_id) || THEMES[0]);
             setIsDark(settings.is_dark_mode);
+            setFontStyle(settings.font_style || 'sans');
             
-            // Ensure links is an array before mapping
             const linksArray = Array.isArray(settings.links) ? settings.links : [];
             const fetchedLinks = linksArray.map((link: any) => ({
               id: link.id,
@@ -164,10 +170,11 @@ const Index = () => {
               url: link.url,
               icon: <Link2 className="w-5 h-5" />
             }));
-            setLinks(fetchedLinks);
+            setLinks(fetchedLinks.length > 0 ? fetchedLinks : DEMO_LINKS);
           }
         } catch (error) {
           console.error('Error in fetchProfileData:', error);
+          setLinks(DEMO_LINKS);
         }
       };
 
@@ -187,6 +194,14 @@ const Index = () => {
     document.documentElement.className = theme.class;
   }, [theme]);
 
+  useEffect(() => {
+    document.documentElement.style.setProperty('--font-current', `var(--font-${fontStyle})`);
+
+    return () => {
+      document.documentElement.style.removeProperty('--font-current');
+    };
+  }, [fontStyle]);
+
   const handleSignOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -201,60 +216,33 @@ const Index = () => {
     }
   };
 
-  // const handleShareProfile = async () => {
-  //   if (!username) {
-  //     toast({
-  //       title: "Error",
-  //       description: "Username not found. Please set up your profile first.",
-  //       variant: "destructive",
-  //     });
-  //     return;
-  //   }
-    
-  //   try {
-  //     const profileUrl = `${window.location.origin}/${username}`;
-  //     await navigator.clipboard.writeText(profileUrl);
-  //     toast({
-  //       title: "Link copied!",
-  //       description: "Your profile link has been copied to clipboard",
-  //     });
-  //   } catch (error) {
-  //     toast({
-  //       title: "Error",
-  //       description: "Failed to copy link to clipboard",
-  //       variant: "destructive",
-  //     });
-  //   }
-  // };
-
   const handleShareProfile = async () => {
-  if (!username || typeof username !== "string" || username.trim() === "") {
-    toast({
-      title: "Error",
-      description: "Username not found. Please set up your profile first.",
-      variant: "destructive",
-    });
-    return;
-  }
+    if (!username || typeof username !== "string" || username.trim() === "") {
+      toast({
+        title: "Error",
+        description: "Username not found. Please set up your profile first.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-  try {
-    const sanitizedUsername = encodeURIComponent(username.trim());
-    const profileUrl = `${window.location.origin}/${sanitizedUsername}`;
+    try {
+      const sanitizedUsername = encodeURIComponent(username.trim());
+      const profileUrl = `${window.location.origin}/${sanitizedUsername}`;
 
-    await navigator.clipboard.writeText(profileUrl);
-    toast({
-      title: "Link copied!",
-      description: "Your profile link has been copied to clipboard",
-    });
-  } catch (error) {
-    toast({
-      title: "Error",
-      description: "Failed to copy link to clipboard",
-      variant: "destructive",
-    });
-  }
-};
-
+      await navigator.clipboard.writeText(profileUrl);
+      toast({
+        title: "Link copied!",
+        description: "Your profile link has been copied to clipboard",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to copy link to clipboard",
+        variant: "destructive",
+      });
+    }
+  };
 
   const container = {
     hidden: { opacity: 0 },
@@ -306,7 +294,7 @@ const Index = () => {
           {session ? (
             <div className="flex items-center space-x-4">
               <Button variant="outline" onClick={() => navigate('/edit-profile')}>
-                {username ? 'Edit Profile' : 'Create Profile'}
+                {hasProfile ? 'Edit Profile' : 'Create Profile'}
               </Button>
               <Button variant="ghost" onClick={handleSignOut} className="text-muted-foreground">
                 <LogOut className="w-4 h-4 mr-2" />
@@ -319,6 +307,18 @@ const Index = () => {
             </Button>
           )}
         </div>
+
+        {showDemo && (
+          <div className="mb-6 p-4 bg-primary/10 rounded-lg border border-primary/20">
+            <h2 className="text-lg font-medium mb-2">Welcome to Your Dashboard!</h2>
+            <p className="text-muted-foreground mb-3">
+              This is a demo view. Create your profile to personalize your page and share it with others.
+            </p>
+            <Button onClick={() => navigate('/edit-profile')} variant="default">
+              Create Your Profile
+            </Button>
+          </div>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -334,10 +334,10 @@ const Index = () => {
             />
           </div>
           <h1 className="text-2xl font-bold mb-2">
-            {session ? session.user.user_metadata.full_name || 'Your Name' : 'Welcome to Profilee'}
+            {session ? session.user.user_metadata.full_name || (showDemo ? 'Demo Profile' : 'Your Name') : 'Welcome to Profilee'}
           </h1>
           <p className="text-muted-foreground">
-            {session ? 'Digital Creator & Developer' : 'Create your personalized profile page'}
+            {session ? (showDemo ? 'Sample Profile Page' : 'Digital Creator & Developer') : 'Create your personalized profile page'}
           </p>
         </motion.div>
 
