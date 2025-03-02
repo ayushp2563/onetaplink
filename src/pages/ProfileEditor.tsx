@@ -9,6 +9,9 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Link2, ArrowLeft, Upload } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 interface Link {
   id: string;
@@ -16,6 +19,41 @@ interface Link {
   url: string;
   icon?: string;
 }
+
+interface Theme {
+  id: string;
+  name: string;
+  background: string;
+  description: string;
+}
+
+// Available themes
+const THEMES: Theme[] = [
+  {
+    id: "elegant",
+    name: "Elegant",
+    background: "bg-gradient-to-b from-purple-50 to-purple-100 dark:from-purple-950 dark:to-slate-950",
+    description: "Refined purple gradient"
+  },
+  {
+    id: "nature",
+    name: "Nature",
+    background: "bg-gradient-to-b from-green-50 to-emerald-100 dark:from-green-950 dark:to-slate-950",
+    description: "Fresh green gradient"
+  },
+  {
+    id: "ocean",
+    name: "Ocean",
+    background: "bg-gradient-to-b from-blue-50 to-cyan-100 dark:from-blue-950 dark:to-slate-950",
+    description: "Calming blue gradient"
+  },
+  {
+    id: "sunset",
+    name: "Sunset",
+    background: "bg-gradient-to-b from-orange-50 to-red-100 dark:from-orange-950 dark:to-slate-950",
+    description: "Warm orange to red gradient"
+  }
+];
 
 export default function ProfileEditor() {
   const [loading, setLoading] = useState(false);
@@ -25,6 +63,8 @@ export default function ProfileEditor() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
+  const [themeId, setThemeId] = useState("elegant");
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -60,20 +100,27 @@ export default function ProfileEditor() {
 
       const { data: settings } = await supabase
         .from('profile_settings')
-        .select('links')
+        .select('links, theme_id, is_dark_mode')
         .eq('id', session.user.id)
         .single();
 
-      if (settings?.links) {
-        // Type assertion and validation
-        const linksData = settings.links as any[];
-        const validLinks = linksData.map(link => ({
-          id: link.id || crypto.randomUUID(),
-          title: link.title || "",
-          url: link.url || "",
-          icon: "link"
-        }));
-        setLinks(validLinks);
+      if (settings) {
+        // Load theme settings
+        setThemeId(settings.theme_id || "elegant");
+        setIsDarkMode(settings.is_dark_mode || false);
+        
+        // Handle links
+        if (settings.links) {
+          // Type assertion and validation
+          const linksData = settings.links as any[];
+          const validLinks = linksData.map(link => ({
+            id: link.id || crypto.randomUUID(),
+            title: link.title || "",
+            url: link.url || "",
+            icon: "link"
+          }));
+          setLinks(validLinks);
+        }
       }
     };
 
@@ -155,15 +202,18 @@ export default function ProfileEditor() {
 
       if (profileError) throw profileError;
 
-      // Update links
-      const { error: linksError } = await supabase
+      // Update links and theme settings
+      const { error: settingsError } = await supabase
         .from('profile_settings')
         .update({ 
-          links: links.map(({ icon, ...rest }) => rest)
+          links: links.map(({ icon, ...rest }) => rest),
+          theme_id: themeId,
+          is_dark_mode: isDarkMode,
+          updated_at: new Date().toISOString(),
         })
         .eq('id', session.user.id);
 
-      if (linksError) throw linksError;
+      if (settingsError) throw settingsError;
 
       toast({
         title: "Success",
@@ -251,6 +301,47 @@ export default function ProfileEditor() {
                   onChange={(e) => setBio(e.target.value)}
                   className="min-h-[100px]"
                 />
+
+                {/* Theme Selection Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Appearance</h3>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="dark-mode" 
+                      checked={isDarkMode} 
+                      onCheckedChange={setIsDarkMode} 
+                    />
+                    <Label htmlFor="dark-mode">Dark Mode</Label>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="theme-select">Select Theme</Label>
+                    <RadioGroup 
+                      value={themeId} 
+                      onValueChange={setThemeId} 
+                      className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2"
+                    >
+                      {THEMES.map((theme) => (
+                        <div key={theme.id} className="flex items-start space-x-2">
+                          <RadioGroupItem value={theme.id} id={theme.id} />
+                          <div className="grid gap-1.5">
+                            <Label htmlFor={theme.id} className="font-medium">
+                              {theme.name}
+                            </Label>
+                            <div 
+                              className={`w-full h-12 rounded-md ${theme.background}`}
+                              aria-hidden="true"
+                            />
+                            <p className="text-sm text-muted-foreground">
+                              {theme.description}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  </div>
+                </div>
 
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">

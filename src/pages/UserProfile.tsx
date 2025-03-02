@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -86,7 +85,7 @@ export default function UserProfile() {
           setError("Failed to load profile");
           toast({
             title: "Error",
-            description: "Failed to load profile: " + profileError.message,
+            description: "Failed to load profile: " + (profileError instanceof Error ? profileError.message : "Unknown error"),
             variant: "destructive",
           });
           return;
@@ -189,7 +188,7 @@ export default function UserProfile() {
     );
   }
 
-  const theme = THEMES[settings.theme_id] || THEMES.elegant;
+  const theme = THEMES[settings?.theme_id || 'elegant'] || THEMES.elegant;
 
   return (
     <div className={`min-h-screen ${theme.background}`}>
@@ -222,7 +221,7 @@ export default function UserProfile() {
           animate="show"
           className="space-y-4"
         >
-          {settings.links?.map((link) => (
+          {settings?.links?.map((link) => (
             <motion.div
               key={link.id}
               variants={{
