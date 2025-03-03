@@ -127,3 +127,31 @@
 .font-display {
   font-family: var(--font-display);
 }
+
+/* New responsive utility classes */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  h1, h2, h3 {
+    word-break: break-word;
+  }
+}
+
+/* Add smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Improve form elements on small screens */
+@media (max-width: 640px) {
+  input, select, textarea {
+    font-size: 16px !important; /* Prevents zoom on mobile */
+  }
+  
+  .form-row {
+    flex-direction: column;
+  }
+}

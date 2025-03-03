@@ -41,7 +41,6 @@ interface FontStyle {
   description: string;
 }
 
-// Available themes
 const THEMES: Theme[] = [
   {
     id: "elegant",
@@ -69,7 +68,6 @@ const THEMES: Theme[] = [
   }
 ];
 
-// Font style options
 const FONT_STYLES: FontStyle[] = [
   {
     id: "sans",
@@ -97,7 +95,6 @@ const FONT_STYLES: FontStyle[] = [
   }
 ];
 
-// Background image options
 const BACKGROUND_IMAGES: BackgroundImage[] = [
   {
     id: "none",
@@ -363,24 +360,24 @@ export default function ProfileEditor() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted p-4">
-      <div className="container max-w-2xl mx-auto">
+      <div className="container max-w-4xl mx-auto">
         <Button
           variant="ghost"
           className="mb-4"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/dashboard")}
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
+          Back to Dashboard
         </Button>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Edit Profile</CardTitle>
+        <Card className="overflow-hidden">
+          <CardHeader className="px-4 sm:px-6">
+            <CardTitle className="text-xl sm:text-2xl">Edit Profile</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="flex flex-col items-center space-y-4">
-                <Avatar className="w-24 h-24">
+                <Avatar className="w-20 h-20 sm:w-24 sm:h-24">
                   <AvatarImage src={avatarUrl} />
                   <AvatarFallback>{fullName?.charAt(0) || "?"}</AvatarFallback>
                 </Avatar>
@@ -396,8 +393,9 @@ export default function ProfileEditor() {
                     type="button"
                     variant="outline"
                     onClick={() => document.getElementById("avatar-upload")?.click()}
+                    className="text-xs sm:text-sm"
                   >
-                    <Upload className="w-4 h-4 mr-2" />
+                    <Upload className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     Change Avatar
                   </Button>
                 </div>
@@ -410,8 +408,9 @@ export default function ProfileEditor() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
+                    className="w-full"
                   />
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                     This will be your profile URL: profilee.app/{username}
                   </p>
                 </div>
@@ -421,13 +420,14 @@ export default function ProfileEditor() {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required
+                  className="w-full"
                 />
 
                 <Textarea
                   placeholder="Write a short bio about yourself..."
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
-                  className="min-h-[100px]"
+                  className="min-h-[100px] w-full"
                 />
 
                 <div className="space-y-4">
@@ -443,10 +443,10 @@ export default function ProfileEditor() {
                   </div>
                   
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="w-full grid grid-cols-3">
-                      <TabsTrigger value="theme">Theme</TabsTrigger>
-                      <TabsTrigger value="background">Background</TabsTrigger>
-                      <TabsTrigger value="font">Font</TabsTrigger>
+                    <TabsList className="w-full grid grid-cols-3 mb-4">
+                      <TabsTrigger value="theme" className="text-xs sm:text-sm">Theme</TabsTrigger>
+                      <TabsTrigger value="background" className="text-xs sm:text-sm">Background</TabsTrigger>
+                      <TabsTrigger value="font" className="text-xs sm:text-sm">Font</TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="theme">
@@ -455,20 +455,20 @@ export default function ProfileEditor() {
                         <RadioGroup 
                           value={themeId} 
                           onValueChange={setThemeId} 
-                          className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2"
+                          className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2"
                         >
                           {THEMES.map((theme) => (
                             <div key={theme.id} className="flex items-start space-x-2">
                               <RadioGroupItem value={theme.id} id={theme.id} />
                               <div className="grid gap-1.5">
-                                <Label htmlFor={theme.id} className="font-medium">
+                                <Label htmlFor={theme.id} className="font-medium text-sm sm:text-base">
                                   {theme.name}
                                 </Label>
                                 <div 
-                                  className={`w-full h-12 rounded-md ${theme.background}`}
+                                  className={`w-full h-8 sm:h-12 rounded-md ${theme.background}`}
                                   aria-hidden="true"
                                 />
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-xs sm:text-sm text-muted-foreground">
                                   {theme.description}
                                 </p>
                               </div>
@@ -490,26 +490,27 @@ export default function ProfileEditor() {
                             <div key={image.id} className="flex items-start space-x-2">
                               <RadioGroupItem value={image.id} id={`bg-${image.id}`} />
                               <div className="grid gap-1.5 w-full">
-                                <Label htmlFor={`bg-${image.id}`} className="font-medium">
+                                <Label htmlFor={`bg-${image.id}`} className="font-medium text-sm sm:text-base">
                                   {image.name}
                                 </Label>
                                 {image.id !== "none" && image.id !== "custom" && (
                                   <div 
-                                    className="w-full h-24 rounded-md bg-cover bg-center"
+                                    className="w-full h-16 sm:h-24 rounded-md bg-cover bg-center"
                                     style={{ backgroundImage: `url(${image.url})` }}
                                     aria-hidden="true"
                                   />
                                 )}
                                 {image.id === "custom" && (
-                                  <div className="mt-2">
+                                  <div className="mt-2 w-full">
                                     <Input
                                       placeholder="Enter image URL"
                                       value={customBackgroundUrl}
                                       onChange={(e) => setCustomBackgroundUrl(e.target.value)}
+                                      className="w-full text-xs sm:text-sm"
                                     />
                                     {customBackgroundUrl && (
                                       <div 
-                                        className="w-full h-24 rounded-md bg-cover bg-center mt-2"
+                                        className="w-full h-16 sm:h-24 rounded-md bg-cover bg-center mt-2"
                                         style={{ backgroundImage: `url(${customBackgroundUrl})` }}
                                         aria-hidden="true"
                                       />
@@ -529,7 +530,7 @@ export default function ProfileEditor() {
                         <RadioGroup 
                           value={fontStyle} 
                           onValueChange={setFontStyle} 
-                          className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2"
+                          className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2"
                         >
                           {FONT_STYLES.map((font) => (
                             <div key={font.id} className="flex items-start space-x-2">
@@ -537,11 +538,11 @@ export default function ProfileEditor() {
                               <div className="grid gap-1.5">
                                 <Label
                                   htmlFor={`font-${font.id}`} 
-                                  className={`font-medium ${font.class}`}
+                                  className={`font-medium text-sm sm:text-base ${font.class}`}
                                 >
                                   {font.name}
                                 </Label>
-                                <p className={`text-sm text-muted-foreground ${font.class}`}>
+                                <p className={`text-xs sm:text-sm text-muted-foreground ${font.class}`}>
                                   {font.description}
                                 </p>
                               </div>
@@ -556,29 +557,32 @@ export default function ProfileEditor() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <h3 className="text-lg font-medium">Links</h3>
-                    <Button type="button" variant="outline" onClick={handleAddLink}>
+                    <Button type="button" variant="outline" onClick={handleAddLink} className="text-xs sm:text-sm">
                       Add Link
                     </Button>
                   </div>
 
                   {links.map((link) => (
-                    <div key={link.id} className="flex gap-2">
+                    <div key={link.id} className="flex flex-col sm:flex-row gap-2">
                       <Input
                         placeholder="Title"
                         value={link.title}
                         onChange={(e) => handleLinkChange(link.id, 'title', e.target.value)}
                         required
+                        className="flex-1 text-xs sm:text-sm"
                       />
                       <Input
                         placeholder="URL"
                         value={link.url}
                         onChange={(e) => handleLinkChange(link.id, 'url', e.target.value)}
                         required
+                        className="flex-1 text-xs sm:text-sm"
                       />
                       <Button
                         type="button"
                         variant="destructive"
                         onClick={() => handleRemoveLink(link.id)}
+                        className="mt-2 sm:mt-0 text-xs sm:text-sm"
                       >
                         Remove
                       </Button>
@@ -587,9 +591,11 @@ export default function ProfileEditor() {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Saving..." : "Save Profile"}
-              </Button>
+              <div className="pt-4">
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Saving..." : "Save Profile"}
+                </Button>
+              </div>
             </form>
           </CardContent>
         </Card>
