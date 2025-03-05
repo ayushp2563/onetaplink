@@ -1,11 +1,11 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Link2, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from "@/components/ui/use-toast";
+import { ProfileContent } from "@/components/layouts/ProfileContent";
+import { LAYOUT_TYPES } from "@/constants/layouts";
 
 interface Profile {
   username: string;
@@ -24,6 +24,7 @@ interface ProfileSettings {
   theme_id: string;
   is_dark_mode: boolean;
   font_style?: string;
+  layout_type?: string;
   background_style?: {
     id: string;
     url: string;
@@ -139,10 +140,10 @@ export default function UserProfile() {
           links: (settings.links || []) as ProfileSettings['links'],
           theme_id: settings.theme_id || 'elegant',
           is_dark_mode: settings.is_dark_mode || false,
-          font_style: settings.font_style || 'sans'
+          font_style: settings.font_style || 'sans',
+          layout_type: settings.layout_type || LAYOUT_TYPES.LINKS
         };
 
-        // Parse background style if available
         if (settings.background_style) {
           try {
             typedSettings.background_style = JSON.parse(settings.background_style);
@@ -153,14 +154,12 @@ export default function UserProfile() {
 
         setSettings(typedSettings);
 
-        // Apply theme and font style
         if (settings.is_dark_mode) {
           document.documentElement.classList.add('dark');
         } else {
           document.documentElement.classList.remove('dark');
         }
 
-        // Apply font style
         document.documentElement.style.setProperty('--font-current', `var(--font-${typedSettings.font_style || 'sans'})`);
       } catch (error: unknown) {
         console.error('Error loading profile:', error);
@@ -177,7 +176,6 @@ export default function UserProfile() {
 
     loadProfile();
 
-    // Cleanup function to reset theme when leaving the profile page
     return () => {
       document.documentElement.classList.remove('dark');
       document.documentElement.style.removeProperty('--font-current');
@@ -211,10 +209,8 @@ export default function UserProfile() {
 
   const theme = THEMES[settings?.theme_id || 'elegant'] || THEMES.elegant;
   
-  // Determine if we should use a background image or theme gradient
   const hasBackgroundImage = settings.background_style && settings.background_style.id !== "none" && settings.background_style.url;
   
-  // Prepare background style based on settings
   const backgroundStyle = hasBackgroundImage
     ? { 
         backgroundImage: `url(${settings.background_style?.url})`,
@@ -224,7 +220,6 @@ export default function UserProfile() {
       }
     : {};
 
-  // Add text shadow for better visibility on any background
   const textShadowClass = hasBackgroundImage ? "text-shadow" : "";
 
   return (
@@ -246,47 +241,15 @@ export default function UserProfile() {
             <h1 className={`text-2xl font-bold mb-2 text-white ${textShadowClass}`}>{profile.full_name}</h1>
             <p className={`text-white/80 mb-4 ${textShadowClass}`}>@{profile.username}</p>
             {profile.bio && (
-              <p className={`text-white/90 max-w-md mx-auto ${textShadowClass}`}>{profile.bio}</p>
+              <p className={`text-white/90 max-w-md mx-auto mb-8 ${textShadowClass}`}>{profile.bio}</p>
             )}
           </motion.div>
 
-          <motion.div
-            variants={{
-              hidden: { opacity: 0 },
-              show: {
-                opacity: 1,
-                transition: { staggerChildren: 0.1 },
-              },
-            }}
-            initial="hidden"
-            animate="show"
-            className="space-y-4"
-          >
-            {settings?.links?.map((link) => (
-              <motion.div
-                key={link.id}
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  show: { opacity: 1, y: 0 },
-                }}
-              >
-                <a
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block p-4 rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-md transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <Link2 className="w-5 h-5 text-white" />
-                      <span className="font-medium text-white">{link.title}</span>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-white/70" />
-                  </div>
-                </a>
-              </motion.div>
-            ))}
-          </motion.div>
+          <ProfileContent 
+            layoutType={settings?.layout_type || LAYOUT_TYPES.LINKS}
+            links={settings?.links || []}
+            textShadowClass={textShadowClass}
+          />
         </div>
       </div>
     </div>

@@ -16,6 +16,7 @@ export type Database = {
           font_style: string | null
           id: string
           is_dark_mode: boolean | null
+          layout_type: string | null
           links: Json | null
           theme_id: string
           updated_at: string
@@ -26,6 +27,7 @@ export type Database = {
           font_style?: string | null
           id: string
           is_dark_mode?: boolean | null
+          layout_type?: string | null
           links?: Json | null
           theme_id?: string
           updated_at?: string
@@ -36,6 +38,7 @@ export type Database = {
           font_style?: string | null
           id?: string
           is_dark_mode?: boolean | null
+          layout_type?: string | null
           links?: Json | null
           theme_id?: string
           updated_at?: string

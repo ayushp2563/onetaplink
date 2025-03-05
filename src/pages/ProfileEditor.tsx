@@ -7,11 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Link2, ArrowLeft, Upload, CheckCircle } from "lucide-react";
+import { Link2, ArrowLeft, Upload, List, LayoutGrid, Layout } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LAYOUT_OPTIONS, LAYOUT_TYPES } from "@/constants/layouts";
 
 interface Link {
   id: string;
@@ -148,6 +149,7 @@ export default function ProfileEditor() {
   const [customBackgroundUrl, setCustomBackgroundUrl] = useState("");
   const [activeTab, setActiveTab] = useState("theme");
   const [fontStyle, setFontStyle] = useState("sans");
+  const [layoutType, setLayoutType] = useState(LAYOUT_TYPES.LINKS);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -183,7 +185,7 @@ export default function ProfileEditor() {
 
       const { data: settings } = await supabase
         .from('profile_settings')
-        .select('links, theme_id, is_dark_mode, background_style, font_style')
+        .select('links, theme_id, is_dark_mode, background_style, font_style, layout_type')
         .eq('id', session.user.id)
         .single();
 
@@ -191,6 +193,7 @@ export default function ProfileEditor() {
         setThemeId(settings.theme_id || "elegant");
         setIsDarkMode(settings.is_dark_mode || false);
         setFontStyle(settings.font_style || "sans");
+        setLayoutType(settings.layout_type || LAYOUT_TYPES.LINKS);
         
         if (settings.background_style) {
           try {
@@ -327,6 +330,7 @@ export default function ProfileEditor() {
           is_dark_mode: isDarkMode,
           background_style: backgroundStyle ? JSON.stringify(backgroundStyle) : null,
           font_style: fontStyle,
+          layout_type: layoutType,
           updated_at: new Date().toISOString(),
         })
         .eq('id', session.user.id);
@@ -443,10 +447,11 @@ export default function ProfileEditor() {
                   </div>
                   
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="w-full grid grid-cols-3 mb-4">
+                    <TabsList className="w-full grid grid-cols-4 mb-4">
                       <TabsTrigger value="theme" className="text-xs sm:text-sm">Theme</TabsTrigger>
                       <TabsTrigger value="background" className="text-xs sm:text-sm">Background</TabsTrigger>
                       <TabsTrigger value="font" className="text-xs sm:text-sm">Font</TabsTrigger>
+                      <TabsTrigger value="layout" className="text-xs sm:text-sm">Layout</TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="theme">
@@ -548,6 +553,44 @@ export default function ProfileEditor() {
                               </div>
                             </div>
                           ))}
+                        </RadioGroup>
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="layout">
+                      <div className="space-y-2">
+                        <Label>Select Layout</Label>
+                        <RadioGroup 
+                          value={layoutType} 
+                          onValueChange={setLayoutType} 
+                          className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2"
+                        >
+                          {LAYOUT_OPTIONS.map((layout) => {
+                            const IconComponent = 
+                              layout.icon === 'list' ? List : 
+                              layout.icon === 'layout-grid' ? LayoutGrid : 
+                              Layout;
+                            
+                            return (
+                              <div key={layout.id} className="flex items-start space-x-2">
+                                <RadioGroupItem value={layout.id} id={`layout-${layout.id}`} />
+                                <div className="grid gap-1.5">
+                                  <Label
+                                    htmlFor={`layout-${layout.id}`}
+                                    className="font-medium text-sm sm:text-base"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <IconComponent className="w-4 h-4" />
+                                      <span>{layout.name}</span>
+                                    </div>
+                                  </Label>
+                                  <p className="text-xs sm:text-sm text-muted-foreground">
+                                    {layout.description}
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </RadioGroup>
                       </div>
                     </TabsContent>
