@@ -570,7 +570,11 @@ export default function ProfileEditor() {
                         <Label>Select Layout</Label>
                         <RadioGroup 
                           value={layoutType} 
-                          onValueChange={(value: LayoutType) => setLayoutType(value)} 
+                          onValueChange={(value) => {
+                            if (Object.values(LAYOUT_TYPES).includes(value as LayoutType)) {
+                              setLayoutType(value as LayoutType);
+                            }
+                          }} 
                           className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2"
                         >
                           {LAYOUT_OPTIONS.map((layout) => {
