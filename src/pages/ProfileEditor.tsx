@@ -147,7 +147,11 @@ export default function ProfileEditor() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [backgroundImageId, setBackgroundImageId] = useState("none");
   const [customBackgroundUrl, setCustomBackgroundUrl] = useState("");
-  const [activeTab, setActiveTab] = useState("theme");
+  
+  type TabType = "theme" | "background" | "font" | "layout";
+  
+  const [activeTab, setActiveTab] = useState<TabType>("theme");
+  
   const [fontStyle, setFontStyle] = useState("sans");
   const [layoutType, setLayoutType] = useState<LayoutType>(LAYOUT_TYPES.LINKS);
   const navigate = useNavigate();
@@ -446,7 +450,11 @@ export default function ProfileEditor() {
                     <Label htmlFor="dark-mode">Dark Mode</Label>
                   </div>
                   
-                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <Tabs 
+                    value={activeTab} 
+                    onValueChange={(value: TabType) => setActiveTab(value)} 
+                    className="w-full"
+                  >
                     <TabsList className="w-full grid grid-cols-4 mb-4">
                       <TabsTrigger value="theme" className="text-xs sm:text-sm">Theme</TabsTrigger>
                       <TabsTrigger value="background" className="text-xs sm:text-sm">Background</TabsTrigger>
