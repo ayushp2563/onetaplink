@@ -12,7 +12,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LAYOUT_OPTIONS, LAYOUT_TYPES } from "@/constants/layouts";
+import { LAYOUT_OPTIONS, LAYOUT_TYPES, LayoutType } from "@/constants/layouts";
 
 interface Link {
   id: string;
@@ -149,7 +149,7 @@ export default function ProfileEditor() {
   const [customBackgroundUrl, setCustomBackgroundUrl] = useState("");
   const [activeTab, setActiveTab] = useState("theme");
   const [fontStyle, setFontStyle] = useState("sans");
-  const [layoutType, setLayoutType] = useState(LAYOUT_TYPES.LINKS);
+  const [layoutType, setLayoutType] = useState<LayoutType>(LAYOUT_TYPES.LINKS);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -562,7 +562,7 @@ export default function ProfileEditor() {
                         <Label>Select Layout</Label>
                         <RadioGroup 
                           value={layoutType} 
-                          onValueChange={setLayoutType} 
+                          onValueChange={(value: LayoutType) => setLayoutType(value)} 
                           className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2"
                         >
                           {LAYOUT_OPTIONS.map((layout) => {

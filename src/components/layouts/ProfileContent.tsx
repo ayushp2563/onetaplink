@@ -2,7 +2,7 @@
 import { LinksLayout } from "./LinksLayout";
 import { BentoLayout } from "./BentoLayout";
 import { MixedLayout } from "./MixedLayout";
-import { LAYOUT_TYPES } from "@/constants/layouts";
+import { LAYOUT_TYPES, LayoutType } from "@/constants/layouts";
 
 interface Link {
   id: string;
@@ -11,7 +11,7 @@ interface Link {
 }
 
 interface ProfileContentProps {
-  layoutType: string;
+  layoutType: LayoutType;
   links: Link[];
   textShadowClass?: string;
 }

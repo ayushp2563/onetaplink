@@ -5,7 +5,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { motion } from "framer-motion";
 import { useToast } from "@/components/ui/use-toast";
 import { ProfileContent } from "@/components/layouts/ProfileContent";
-import { LAYOUT_TYPES } from "@/constants/layouts";
+import { LAYOUT_TYPES, LayoutType } from "@/constants/layouts";
 
 interface Profile {
   username: string;
@@ -24,7 +24,7 @@ interface ProfileSettings {
   theme_id: string;
   is_dark_mode: boolean;
   font_style?: string;
-  layout_type?: string;
+  layout_type?: LayoutType;
   background_style?: {
     id: string;
     url: string;
@@ -141,7 +141,7 @@ export default function UserProfile() {
           theme_id: settings.theme_id || 'elegant',
           is_dark_mode: settings.is_dark_mode || false,
           font_style: settings.font_style || 'sans',
-          layout_type: settings.layout_type || LAYOUT_TYPES.LINKS
+          layout_type: (settings.layout_type as LayoutType) || LAYOUT_TYPES.LINKS
         };
 
         if (settings.background_style) {
