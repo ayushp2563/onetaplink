@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface Link {
   id: string;
@@ -182,13 +183,18 @@ const Index = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <div className="relative w-24 h-24 mx-auto mb-4">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-full animate-pulse" />
-            <img
-              src="/placeholder.svg"
-              alt="Profile"
-              className="relative w-full h-full rounded-full object-cover border-2 border-white/50"
-            />
+          <div className="relative w-32 h-32 mx-auto mb-6">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-full animate-pulse opacity-80" />
+            <Avatar className="w-full h-full border-4 border-white/50 dark:border-black/20 shadow-lg">
+              <AvatarImage
+                src="/placeholder.svg"
+                alt="Profile"
+                className="object-cover"
+              />
+              <AvatarFallback className="text-2xl font-bold">
+                {session?.user?.user_metadata?.full_name?.charAt(0) || '?'}
+              </AvatarFallback>
+            </Avatar>
           </div>
           <h1 className="text-2xl font-bold mb-2">
             {session ? session.user.user_metadata.full_name || 'Your Profile' : 'Welcome to Profilee'}
