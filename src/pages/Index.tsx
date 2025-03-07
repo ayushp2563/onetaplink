@@ -1,5 +1,5 @@
 
-import { LogOut } from "lucide-react";
+import { LogOut, Share2, Copy } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
@@ -167,6 +167,23 @@ const Index = () => {
     }
   };
 
+  const handleShareProfile = () => {
+    if (username) {
+      const profileUrl = `${window.location.origin}/${username}`;
+      navigator.clipboard.writeText(profileUrl);
+      toast({
+        title: "Profile link copied!",
+        description: "Share your profile link with others.",
+      });
+    } else {
+      toast({
+        title: "No username found",
+        description: "Please create a profile first.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -183,7 +200,7 @@ const Index = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <div className="relative w-32 h-32 mx-auto mb-6">
+          <div className="relative w-40 h-40 mx-auto mb-6">
             <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-full animate-pulse opacity-80" />
             <Avatar className="w-full h-full border-4 border-white/50 dark:border-black/20 shadow-lg">
               <AvatarImage
@@ -191,7 +208,7 @@ const Index = () => {
                 alt="Profile"
                 className="object-cover"
               />
-              <AvatarFallback className="text-2xl font-bold">
+              <AvatarFallback className="text-3xl font-bold">
                 {session?.user?.user_metadata?.full_name?.charAt(0) || '?'}
               </AvatarFallback>
             </Avatar>
@@ -232,13 +249,23 @@ const Index = () => {
             <p className="mb-4 text-muted-foreground">
               Share your profile or view how it looks to others:
             </p>
-            <Button 
-              variant="default" 
-              onClick={() => window.open(`/${username}`, '_blank')} 
-              className="w-full sm:w-auto"
-            >
-              View Public Profile
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button 
+                variant="default" 
+                onClick={() => window.open(`/${username}`, '_blank')} 
+                className="w-full sm:w-auto"
+              >
+                View Public Profile
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={handleShareProfile}
+                className="w-full sm:w-auto"
+              >
+                <Share2 className="w-4 h-4 mr-2" />
+                Share Profile
+              </Button>
+            </div>
           </motion.div>
         )}
       </div>
