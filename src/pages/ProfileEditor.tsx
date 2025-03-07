@@ -571,8 +571,9 @@ export default function ProfileEditor() {
                         <RadioGroup 
                           value={layoutType} 
                           onValueChange={(value) => {
-                            if (Object.values(LAYOUT_TYPES).includes(value as LayoutType)) {
-                              setLayoutType(value as LayoutType);
+                            const layoutValue = value as LayoutType;
+                            if (Object.values(LAYOUT_TYPES).includes(layoutValue)) {
+                              setLayoutType(layoutValue);
                             }
                           }} 
                           className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2"

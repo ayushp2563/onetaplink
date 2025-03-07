@@ -42,7 +42,6 @@ export const BentoLayout = ({ links, textShadowClass = "" }: BentoLayoutProps) =
             hidden: { opacity: 0, scale: 0.9 },
             show: { opacity: 1, scale: 1 },
           }}
-          className="aspect-square flex flex-col"
         >
           <a
             href={link.url}
@@ -58,8 +57,8 @@ export const BentoLayout = ({ links, textShadowClass = "" }: BentoLayoutProps) =
               <h3 className={`text-lg font-medium text-white mb-1 ${textShadowClass}`}>
                 {link.title}
               </h3>
-              <p className={`text-sm text-white/70 line-clamp-2 ${textShadowClass}`}>
-                {new URL(link.url).hostname}
+              <p className={`text-sm text-white/70 truncate ${textShadowClass}`}>
+                {link.url && (link.url.startsWith('http') ? new URL(link.url).hostname : link.url)}
               </p>
             </div>
           </a>
@@ -67,4 +66,4 @@ export const BentoLayout = ({ links, textShadowClass = "" }: BentoLayoutProps) =
       ))}
     </motion.div>
   );
-};
+}
