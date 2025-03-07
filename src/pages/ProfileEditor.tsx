@@ -197,7 +197,7 @@ export default function ProfileEditor() {
         setThemeId(settings.theme_id || "elegant");
         setIsDarkMode(settings.is_dark_mode || false);
         setFontStyle(settings.font_style || "sans");
-        setLayoutType(settings.layout_type || LAYOUT_TYPES.LINKS);
+        setLayoutType(settings.layout_type as LayoutType || LAYOUT_TYPES.LINKS);
         
         if (settings.background_style) {
           try {
@@ -213,7 +213,7 @@ export default function ProfileEditor() {
         
         if (settings.links) {
           try {
-            const linksData = settings.links as any[];
+            const linksData = settings.links as unknown as Link[];
             if (Array.isArray(linksData)) {
               const validLinks = linksData.map(link => ({
                 id: link.id || crypto.randomUUID(),
@@ -419,7 +419,7 @@ export default function ProfileEditor() {
                     className="w-full"
                   />
                   <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                    This will be your profile URL: profilee.app/{username}
+                    This will be your profile URL: onetaplink.vercel.app/{username}
                   </p>
                 </div>
 
@@ -455,9 +455,11 @@ export default function ProfileEditor() {
                     onValueChange={(value: TabType) => setActiveTab(value)} 
                     className="w-full"
                   >
-                    <TabsList className="w-full grid grid-cols-4 mb-4">
+                    <TabsList className="w-full grid grid-cols-2 mb-2">
                       <TabsTrigger value="theme" className="text-xs sm:text-sm">Theme</TabsTrigger>
                       <TabsTrigger value="background" className="text-xs sm:text-sm">Background</TabsTrigger>
+                    </TabsList>
+                    <TabsList className="w-full grid grid-cols-2 mb-4">
                       <TabsTrigger value="font" className="text-xs sm:text-sm">Font</TabsTrigger>
                       <TabsTrigger value="layout" className="text-xs sm:text-sm">Layout</TabsTrigger>
                     </TabsList>

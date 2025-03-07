@@ -11,7 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fontsource/inter": "^5.0.18",
+    "@fontsource/inter": "^5.2.5",
     "@fontsource/montserrat": "^5.0.17",
     "@fontsource/playfair-display": "^5.0.13",
     "@fontsource/roboto-mono": "^5.0.17",
