@@ -58,7 +58,14 @@ export const BentoLayout = ({ links, textShadowClass = "" }: BentoLayoutProps) =
                 {link.title}
               </h3>
               <p className={`text-sm text-white/70 truncate ${textShadowClass}`}>
-                {link.url && (link.url.startsWith('http') ? new URL(link.url).hostname : link.url)}
+                {link.url && (link.url.startsWith('http') ? 
+                  (() => {
+                    try {
+                      return new URL(link.url).hostname;
+                    } catch (e) {
+                      return link.url;
+                    }
+                  })() : link.url)}
               </p>
             </div>
           </a>
@@ -66,4 +73,4 @@ export const BentoLayout = ({ links, textShadowClass = "" }: BentoLayoutProps) =
       ))}
     </motion.div>
   );
-}
+};
