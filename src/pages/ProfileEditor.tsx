@@ -571,7 +571,7 @@ export default function ProfileEditor() {
                         <RadioGroup 
                           value={layoutType} 
                           onValueChange={(value) => {
-                            if (value === 'bento' || value === 'links' || value === 'mixed') {
+                            if (Object.values(LAYOUT_TYPES).includes(value as LayoutType)) {
                               setLayoutType(value as LayoutType);
                             }
                           }} 

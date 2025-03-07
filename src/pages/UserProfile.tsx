@@ -234,10 +234,13 @@ export default function UserProfile() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-12"
           >
-            <Avatar className="w-24 h-24 mx-auto mb-4">
-              <AvatarImage src={profile.avatar_url} />
-              <AvatarFallback>{profile.full_name?.charAt(0) || "?"}</AvatarFallback>
-            </Avatar>
+            <div className="relative w-40 h-40 mx-auto mb-6">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-full animate-pulse opacity-80" />
+              <Avatar className="w-full h-full border-4 border-white/50 dark:border-black/20 shadow-lg">
+                <AvatarImage src={profile.avatar_url} alt={profile.full_name} className="object-cover" />
+                <AvatarFallback className="text-3xl font-bold">{profile.full_name?.charAt(0) || "?"}</AvatarFallback>
+              </Avatar>
+            </div>
             <h1 className={`text-2xl font-bold mb-2 text-white ${textShadowClass}`}>{profile.full_name}</h1>
             <p className={`text-white/80 mb-4 ${textShadowClass}`}>@{profile.username}</p>
             {profile.bio && (
