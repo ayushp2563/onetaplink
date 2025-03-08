@@ -8,12 +8,13 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-accent/20">
-      <div className="container max-w-6xl px-4 py-16 mx-auto">
+      <div className="container max-w-6xl px-4 py-8 mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center space-y-6"
         >
+          <img src="/main-logo-black-transparent.svg" alt="One Tap Link" className="w-64 h-64 mx-auto" />
           <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             Create Your Digital Identity
           </h1>

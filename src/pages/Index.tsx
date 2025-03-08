@@ -198,10 +198,7 @@ const Index = () => {
       {/* Logo and Header */}
       <header className="w-full py-4 px-6 flex justify-center items-center">
         <div className="flex items-center">
-          <Link2 className="w-8 h-8 text-primary mr-2" />
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
-            One Tap Link
-          </h1>
+          <img src="/main-logo-black-transparent.svg" alt="One Tap Link" className="w-48 h-48 text-primary mr-2" />
         </div>
       </header>
 
