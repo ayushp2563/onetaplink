@@ -22,7 +22,26 @@ export default function Auth() {
     e.preventDefault();
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signUp({
+      
+      // Check if username is already taken
+      const { data: existingUser, error: checkError } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('username', username)
+        .single();
+      
+      if (existingUser) {
+        toast({
+          title: "Username already taken",
+          description: "Please choose a different username",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+      
+      // Proceed with signup
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -35,18 +54,26 @@ export default function Auth() {
 
       if (error) throw error;
       
-      toast({
-        title: "Success!",
-        description: "Check your email for the confirmation link.",
-      });
-
-      // Redirect to dashboard after successful signup
-      navigate("/dashboard");
+      if (data?.user) {
+        toast({
+          title: "Account created successfully!",
+          description: "You're now signed in.",
+        });
+        
+        // Redirect to dashboard after successful signup
+        navigate("/dashboard");
+      } else {
+        toast({
+          title: "Success!",
+          description: "Check your email for the confirmation link.",
+        });
+      }
       
     } catch (error) {
+      console.error("Signup error:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description: error instanceof Error ? error.message : "An error occurred during signup",
         variant: "destructive",
       });
     } finally {
@@ -58,19 +85,23 @@ export default function Auth() {
     e.preventDefault();
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
 
+      // Log the successful sign in for debugging
+      console.log("Successfully signed in:", data);
+      
       // Redirect to dashboard after successful signin
       navigate("/dashboard");
     } catch (error) {
+      console.error("Login error:", error);
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "An error occurred",
+        title: "Error signing in",
+        description: error instanceof Error ? error.message : "Invalid email or password",
         variant: "destructive",
       });
     } finally {
@@ -91,7 +122,7 @@ export default function Auth() {
       
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle>Welcome to Profilee</CardTitle>
+          <CardTitle>Welcome to One Tap Link</CardTitle>
           <CardDescription>
             Create and customize your personal profile page
           </CardDescription>
