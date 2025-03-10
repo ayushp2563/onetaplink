@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function Auth() {
   const [email, setEmail] = useState("");
@@ -15,11 +16,15 @@ export default function Auth() {
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage("");
+    
     try {
       setLoading(true);
       
@@ -31,12 +36,12 @@ export default function Auth() {
         .single();
       
       if (existingUser) {
+        setErrorMessage("Username already taken. Please choose a different username.");
         toast({
           title: "Username already taken",
           description: "Please choose a different username",
           variant: "destructive",
         });
-        setLoading(false);
         return;
       }
       
@@ -49,28 +54,22 @@ export default function Auth() {
             username,
             full_name: fullName,
           },
+          emailRedirectTo: `${window.location.origin}/auth`,
         },
       });
 
       if (error) throw error;
       
-      if (data?.user) {
-        toast({
-          title: "Account created successfully!",
-          description: "You're now signed in.",
-        });
-        
-        // Redirect to dashboard after successful signup
-        navigate("/dashboard");
-      } else {
-        toast({
-          title: "Success!",
-          description: "Check your email for the confirmation link.",
-        });
-      }
+      // If email confirmation is required
+      setEmailSent(true);
+      toast({
+        title: "Success!",
+        description: "Check your email for the confirmation link.",
+      });
       
     } catch (error) {
       console.error("Signup error:", error);
+      setErrorMessage(error instanceof Error ? error.message : "An error occurred during signup");
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "An error occurred during signup",
@@ -83,6 +82,8 @@ export default function Auth() {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage("");
+    
     try {
       setLoading(true);
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -90,15 +91,28 @@ export default function Auth() {
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes("Email not confirmed")) {
+          setEmailSent(true);
+          throw new Error("Please check your email and confirm your account before signing in.");
+        }
+        throw error;
+      }
 
       // Log the successful sign in for debugging
       console.log("Successfully signed in:", data);
       
       // Redirect to dashboard after successful signin
       navigate("/dashboard");
+      
+      toast({
+        title: "Welcome back!",
+        description: "You have successfully signed in.",
+      });
+      
     } catch (error) {
       console.error("Login error:", error);
+      setErrorMessage(error instanceof Error ? error.message : "Invalid email or password");
       toast({
         title: "Error signing in",
         description: error instanceof Error ? error.message : "Invalid email or password",
@@ -128,6 +142,24 @@ export default function Auth() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {emailSent && (
+            <Alert className="mb-4 bg-yellow-50 text-yellow-800 border-yellow-200">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                We've sent a confirmation link to your email. Please check your inbox and confirm your account before signing in.
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {errorMessage && (
+            <Alert className="mb-4 bg-red-50 text-red-800 border-red-200">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                {errorMessage}
+              </AlertDescription>
+            </Alert>
+          )}
+          
           <Tabs defaultValue="signin">
             <TabsList className="grid w-full grid-cols-2 mb-4">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
