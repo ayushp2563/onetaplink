@@ -54,18 +54,32 @@ export default function Auth() {
             username,
             full_name: fullName,
           },
-          emailRedirectTo: `${window.location.origin}/auth`,
         },
       });
 
       if (error) throw error;
       
-      // If email confirmation is required
-      setEmailSent(true);
-      toast({
-        title: "Success!",
-        description: "Check your email for the confirmation link.",
+      // Try to sign in immediately after successful signup (since email confirmation is disabled)
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
+      
+      if (signInError) {
+        // If sign-in fails, show email confirmation message
+        setEmailSent(true);
+        toast({
+          title: "Account created!",
+          description: "Please check your email for confirmation if you're unable to sign in.",
+        });
+      } else {
+        // If sign-in succeeds, redirect to dashboard
+        toast({
+          title: "Account created successfully!",
+          description: "You're now signed in.",
+        });
+        navigate("/dashboard");
+      }
       
     } catch (error) {
       console.error("Signup error:", error);
@@ -86,15 +100,24 @@ export default function Auth() {
     
     try {
       setLoading(true);
+      
+      // Try to sign in with the provided credentials
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        if (error.message.includes("Email not confirmed")) {
+        // Special handling for email not confirmed error
+        if (error.message.toLowerCase().includes("email not confirmed")) {
+          // Try to send another confirmation email
+          await supabase.auth.resend({
+            type: 'signup',
+            email,
+          });
+          
           setEmailSent(true);
-          throw new Error("Please check your email and confirm your account before signing in.");
+          throw new Error("Your email is not confirmed. We've sent a new confirmation link to your email.");
         }
         throw error;
       }
