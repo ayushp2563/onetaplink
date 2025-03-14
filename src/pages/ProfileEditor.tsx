@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +14,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LAYOUT_OPTIONS, LAYOUT_TYPES, LayoutType } from "@/constants/layouts";
+import { IconSelector } from "@/components/IconSelector";
+import { DynamicIcon } from "@/components/DynamicIcon";
 
 interface Link {
   id: string;
@@ -244,7 +247,7 @@ export default function ProfileEditor() {
     setLinks([...links, { id: crypto.randomUUID(), title: "", url: "", icon: "link" }]);
   };
 
-  const handleLinkChange = (id: string, field: 'title' | 'url', value: string) => {
+  const handleLinkChange = (id: string, field: 'title' | 'url' | 'icon', value: string) => {
     setLinks(links.map(link => 
       link.id === id ? { ...link, [field]: value } : link
     ));
@@ -622,7 +625,13 @@ export default function ProfileEditor() {
                   </div>
 
                   {links.map((link) => (
-                    <div key={link.id} className="flex flex-col sm:flex-row gap-2">
+                    <div key={link.id} className="flex flex-col sm:flex-row gap-2 items-start">
+                      <div className="flex-none">
+                        <IconSelector 
+                          selectedIcon={link.icon || "link"} 
+                          onSelectIcon={(iconName) => handleLinkChange(link.id, 'icon', iconName)} 
+                        />
+                      </div>
                       <Input
                         placeholder="Title"
                         value={link.title}

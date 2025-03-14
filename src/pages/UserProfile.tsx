@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +21,7 @@ interface ProfileSettings {
     id: string;
     title: string;
     url: string;
+    icon?: string;
   }>;
   theme_id: string;
   is_dark_mode: boolean;
