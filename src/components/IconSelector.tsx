@@ -48,6 +48,9 @@ interface IconSelectorProps {
 export const IconSelector = ({ selectedIcon, onSelectIcon }: IconSelectorProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredIcons, setFilteredIcons] = useState(AVAILABLE_ICONS);
+  
+  // Find icon from the available icons list, defaulting to Link if not found
+  const IconComponent = AVAILABLE_ICONS.find(i => i.name === selectedIcon)?.icon || Link;
 
   // Filter icons based on search query
   useEffect(() => {
@@ -64,14 +67,11 @@ export const IconSelector = ({ selectedIcon, onSelectIcon }: IconSelectorProps) 
     setFilteredIcons(filtered);
   }, [searchQuery]);
 
-  // Get the current icon component
-  const CurrentIcon = AVAILABLE_ICONS.find(i => i.name === selectedIcon)?.icon || Link;
-
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="outline" size="icon" className="w-10 h-10" aria-label="Select icon">
-          <CurrentIcon className="h-5 w-5" />
+          <IconComponent className="h-5 w-5" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-72">

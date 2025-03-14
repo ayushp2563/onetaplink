@@ -21,6 +21,7 @@ interface ProfileSettings {
     title: string;
     url: string;
     icon?: string;
+    display?: "title" | "icon" | "both";
   }>;
   theme_id: string;
   is_dark_mode: boolean;
@@ -35,6 +36,14 @@ interface ProfileSettings {
 interface Theme {
   id: string;
   background: string;
+}
+
+interface Link {
+  id: string;
+  title: string;
+  url: string;
+  icon?: string;
+  display?: "title" | "icon" | "both";
 }
 
 const THEMES: { [key: string]: Theme } = {
@@ -137,13 +146,14 @@ export default function UserProfile() {
           return;
         }
         
-        let processedLinks = [];
+        let processedLinks: Link[] = [];
         if (settings.links && Array.isArray(settings.links)) {
           processedLinks = settings.links.map((link: any) => ({
-            id: link.id || "",
+            id: link.id || crypto.randomUUID(),
             title: link.title || "",
             url: link.url || "",
-            icon: link.icon || "link"
+            icon: link.icon || "link",
+            display: link.display || "both"
           }));
         }
         

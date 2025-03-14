@@ -51,12 +51,12 @@ export const BentoLayout = ({ links, textShadowClass = "" }: BentoLayoutProps) =
             className="flex flex-col items-center justify-center gap-2 p-3 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors shadow-md aspect-square"
           >
             {(displayMode === "both" || displayMode === "icon") && (
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                <LinkIcon iconName={link.icon || "link"} className="text-white w-6 h-6" />
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                <LinkIcon iconName={link.icon || "link"} className="text-white w-5 h-5" />
               </div>
             )}
             {(displayMode === "both" || displayMode === "title") && (
-              <span className={`text-white text-center text-sm line-clamp-2 ${textShadowClass}`}>
+              <span className={`text-white text-center text-xs line-clamp-2 ${textShadowClass}`}>
                 {link.title}
               </span>
             )}

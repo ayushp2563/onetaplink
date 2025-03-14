@@ -7,6 +7,7 @@ interface Link {
   title: string;
   url: string;
   icon?: string;
+  display?: "title" | "icon" | "both";
 }
 
 interface LinksLayoutProps {
@@ -37,19 +38,27 @@ export const LinksLayout = ({ links, textShadowClass = "" }: LinksLayoutProps) =
       animate="show"
       className="space-y-3"
     >
-      {links.map((link) => (
-        <motion.a
-          key={link.id}
-          href={link.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          variants={item}
-          className="flex items-center gap-3 p-4 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors shadow-md"
-        >
-          <LinkIcon iconName={link.icon || "link"} className="text-white" />
-          <span className={`flex-1 text-white truncate ${textShadowClass}`}>{link.title}</span>
-        </motion.a>
-      ))}
+      {links.map((link) => {
+        const displayMode = link.display || "both";
+        
+        return (
+          <motion.a
+            key={link.id}
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            variants={item}
+            className="flex items-center gap-3 p-4 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors shadow-md"
+          >
+            {(displayMode === "both" || displayMode === "icon") && (
+              <LinkIcon iconName={link.icon || "link"} className="text-white" />
+            )}
+            {(displayMode === "both" || displayMode === "title") && (
+              <span className={`flex-1 text-white truncate ${textShadowClass}`}>{link.title}</span>
+            )}
+          </motion.a>
+        );
+      })}
     </motion.div>
   );
 };

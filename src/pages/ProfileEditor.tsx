@@ -224,13 +224,13 @@ export default function ProfileEditor() {
         
         if (settings.links) {
           try {
-            const linksData = settings.links as unknown as Link[];
+            const linksData = settings.links as unknown as any[];
             if (Array.isArray(linksData)) {
               const validLinks = linksData.map(link => ({
                 id: link.id || crypto.randomUUID(),
                 title: link.title || "",
                 url: link.url || "",
-                icon: "link",
+                icon: link.icon || "link",
                 display: link.display || "both"
               }));
               setLinks(validLinks);
