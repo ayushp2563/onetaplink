@@ -329,10 +329,11 @@ export default function ProfileEditor() {
 
       const backgroundStyle = getBackgroundStyle();
       
+      // Important: Update this part to save the full links with icons
       const { error: settingsError } = await supabase
         .from('profile_settings')
         .update({ 
-          links: links.map(({ icon, ...rest }) => rest),
+          links: links, // Save the complete links array including icons
           theme_id: themeId,
           is_dark_mode: isDarkMode,
           background_style: backgroundStyle ? JSON.stringify(backgroundStyle) : null,

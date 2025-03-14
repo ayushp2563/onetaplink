@@ -138,8 +138,20 @@ export default function UserProfile() {
           return;
         }
         
+        // Process the links to ensure they include the icon property
+        let processedLinks = [];
+        if (settings.links && Array.isArray(settings.links)) {
+          processedLinks = settings.links.map(link => {
+            // Ensure icon defaults to "link" if not present
+            return {
+              ...link,
+              icon: link.icon || "link"
+            };
+          });
+        }
+        
         const typedSettings: ProfileSettings = {
-          links: (settings.links || []) as ProfileSettings['links'],
+          links: processedLinks,
           theme_id: settings.theme_id || 'elegant',
           is_dark_mode: settings.is_dark_mode || false,
           font_style: settings.font_style || 'sans',
