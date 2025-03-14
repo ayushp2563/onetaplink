@@ -49,7 +49,7 @@ export const MixedLayout = ({ links, textShadowClass = "" }: MixedLayoutProps) =
       className="space-y-3"
     >
       {featuredLinks.length > 0 && (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 md:grid-cols-3 gap-2 max-w-lg mx-auto">
           {featuredLinks.map((link) => {
             const displayMode = link.display || "both";
             
