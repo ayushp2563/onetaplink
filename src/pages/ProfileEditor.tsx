@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -329,11 +328,17 @@ export default function ProfileEditor() {
 
       const backgroundStyle = getBackgroundStyle();
       
-      // Important: Update this part to save the full links with icons
+      const jsonLinks = links.map(link => ({
+        id: link.id,
+        title: link.title,
+        url: link.url,
+        icon: link.icon || "link"
+      }));
+      
       const { error: settingsError } = await supabase
         .from('profile_settings')
         .update({ 
-          links: links, // Save the complete links array including icons
+          links: jsonLinks as unknown as Json,
           theme_id: themeId,
           is_dark_mode: isDarkMode,
           background_style: backgroundStyle ? JSON.stringify(backgroundStyle) : null,
@@ -672,3 +677,4 @@ export default function ProfileEditor() {
     </div>
   );
 }
+

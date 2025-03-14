@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -138,16 +137,14 @@ export default function UserProfile() {
           return;
         }
         
-        // Process the links to ensure they include the icon property
         let processedLinks = [];
         if (settings.links && Array.isArray(settings.links)) {
-          processedLinks = settings.links.map(link => {
-            // Ensure icon defaults to "link" if not present
-            return {
-              ...link,
-              icon: link.icon || "link"
-            };
-          });
+          processedLinks = settings.links.map((link: any) => ({
+            id: link.id || "",
+            title: link.title || "",
+            url: link.url || "",
+            icon: link.icon || "link"
+          }));
         }
         
         const typedSettings: ProfileSettings = {

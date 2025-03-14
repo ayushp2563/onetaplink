@@ -4,7 +4,8 @@ import { BentoLayout } from "./BentoLayout";
 import { MixedLayout } from "./MixedLayout";
 import { LAYOUT_TYPES, LayoutType } from "@/constants/layouts";
 
-interface Link {
+// Define the Link interface to match what we're using in Supabase
+export interface Link {
   id: string;
   title: string;
   url: string;
