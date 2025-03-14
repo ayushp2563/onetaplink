@@ -7,6 +7,7 @@ interface Link {
   title: string;
   url: string;
   icon?: string;
+  display?: "title" | "icon" | "both";
 }
 
 interface BentoLayoutProps {
@@ -35,25 +36,33 @@ export const BentoLayout = ({ links, textShadowClass = "" }: BentoLayoutProps) =
       variants={container}
       initial="hidden"
       animate="show"
-      className="grid grid-cols-2 gap-3"
+      className="grid grid-cols-3 md:grid-cols-3 gap-2 max-w-lg mx-auto"
     >
-      {links.map((link) => (
-        <motion.a
-          key={link.id}
-          href={link.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          variants={item}
-          className="flex flex-col items-center gap-2 p-4 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors shadow-md aspect-square"
-        >
-          <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-            <LinkIcon iconName={link.icon || "link"} className="text-white w-8 h-8" />
-          </div>
-          <span className={`text-white text-center line-clamp-2 ${textShadowClass}`}>
-            {link.title}
-          </span>
-        </motion.a>
-      ))}
+      {links.map((link) => {
+        const displayMode = link.display || "both";
+        
+        return (
+          <motion.a
+            key={link.id}
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            variants={item}
+            className="flex flex-col items-center justify-center gap-2 p-3 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors shadow-md aspect-square"
+          >
+            {(displayMode === "both" || displayMode === "icon") && (
+              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                <LinkIcon iconName={link.icon || "link"} className="text-white w-6 h-6" />
+              </div>
+            )}
+            {(displayMode === "both" || displayMode === "title") && (
+              <span className={`text-white text-center text-sm line-clamp-2 ${textShadowClass}`}>
+                {link.title}
+              </span>
+            )}
+          </motion.a>
+        );
+      })}
     </motion.div>
   );
 };

@@ -16,12 +16,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LAYOUT_OPTIONS, LAYOUT_TYPES, LayoutType } from "@/constants/layouts";
 import { IconSelector } from "@/components/IconSelector";
 import { DynamicIcon } from "@/components/DynamicIcon";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Link {
   id: string;
   title: string;
   url: string;
   icon?: string;
+  display?: "title" | "icon" | "both";
 }
 
 interface Theme {
@@ -222,7 +230,8 @@ export default function ProfileEditor() {
                 id: link.id || crypto.randomUUID(),
                 title: link.title || "",
                 url: link.url || "",
-                icon: "link"
+                icon: "link",
+                display: link.display || "both"
               }));
               setLinks(validLinks);
             }
@@ -244,10 +253,10 @@ export default function ProfileEditor() {
   };
 
   const handleAddLink = () => {
-    setLinks([...links, { id: crypto.randomUUID(), title: "", url: "", icon: "link" }]);
+    setLinks([...links, { id: crypto.randomUUID(), title: "", url: "", icon: "link", display: "both" }]);
   };
 
-  const handleLinkChange = (id: string, field: 'title' | 'url' | 'icon', value: string) => {
+  const handleLinkChange = (id: string, field: 'title' | 'url' | 'icon' | 'display', value: string) => {
     setLinks(links.map(link => 
       link.id === id ? { ...link, [field]: value } : link
     ));
@@ -333,7 +342,8 @@ export default function ProfileEditor() {
         id: link.id,
         title: link.title,
         url: link.url,
-        icon: link.icon || "link"
+        icon: link.icon || "link",
+        display: link.display || "both"
       }));
       
       const { error: settingsError } = await supabase
@@ -653,6 +663,19 @@ export default function ProfileEditor() {
                         required
                         className="flex-1 text-xs sm:text-sm"
                       />
+                      <Select
+                        value={link.display || "both"}
+                        onValueChange={(value) => handleLinkChange(link.id, 'display', value)}
+                      >
+                        <SelectTrigger className="w-[110px]">
+                          <SelectValue placeholder="Display" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="both">Icon & Title</SelectItem>
+                          <SelectItem value="icon">Icon Only</SelectItem>
+                          <SelectItem value="title">Title Only</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <Button
                         type="button"
                         variant="destructive"

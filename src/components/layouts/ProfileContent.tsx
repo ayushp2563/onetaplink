@@ -10,6 +10,7 @@ export interface Link {
   title: string;
   url: string;
   icon?: string;
+  display?: "title" | "icon" | "both";
 }
 
 interface ProfileContentProps {
