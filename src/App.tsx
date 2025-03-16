@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound";
 import ProfileEditor from "./pages/ProfileEditor";
 import UserProfile from "./pages/UserProfile";
 import Landing from "./pages/Landing";
+import HowToUse from "./pages/HowToUse";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/dashboard" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/edit-profile" element={<ProfileEditor />} />
+          <Route path="/how-to-use" element={<HowToUse />} />
           <Route path="/:username" element={<UserProfile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
