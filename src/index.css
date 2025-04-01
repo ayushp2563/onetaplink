@@ -34,6 +34,13 @@
     --font-mono: 'Roboto Mono', monospace;
     --font-display: 'Montserrat', sans-serif;
     --font-current: var(--font-sans);
+    
+    /* Font appearance variables */
+    --text-base: 240 10% 3.9%; 
+    --text-muted: 240 3.8% 46.1%;
+    --text-light: 220 14% 96%;
+    --text-link: 221.2 83.2% 53.3%;
+    --heading-color: 240 6% 10%;
   }
 
   .dark {
@@ -56,6 +63,13 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 142.4 71.8% 29.2%;
+    
+    /* Font appearance variables for dark mode */
+    --text-base: 0 0% 98%;
+    --text-muted: 240 5% 64.9%; 
+    --text-light: 0 0% 98%;
+    --text-link: 221.2 83.2% 65%;
+    --heading-color: 0 0% 95%;
   }
 }
 
@@ -66,6 +80,20 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-current);
+  }
+  h1, h2, h3, h4, h5, h6 {
+    color: hsl(var(--heading-color));
+    @apply font-medium tracking-tight;
+  }
+  p {
+    color: hsl(var(--text-base));
+  }
+  .text-muted {
+    color: hsl(var(--text-muted));
+  }
+  a {
+    color: hsl(var(--text-link));
+    @apply hover:underline transition-colors;
   }
 }
 
@@ -128,6 +156,31 @@
   font-family: var(--font-display);
 }
 
+/* Font appearance utility classes */
+.text-enhanced {
+  @apply text-foreground dark:text-foreground leading-relaxed;
+  letter-spacing: -0.011em;
+}
+
+.text-heading {
+  @apply font-medium tracking-tight;
+  color: hsl(var(--heading-color));
+}
+
+.text-base {
+  color: hsl(var(--text-base));
+}
+
+.text-dim {
+  color: hsl(var(--text-muted));
+  @apply text-sm;
+}
+
+.text-bright {
+  color: hsl(var(--text-light));
+  @apply font-medium;
+}
+
 /* New responsive utility classes */
 @media (max-width: 640px) {
   .container {
@@ -154,4 +207,28 @@ html {
   .form-row {
     flex-direction: column;
   }
+}
+
+/* Additional font contrast enhancement for dark mode */
+.dark .text-enhanced {
+  font-weight: 450;
+}
+
+/* Improved link styles */
+.link {
+  @apply text-link hover:text-link/80 transition-colors;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+/* Card text improvements */
+.card-title {
+  @apply text-xl font-medium text-heading mb-2;
+}
+
+.card-description {
+  @apply text-base text-muted-foreground;
 }

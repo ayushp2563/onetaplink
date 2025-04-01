@@ -48,6 +48,12 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // New text appearance colors
+        textBase: "hsl(var(--text-base))",
+        textMuted: "hsl(var(--text-muted))",
+        textLight: "hsl(var(--text-light))",
+        textLink: "hsl(var(--text-link))",
+        headingColor: "hsl(var(--heading-color))",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -77,6 +83,56 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.3s ease-out",
         "fade-out": "fade-out 0.3s ease-out",
+      },
+      typography: {
+        DEFAULT: {
+          css: {
+            maxWidth: '65ch',
+            color: 'hsl(var(--text-base))',
+            '[class~="lead"]': {
+              color: 'hsl(var(--text-muted))',
+            },
+            a: {
+              color: 'hsl(var(--text-link))',
+              textDecoration: 'underline',
+              fontWeight: '500',
+            },
+            strong: {
+              color: 'hsl(var(--heading-color))',
+              fontWeight: '600',
+            },
+            h1: {
+              color: 'hsl(var(--heading-color))',
+              fontWeight: '800',
+            },
+            h2: {
+              color: 'hsl(var(--heading-color))',
+              fontWeight: '700',
+            },
+            h3: {
+              color: 'hsl(var(--heading-color))',
+              fontWeight: '600',
+            },
+            h4: {
+              color: 'hsl(var(--heading-color))',
+              fontWeight: '600',
+            },
+            code: {
+              color: 'hsl(var(--text-base))',
+              backgroundColor: 'hsl(var(--muted))',
+              borderRadius: '0.25rem',
+              paddingLeft: '0.35rem',
+              paddingRight: '0.35rem',
+              paddingTop: '0.1rem',
+              paddingBottom: '0.1rem',
+              fontFamily: 'var(--font-mono)',
+            },
+            blockquote: {
+              borderLeftColor: 'hsl(var(--border))',
+              color: 'hsl(var(--text-muted))',
+            },
+          },
+        },
       },
     },
   },

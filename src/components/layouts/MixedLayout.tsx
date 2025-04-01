@@ -68,7 +68,7 @@ export const MixedLayout = ({ links, textShadowClass = "" }: MixedLayoutProps) =
                   </div>
                 )}
                 {(displayMode === "both" || displayMode === "title") && (
-                  <span className={`text-white text-center text-xs line-clamp-2 ${textShadowClass}`}>
+                  <span className={`text-white text-center text-xs line-clamp-2 ${textShadowClass} font-medium`}>
                     {link.title}
                   </span>
                 )}
@@ -96,7 +96,7 @@ export const MixedLayout = ({ links, textShadowClass = "" }: MixedLayoutProps) =
                   <LinkIcon iconName={link.icon || "link"} className="text-white" />
                 )}
                 {(displayMode === "both" || displayMode === "title") && (
-                  <span className={`flex-1 text-white truncate ${textShadowClass}`}>
+                  <span className={`flex-1 text-white truncate ${textShadowClass} font-medium`}>
                     {link.title}
                   </span>
                 )}
