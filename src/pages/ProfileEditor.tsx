@@ -14,6 +14,27 @@ import { LAYOUT_TYPES } from "@/constants/layouts";
 import { useToast } from "@/hooks/use-toast";
 import FaviconUploader from "@/components/FaviconUploader";
 
+interface Profile {
+  id: string;
+  username: string;
+  full_name: string;
+  avatar_url: string;
+  bio: string;
+  custom_title?: string;
+}
+
+interface ProfileSettings {
+  id: string;
+  links: any[];
+  theme_id: string;
+  is_dark_mode: boolean;
+  font_style: string;
+  layout_type: string;
+  text_shadow: boolean;
+  background_style?: string;
+  favicon_url?: string;
+}
+
 export default function ProfileEditor() {
   const navigate = useNavigate();
   const { username } = useParams();
@@ -52,8 +73,8 @@ export default function ProfileEditor() {
         .single();
 
       return {
-        profile: profileData,
-        settings: settingsError ? null : settingsData,
+        profile: profileData as Profile,
+        settings: settingsError ? null : (settingsData as ProfileSettings),
       };
     },
   });

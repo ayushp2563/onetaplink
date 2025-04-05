@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +9,11 @@ import { MixedLayout } from "@/components/layouts/MixedLayout";
 import { LinksLayout } from "@/components/layouts/LinksLayout";
 import { BentoLayout } from "@/components/layouts/BentoLayout";
 import { usePageMetadata } from "@/hooks/usePageMetadata";
+import { LAYOUT_TYPES, type LayoutType } from "@/constants/layouts";
+import { useToast } from "@/hooks/use-toast";
+import { motion } from "framer-motion";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { ProfileContent } from "@/components/layouts/ProfileContent";
 
 interface Profile {
   username: string;
@@ -15,6 +21,7 @@ interface Profile {
   bio: string;
   avatar_url: string;
   id: string;
+  custom_title?: string;
 }
 
 interface ProfileSettings {
@@ -33,6 +40,7 @@ interface ProfileSettings {
     id: string;
     url: string;
   } | null;
+  favicon_url?: string;
 }
 
 interface Theme {
@@ -75,7 +83,12 @@ export default function UserProfile() {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { metadata } = usePageMetadata();
+  
+  // Set page metadata (title and favicon)
+  usePageMetadata({
+    title: profile?.custom_title || profile?.full_name || `${profile?.username}'s Profile`,
+    faviconUrl: settings?.favicon_url
+  });
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -165,7 +178,8 @@ export default function UserProfile() {
           theme_id: settings.theme_id || 'elegant',
           is_dark_mode: settings.is_dark_mode || false,
           font_style: settings.font_style || 'sans',
-          layout_type: (settings.layout_type as LayoutType) || LAYOUT_TYPES.LINKS
+          layout_type: (settings.layout_type as LayoutType) || LAYOUT_TYPES.LINKS,
+          favicon_url: settings.favicon_url
         };
 
         if (settings.background_style) {
