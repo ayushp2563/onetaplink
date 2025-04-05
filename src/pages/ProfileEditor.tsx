@@ -59,10 +59,14 @@ export default function ProfileEditor() {
         .from("profiles")
         .select("*")
         .eq("username", username)
-        .single();
+        .maybeSingle();
 
       if (profileError) {
         throw profileError;
+      }
+
+      if (!profileData) {
+        throw new Error(`Profile not found for username: ${username}`);
       }
 
       // Get profile settings
@@ -70,11 +74,16 @@ export default function ProfileEditor() {
         .from("profile_settings")
         .select("*")
         .eq("id", profileData.id)
-        .single();
+        .maybeSingle();
 
+      if (settingsError) {
+        throw settingsError;
+      }
+
+      // If settings don't exist, return profile with empty settings
       return {
         profile: profileData as Profile,
-        settings: settingsError ? null : (settingsData as ProfileSettings),
+        settings: settingsError || !settingsData ? null : (settingsData as ProfileSettings),
       };
     },
   });
@@ -99,7 +108,7 @@ export default function ProfileEditor() {
           const parsedLinks = typeof settings.links === 'string' 
             ? JSON.parse(settings.links) 
             : settings.links;
-          setLinks(parsedLinks);
+          setLinks(parsedLinks.length > 0 ? parsedLinks : [{ title: "", url: "", icon: "Link" }]);
         } catch (e) {
           console.error("Failed to parse links:", e);
           setLinks([{ title: "", url: "", icon: "Link" }]);
@@ -144,6 +153,20 @@ export default function ProfileEditor() {
 
         if (settingsUpdateError) {
           throw settingsUpdateError;
+        }
+      } else {
+        // Create settings if they don't exist
+        const { error: settingsCreateError } = await supabase
+          .from("profile_settings")
+          .insert({
+            id: data.profile.id,
+            favicon_url: faviconUrl,
+            links: links,
+            theme_id: "elegant", // Default theme
+          });
+
+        if (settingsCreateError) {
+          throw settingsCreateError;
         }
       }
 
