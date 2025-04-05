@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -84,7 +83,6 @@ export default function UserProfile() {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Set page metadata (title and favicon)
   usePageMetadata({
     title: profile?.custom_title || profile?.full_name || `${profile?.username}'s Profile`,
     faviconUrl: settings?.favicon_url
