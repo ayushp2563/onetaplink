@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LAYOUT_OPTIONS, LAYOUT_TYPES, LayoutType } from "@/constants/layouts";
 import { IconSelector } from "@/components/IconSelector";
 import { DynamicIcon } from "@/components/DynamicIcon";
+import { FaviconUploader } from "@/components/FaviconUploader";
 import { 
   Select,
   SelectContent,
@@ -154,12 +155,14 @@ export default function ProfileEditor() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
+  const [tabTitle, setTabTitle] = useState("");
+  const [faviconUrl, setFaviconUrl] = useState("");
   const [themeId, setThemeId] = useState("elegant");
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [backgroundImageId, setBackgroundImageId] = useState("none");
   const [customBackgroundUrl, setCustomBackgroundUrl] = useState("");
   
-  type TabType = "theme" | "background" | "font" | "layout";
+  type TabType = "theme" | "background" | "font" | "layout" | "metadata";
   
   const [activeTab, setActiveTab] = useState<TabType>("theme");
   
@@ -167,6 +170,7 @@ export default function ProfileEditor() {
   const [layoutType, setLayoutType] = useState<LayoutType>(LAYOUT_TYPES.LINKS);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -175,6 +179,8 @@ export default function ProfileEditor() {
         navigate('/auth');
         return;
       }
+
+      setUserId(session.user.id);
 
       const { data: profile, error } = await supabase
         .from('profiles')
@@ -196,11 +202,12 @@ export default function ProfileEditor() {
         setUsername(profile.username || "");
         setFullName(profile.full_name || "");
         setAvatarUrl(profile.avatar_url || "");
+        setTabTitle(profile.custom_title || profile.full_name || "");
       }
 
       const { data: settings } = await supabase
         .from('profile_settings')
-        .select('links, theme_id, is_dark_mode, background_style, font_style, layout_type')
+        .select('links, theme_id, is_dark_mode, background_style, font_style, layout_type, favicon_url')
         .eq('id', session.user.id)
         .single();
 
@@ -209,6 +216,7 @@ export default function ProfileEditor() {
         setIsDarkMode(settings.is_dark_mode || false);
         setFontStyle(settings.font_style || "sans");
         setLayoutType(settings.layout_type as LayoutType || LAYOUT_TYPES.LINKS);
+        setFaviconUrl(settings.favicon_url || "");
         
         if (settings.background_style) {
           try {
@@ -331,6 +339,7 @@ export default function ProfileEditor() {
           full_name: fullName,
           bio,
           avatar_url: avatar_url,
+          custom_title: tabTitle,
           updated_at: new Date().toISOString(),
         });
 
@@ -355,6 +364,7 @@ export default function ProfileEditor() {
           background_style: backgroundStyle ? JSON.stringify(backgroundStyle) : null,
           font_style: fontStyle,
           layout_type: layoutType,
+          favicon_url: faviconUrl,
           updated_at: new Date().toISOString(),
         })
         .eq('id', session.user.id);
@@ -459,7 +469,7 @@ export default function ProfileEditor() {
                 />
 
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Appearance</h3>
+                  <h3 className="text-lg font-medium">Appearance & Metadata</h3>
                   
                   <div className="flex items-center space-x-2">
                     <Switch 
@@ -472,12 +482,13 @@ export default function ProfileEditor() {
                   
                   <Tabs 
                     value={activeTab} 
-                    onValueChange={(value: TabType) => setActiveTab(value)} 
+                    onValueChange={(value: string) => setActiveTab(value as TabType)} 
                     className="w-full"
                   >
-                    <TabsList className="w-full grid grid-cols-2 mb-2">
+                    <TabsList className="w-full grid grid-cols-3 mb-2">
                       <TabsTrigger value="theme" className="text-xs sm:text-sm">Theme</TabsTrigger>
                       <TabsTrigger value="background" className="text-xs sm:text-sm">Background</TabsTrigger>
+                      <TabsTrigger value="metadata" className="text-xs sm:text-sm">Metadata</TabsTrigger>
                     </TabsList>
                     <TabsList className="w-full grid grid-cols-2 mb-4">
                       <TabsTrigger value="font" className="text-xs sm:text-sm">Font</TabsTrigger>
@@ -628,6 +639,38 @@ export default function ProfileEditor() {
                             );
                           })}
                         </RadioGroup>
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="metadata">
+                      <div className="space-y-6">
+                        <div>
+                          <Label htmlFor="tab-title">Browser Tab Title</Label>
+                          <Input
+                            id="tab-title"
+                            placeholder="Enter custom browser tab title"
+                            value={tabTitle}
+                            onChange={(e) => setTabTitle(e.target.value)}
+                            className="mt-1.5"
+                          />
+                          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                            This will be shown in the browser tab when someone visits your page.
+                            Leave empty to use your full name.
+                          </p>
+                        </div>
+                        
+                        <div>
+                          <Label>Custom Favicon</Label>
+                          {userId && (
+                            <div className="mt-1.5">
+                              <FaviconUploader
+                                userId={userId}
+                                currentFaviconUrl={faviconUrl}
+                                onFaviconChange={setFaviconUrl}
+                              />
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </TabsContent>
                   </Tabs>
