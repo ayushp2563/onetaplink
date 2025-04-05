@@ -1,746 +1,305 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Json } from "@/integrations/supabase/types";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Link2, ArrowLeft, Upload, List, LayoutGrid, Layout } from "lucide-react";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LAYOUT_OPTIONS, LAYOUT_TYPES, LayoutType } from "@/constants/layouts";
-import { IconSelector } from "@/components/IconSelector";
-import { DynamicIcon } from "@/components/DynamicIcon";
-import { FaviconUploader } from "@/components/FaviconUploader";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-interface Link {
-  id: string;
-  title: string;
-  url: string;
-  icon?: string;
-  display?: "title" | "icon" | "both";
-}
-
-interface Theme {
-  id: string;
-  name: string;
-  background: string;
-  description: string;
-}
-
-interface BackgroundImage {
-  id: string;
-  name: string;
-  url: string;
-  theme: string;
-}
-
-interface FontStyle {
-  id: string;
-  name: string;
-  class: string;
-  description: string;
-}
-
-const THEMES: Theme[] = [
-  {
-    id: "elegant",
-    name: "Elegant",
-    background: "bg-gradient-to-b from-purple-50 to-purple-100 dark:from-purple-950 dark:to-slate-950",
-    description: "Refined purple gradient"
-  },
-  {
-    id: "nature",
-    name: "Nature",
-    background: "bg-gradient-to-b from-green-50 to-emerald-100 dark:from-green-950 dark:to-slate-950",
-    description: "Fresh green gradient"
-  },
-  {
-    id: "ocean",
-    name: "Ocean",
-    background: "bg-gradient-to-b from-blue-50 to-cyan-100 dark:from-blue-950 dark:to-slate-950",
-    description: "Calming blue gradient"
-  },
-  {
-    id: "sunset",
-    name: "Sunset",
-    background: "bg-gradient-to-b from-orange-50 to-red-100 dark:from-orange-950 dark:to-slate-950",
-    description: "Warm orange to red gradient"
-  }
-];
-
-const FONT_STYLES: FontStyle[] = [
-  {
-    id: "sans",
-    name: "Sans-Serif",
-    class: "font-sans",
-    description: "Clean and modern look"
-  },
-  {
-    id: "serif",
-    name: "Serif",
-    class: "font-serif",
-    description: "Elegant and traditional"
-  },
-  {
-    id: "mono",
-    name: "Monospace",
-    class: "font-mono",
-    description: "Technical and precise"
-  },
-  {
-    id: "display",
-    name: "Display",
-    class: "font-display",
-    description: "Bold and attention-grabbing"
-  }
-];
-
-const BACKGROUND_IMAGES: BackgroundImage[] = [
-  {
-    id: "none",
-    name: "None (Use Theme)",
-    url: "",
-    theme: "all"
-  },
-  {
-    id: "abstract-purple",
-    name: "Abstract Purple",
-    url: "https://images.unsplash.com/photo-1518770660439-4636190af475",
-    theme: "elegant"
-  },
-  {
-    id: "nature-green",
-    name: "Forest Path",
-    url: "https://images.unsplash.com/photo-1500673922987-e212871fec22",
-    theme: "nature"
-  },
-  {
-    id: "ocean-blue",
-    name: "Ocean Wave",
-    url: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
-    theme: "ocean"
-  },
-  {
-    id: "sunset-warm",
-    name: "Sunset Glow",
-    url: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7",
-    theme: "sunset"
-  },
-  {
-    id: "custom",
-    name: "Custom URL",
-    url: "",
-    theme: "all"
-  }
-];
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { LAYOUT_TYPES } from "@/constants/layouts";
+import { useToast } from "@/hooks/use-toast";
+import FaviconUploader from "@/components/FaviconUploader";
 
 export default function ProfileEditor() {
-  const [loading, setLoading] = useState(false);
-  const [bio, setBio] = useState("");
-  const [links, setLinks] = useState<Link[]>([]);
-  const [avatar, setAvatar] = useState<File | null>(null);
-  const [avatarUrl, setAvatarUrl] = useState("");
-  const [username, setUsername] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [tabTitle, setTabTitle] = useState("");
-  const [faviconUrl, setFaviconUrl] = useState("");
-  const [themeId, setThemeId] = useState("elegant");
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [backgroundImageId, setBackgroundImageId] = useState("none");
-  const [customBackgroundUrl, setCustomBackgroundUrl] = useState("");
-  
-  type TabType = "theme" | "background" | "font" | "layout" | "metadata";
-  
-  const [activeTab, setActiveTab] = useState<TabType>("theme");
-  
-  const [fontStyle, setFontStyle] = useState("sans");
-  const [layoutType, setLayoutType] = useState<LayoutType>(LAYOUT_TYPES.LINKS);
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [userId, setUserId] = useState<string | null>(null);
+  const { username } = useParams();
+  const [loading, setLoading] = useState(false);
+  const { toast: showToast } = useToast();
+
+  // Form state
+  const [fullName, setFullName] = useState("");
+  const [bio, setBio] = useState("");
+  const [customTitle, setCustomTitle] = useState("");
+  const [faviconUrl, setFaviconUrl] = useState<string | null>(null);
+  const [links, setLinks] = useState([
+    { title: "", url: "", icon: "Link" },
+  ]);
+
+  // Query to fetch user data
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["user-profile", username],
+    queryFn: async () => {
+      // Get user id from username
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("username", username)
+        .single();
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      // Get profile settings
+      const { data: settingsData, error: settingsError } = await supabase
+        .from("profile_settings")
+        .select("*")
+        .eq("id", profileData.id)
+        .single();
+
+      return {
+        profile: profileData,
+        settings: settingsError ? null : settingsData,
+      };
+    },
+  });
 
   useEffect(() => {
-    const loadProfile = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate('/auth');
-        return;
+    if (data) {
+      const { profile, settings } = data;
+      
+      // Set form values from profile
+      setFullName(profile.full_name || "");
+      setBio(profile.bio || "");
+      setCustomTitle(profile.custom_title || "");
+      
+      // Set favicon URL if available
+      if (settings?.favicon_url) {
+        setFaviconUrl(settings.favicon_url);
       }
-
-      setUserId(session.user.id);
-
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
-
-      if (error) {
-        toast({
-          title: "Error loading profile",
-          description: error instanceof Error ? error.message : "Failed to load profile",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (profile) {
-        setBio(profile.bio || "");
-        setUsername(profile.username || "");
-        setFullName(profile.full_name || "");
-        setAvatarUrl(profile.avatar_url || "");
-        setTabTitle(profile.custom_title || profile.full_name || "");
-      }
-
-      const { data: settings } = await supabase
-        .from('profile_settings')
-        .select('links, theme_id, is_dark_mode, background_style, font_style, layout_type, favicon_url')
-        .eq('id', session.user.id)
-        .single();
-
-      if (settings) {
-        setThemeId(settings.theme_id || "elegant");
-        setIsDarkMode(settings.is_dark_mode || false);
-        setFontStyle(settings.font_style || "sans");
-        setLayoutType(settings.layout_type as LayoutType || LAYOUT_TYPES.LINKS);
-        setFaviconUrl(settings.favicon_url || "");
-        
-        if (settings.background_style) {
-          try {
-            const bgStyle = JSON.parse(settings.background_style);
-            setBackgroundImageId(bgStyle.id || "none");
-            if (bgStyle.id === "custom" && bgStyle.url) {
-              setCustomBackgroundUrl(bgStyle.url);
-            }
-          } catch (e) {
-            console.error("Failed to parse background style:", e);
-          }
-        }
-        
-        if (settings.links) {
-          try {
-            const linksData = settings.links as unknown as any[];
-            if (Array.isArray(linksData)) {
-              const validLinks = linksData.map(link => ({
-                id: link.id || crypto.randomUUID(),
-                title: link.title || "",
-                url: link.url || "",
-                icon: link.icon || "link",
-                display: link.display || "both"
-              }));
-              setLinks(validLinks);
-            }
-          } catch (e) {
-            console.error("Failed to parse links:", e);
-          }
+      
+      // Set links from settings if available
+      if (settings?.links) {
+        try {
+          const parsedLinks = typeof settings.links === 'string' 
+            ? JSON.parse(settings.links) 
+            : settings.links;
+          setLinks(parsedLinks);
+        } catch (e) {
+          console.error("Failed to parse links:", e);
+          setLinks([{ title: "", url: "", icon: "Link" }]);
         }
       }
-    };
-
-    loadProfile();
-  }, [navigate, toast]);
-
-  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setAvatar(file);
-    setAvatarUrl(URL.createObjectURL(file));
-  };
-
-  const handleAddLink = () => {
-    setLinks([...links, { id: crypto.randomUUID(), title: "", url: "", icon: "link", display: "both" }]);
-  };
-
-  const handleLinkChange = (id: string, field: 'title' | 'url' | 'icon' | 'display', value: string) => {
-    setLinks(links.map(link => 
-      link.id === id ? { ...link, [field]: value } : link
-    ));
-  };
-
-  const handleRemoveLink = (id: string) => {
-    setLinks(links.filter(link => link.id !== id));
-  };
-
-  const getBackgroundStyle = () => {
-    if (backgroundImageId === "none") {
-      return null;
     }
-    
-    if (backgroundImageId === "custom") {
-      return {
-        id: "custom",
-        url: customBackgroundUrl
-      };
-    }
-    
-    const selectedImage = BACKGROUND_IMAGES.find(img => img.id === backgroundImageId);
-    return {
-      id: selectedImage?.id,
-      url: selectedImage?.url
-    };
-  };
+  }, [data]);
 
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+
     try {
-      setLoading(true);
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("No session");
+      if (!data?.profile?.id) {
+        throw new Error("User ID not found");
+      }
 
-      if (username) {
-        const { count, error: checkError } = await supabase
-          .from('profiles')
-          .select('*', { count: 'exact', head: true })
-          .eq('username', username)
-          .neq('id', session.user.id);
+      // Update the profile data
+      const { error: profileUpdateError } = await supabase
+        .from("profiles")
+        .update({
+          full_name: fullName,
+          bio,
+          custom_title: customTitle,
+        })
+        .eq("id", data.profile.id);
 
-        if (checkError) throw checkError;
-        if (count && count > 0) {
-          throw new Error("Username already taken");
+      if (profileUpdateError) {
+        throw profileUpdateError;
+      }
+
+      // Update favicon URL in settings
+      if (data.settings) {
+        const { error: settingsUpdateError } = await supabase
+          .from("profile_settings")
+          .update({
+            favicon_url: faviconUrl,
+            links: links,
+          })
+          .eq("id", data.profile.id);
+
+        if (settingsUpdateError) {
+          throw settingsUpdateError;
         }
       }
 
-      let avatar_url = avatarUrl;
-      if (avatar) {
-        const fileExt = avatar.name.split('.').pop();
-        const filePath = `${session.user.id}.${fileExt}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('avatars')
-          .upload(filePath, avatar, { upsert: true });
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('avatars')
-          .getPublicUrl(filePath);
-        
-        avatar_url = publicUrl;
-      }
-
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-          id: session.user.id,
-          username,
-          full_name: fullName,
-          bio,
-          avatar_url: avatar_url,
-          custom_title: tabTitle,
-          updated_at: new Date().toISOString(),
-        });
-
-      if (profileError) throw profileError;
-
-      const backgroundStyle = getBackgroundStyle();
-      
-      const jsonLinks = links.map(link => ({
-        id: link.id,
-        title: link.title,
-        url: link.url,
-        icon: link.icon || "link",
-        display: link.display || "both"
-      }));
-      
-      const { error: settingsError } = await supabase
-        .from('profile_settings')
-        .update({ 
-          links: jsonLinks as unknown as Json,
-          theme_id: themeId,
-          is_dark_mode: isDarkMode,
-          background_style: backgroundStyle ? JSON.stringify(backgroundStyle) : null,
-          font_style: fontStyle,
-          layout_type: layoutType,
-          favicon_url: faviconUrl,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', session.user.id);
-
-      if (settingsError) throw settingsError;
-
-      toast({
-        title: "Success",
-        description: "Profile updated successfully",
-      });
-
-      navigate('/dashboard');
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive",
-      });
+      toast.success("Profile updated successfully!");
+      navigate(`/u/${username}`);
+    } catch (error: any) {
+      toast.error(`Error updating profile: ${error.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredBackgroundImages = BACKGROUND_IMAGES.filter(img => 
-    img.theme === "all" || img.theme === themeId
-  );
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
-  useEffect(() => {
-    document.documentElement.style.setProperty('--font-current', `var(--font-${fontStyle})`);
-  }, [fontStyle]);
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <h1 className="text-2xl font-bold">Error</h1>
+        <p className="text-red-500">{(error as Error).message}</p>
+        <Button onClick={() => navigate("/")} className="mt-4">
+          Go Home
+        </Button>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted p-4">
-      <div className="container max-w-4xl mx-auto">
-        <Button
-          variant="ghost"
-          className="mb-4"
-          onClick={() => navigate("/dashboard")}
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Dashboard
-        </Button>
+    <div className="container px-4 py-8 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6">Edit Profile</h1>
 
-        <Card className="overflow-hidden">
-          <CardHeader className="px-4 sm:px-6">
-            <CardTitle className="text-xl sm:text-2xl">Edit Profile</CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 sm:px-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="flex flex-col items-center space-y-4">
-                <Avatar className="w-20 h-20 sm:w-24 sm:h-24">
-                  <AvatarImage src={avatarUrl} />
-                  <AvatarFallback>{fullName?.charAt(0) || "?"}</AvatarFallback>
-                </Avatar>
-                <div className="flex items-center space-x-2">
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarChange}
-                    className="hidden"
-                    id="avatar-upload"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => document.getElementById("avatar-upload")?.click()}
-                    className="text-xs sm:text-sm"
-                  >
-                    <Upload className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                    Change Avatar
-                  </Button>
-                </div>
-              </div>
+      <Tabs defaultValue="profile">
+        <TabsList>
+          <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="metadata">Metadata</TabsTrigger>
+          <TabsTrigger value="links">Links</TabsTrigger>
+        </TabsList>
 
+        <div className="mt-6">
+          <form onSubmit={handleSubmit}>
+            <TabsContent value="profile">
               <div className="space-y-4">
                 <div>
+                  <Label htmlFor="fullName">Full Name</Label>
                   <Input
-                    placeholder="Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                    className="w-full"
+                    id="fullName"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="John Doe"
                   />
-                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                    This will be your profile URL: onetaplink.vercel.app/{username}
+                </div>
+
+                <div>
+                  <Label htmlFor="bio">Bio</Label>
+                  <Textarea
+                    id="bio"
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    placeholder="Tell us about yourself"
+                    className="min-h-[120px]"
+                  />
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="metadata">
+              <div className="space-y-6">
+                <div>
+                  <Label htmlFor="customTitle">Custom Page Title</Label>
+                  <Input
+                    id="customTitle"
+                    value={customTitle}
+                    onChange={(e) => setCustomTitle(e.target.value)}
+                    placeholder="My Awesome Profile - John Doe"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    This title will be shown in the browser tab when someone visits your profile.
                   </p>
                 </div>
 
-                <Input
-                  placeholder="Full Name"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  required
-                  className="w-full"
-                />
-
-                <Textarea
-                  placeholder="Write a short bio about yourself..."
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  className="min-h-[100px] w-full"
-                />
-
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Appearance & Metadata</h3>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Switch 
-                      id="dark-mode" 
-                      checked={isDarkMode} 
-                      onCheckedChange={setIsDarkMode} 
+                <div>
+                  <Label htmlFor="favicon">Custom Favicon</Label>
+                  <div className="mt-2">
+                    <FaviconUploader 
+                      userId={data?.profile?.id || ""}
+                      currentFavicon={faviconUrl}
+                      onFaviconUpload={setFaviconUrl}
                     />
-                    <Label htmlFor="dark-mode">Dark Mode</Label>
                   </div>
-                  
-                  <Tabs 
-                    value={activeTab} 
-                    onValueChange={(value: string) => setActiveTab(value as TabType)} 
-                    className="w-full"
-                  >
-                    <TabsList className="w-full grid grid-cols-3 mb-2">
-                      <TabsTrigger value="theme" className="text-xs sm:text-sm">Theme</TabsTrigger>
-                      <TabsTrigger value="background" className="text-xs sm:text-sm">Background</TabsTrigger>
-                      <TabsTrigger value="metadata" className="text-xs sm:text-sm">Metadata</TabsTrigger>
-                    </TabsList>
-                    <TabsList className="w-full grid grid-cols-2 mb-4">
-                      <TabsTrigger value="font" className="text-xs sm:text-sm">Font</TabsTrigger>
-                      <TabsTrigger value="layout" className="text-xs sm:text-sm">Layout</TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="theme">
-                      <div className="space-y-2">
-                        <Label>Select Theme</Label>
-                        <RadioGroup 
-                          value={themeId} 
-                          onValueChange={setThemeId} 
-                          className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2"
-                        >
-                          {THEMES.map((theme) => (
-                            <div key={theme.id} className="flex items-start space-x-2">
-                              <RadioGroupItem value={theme.id} id={theme.id} />
-                              <div className="grid gap-1.5">
-                                <Label htmlFor={theme.id} className="font-medium text-sm sm:text-base">
-                                  {theme.name}
-                                </Label>
-                                <div 
-                                  className={`w-full h-8 sm:h-12 rounded-md ${theme.background}`}
-                                  aria-hidden="true"
-                                />
-                                <p className="text-xs sm:text-sm text-muted-foreground">
-                                  {theme.description}
-                                </p>
-                              </div>
-                            </div>
-                          ))}
-                        </RadioGroup>
-                      </div>
-                    </TabsContent>
-                    
-                    <TabsContent value="background">
-                      <div className="space-y-2">
-                        <Label>Select Background Image</Label>
-                        <RadioGroup 
-                          value={backgroundImageId} 
-                          onValueChange={setBackgroundImageId} 
-                          className="grid grid-cols-1 gap-4 mt-2"
-                        >
-                          {filteredBackgroundImages.map((image) => (
-                            <div key={image.id} className="flex items-start space-x-2">
-                              <RadioGroupItem value={image.id} id={`bg-${image.id}`} />
-                              <div className="grid gap-1.5 w-full">
-                                <Label htmlFor={`bg-${image.id}`} className="font-medium text-sm sm:text-base">
-                                  {image.name}
-                                </Label>
-                                {image.id !== "none" && image.id !== "custom" && (
-                                  <div 
-                                    className="w-full h-16 sm:h-24 rounded-md bg-cover bg-center"
-                                    style={{ backgroundImage: `url(${image.url})` }}
-                                    aria-hidden="true"
-                                  />
-                                )}
-                                {image.id === "custom" && (
-                                  <div className="mt-2 w-full">
-                                    <Input
-                                      placeholder="Enter image URL"
-                                      value={customBackgroundUrl}
-                                      onChange={(e) => setCustomBackgroundUrl(e.target.value)}
-                                      className="w-full text-xs sm:text-sm"
-                                    />
-                                    {customBackgroundUrl && (
-                                      <div 
-                                        className="w-full h-16 sm:h-24 rounded-md bg-cover bg-center mt-2"
-                                        style={{ backgroundImage: `url(${customBackgroundUrl})` }}
-                                        aria-hidden="true"
-                                      />
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </RadioGroup>
-                      </div>
-                    </TabsContent>
-                    
-                    <TabsContent value="font">
-                      <div className="space-y-2">
-                        <Label>Select Font Style</Label>
-                        <RadioGroup 
-                          value={fontStyle} 
-                          onValueChange={setFontStyle} 
-                          className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2"
-                        >
-                          {FONT_STYLES.map((font) => (
-                            <div key={font.id} className="flex items-start space-x-2">
-                              <RadioGroupItem value={font.id} id={`font-${font.id}`} />
-                              <div className="grid gap-1.5">
-                                <Label
-                                  htmlFor={`font-${font.id}`} 
-                                  className={`font-medium text-sm sm:text-base ${font.class}`}
-                                >
-                                  {font.name}
-                                </Label>
-                                <p className={`text-xs sm:text-sm text-muted-foreground ${font.class}`}>
-                                  {font.description}
-                                </p>
-                              </div>
-                            </div>
-                          ))}
-                        </RadioGroup>
-                      </div>
-                    </TabsContent>
-                    
-                    <TabsContent value="layout">
-                      <div className="space-y-2">
-                        <Label>Select Layout</Label>
-                        <RadioGroup 
-                          value={layoutType} 
-                          onValueChange={(value) => {
-                            if (value === LAYOUT_TYPES.LINKS || 
-                                value === LAYOUT_TYPES.BENTO || 
-                                value === LAYOUT_TYPES.MIXED) {
-                              setLayoutType(value);
-                            }
-                          }} 
-                          className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2"
-                        >
-                          {LAYOUT_OPTIONS.map((layout) => {
-                            const IconComponent = 
-                              layout.icon === 'list' ? List : 
-                              layout.icon === 'layout-grid' ? LayoutGrid : 
-                              Layout;
-                            
-                            return (
-                              <div key={layout.id} className="flex items-start space-x-2">
-                                <RadioGroupItem value={layout.id} id={`layout-${layout.id}`} />
-                                <div className="grid gap-1.5">
-                                  <Label
-                                    htmlFor={`layout-${layout.id}`}
-                                    className="font-medium text-sm sm:text-base"
-                                  >
-                                    <div className="flex items-center gap-2">
-                                      <IconComponent className="w-4 h-4" />
-                                      <span>{layout.name}</span>
-                                    </div>
-                                  </Label>
-                                  <p className="text-xs sm:text-sm text-muted-foreground">
-                                    {layout.description}
-                                  </p>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </RadioGroup>
-                      </div>
-                    </TabsContent>
-                    
-                    <TabsContent value="metadata">
-                      <div className="space-y-6">
-                        <div>
-                          <Label htmlFor="tab-title">Browser Tab Title</Label>
-                          <Input
-                            id="tab-title"
-                            placeholder="Enter custom browser tab title"
-                            value={tabTitle}
-                            onChange={(e) => setTabTitle(e.target.value)}
-                            className="mt-1.5"
-                          />
-                          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                            This will be shown in the browser tab when someone visits your page.
-                            Leave empty to use your full name.
-                          </p>
-                        </div>
-                        
-                        <div>
-                          <Label>Custom Favicon</Label>
-                          {userId && (
-                            <div className="mt-1.5">
-                              <FaviconUploader
-                                userId={userId}
-                                currentFaviconUrl={faviconUrl}
-                                onFaviconChange={setFaviconUrl}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </TabsContent>
-                  </Tabs>
                 </div>
+              </div>
+            </TabsContent>
 
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-medium">Links</h3>
-                    <Button type="button" variant="outline" onClick={handleAddLink} className="text-xs sm:text-sm">
-                      Add Link
-                    </Button>
-                  </div>
-
-                  {links.map((link) => (
-                    <div key={link.id} className="flex flex-col sm:flex-row gap-2 items-start">
-                      <div className="flex-none">
-                        <IconSelector 
-                          selectedIcon={link.icon || "link"} 
-                          onSelectIcon={(iconName) => handleLinkChange(link.id, 'icon', iconName)} 
-                        />
-                      </div>
+            <TabsContent value="links">
+              <div className="space-y-4">
+                {links.map((link, index) => (
+                  <div key={index} className="flex gap-2 items-start">
+                    <div className="flex-1">
+                      <Label htmlFor={`link-title-${index}`}>Link Title</Label>
                       <Input
-                        placeholder="Title"
+                        id={`link-title-${index}`}
                         value={link.title}
-                        onChange={(e) => handleLinkChange(link.id, 'title', e.target.value)}
-                        required
-                        className="flex-1 text-xs sm:text-sm"
+                        onChange={(e) => {
+                          const newLinks = [...links];
+                          newLinks[index].title = e.target.value;
+                          setLinks(newLinks);
+                        }}
+                        placeholder="GitHub"
                       />
+                    </div>
+                    <div className="flex-1">
+                      <Label htmlFor={`link-url-${index}`}>URL</Label>
                       <Input
-                        placeholder="URL"
+                        id={`link-url-${index}`}
                         value={link.url}
-                        onChange={(e) => handleLinkChange(link.id, 'url', e.target.value)}
-                        required
-                        className="flex-1 text-xs sm:text-sm"
+                        onChange={(e) => {
+                          const newLinks = [...links];
+                          newLinks[index].url = e.target.value;
+                          setLinks(newLinks);
+                        }}
+                        placeholder="https://github.com/yourusername"
                       />
-                      <Select
-                        value={link.display || "both"}
-                        onValueChange={(value) => handleLinkChange(link.id, 'display', value)}
-                      >
-                        <SelectTrigger className="w-[110px]">
-                          <SelectValue placeholder="Display" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="both">Icon & Title</SelectItem>
-                          <SelectItem value="icon">Icon Only</SelectItem>
-                          <SelectItem value="title">Title Only</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    </div>
+                    <div className="mt-8">
                       <Button
                         type="button"
                         variant="destructive"
-                        onClick={() => handleRemoveLink(link.id)}
-                        className="mt-2 sm:mt-0 text-xs sm:text-sm"
+                        onClick={() => {
+                          const newLinks = links.filter((_, i) => i !== index);
+                          setLinks(newLinks.length ? newLinks : [{ title: "", url: "", icon: "Link" }]);
+                        }}
                       >
                         Remove
                       </Button>
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
+                ))}
 
-              <div className="pt-4">
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Saving..." : "Save Profile"}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setLinks([...links, { title: "", url: "", icon: "Link" }]);
+                  }}
+                >
+                  Add Link
                 </Button>
               </div>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
+            </TabsContent>
+
+            <div className="mt-6 flex gap-4 justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate(`/u/${username}`)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
+            </div>
+          </form>
+        </div>
+      </Tabs>
     </div>
   );
 }

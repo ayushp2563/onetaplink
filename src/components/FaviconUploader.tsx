@@ -1,113 +1,119 @@
 
-import { useState } from "react";
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Upload } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { Loader2, Upload } from 'lucide-react';
 
 interface FaviconUploaderProps {
   userId: string;
-  currentFaviconUrl: string;
-  onFaviconChange: (url: string) => void;
+  currentFavicon: string | null;
+  onFaviconUpload: (url: string) => void;
 }
 
-export const FaviconUploader = ({ userId, currentFaviconUrl, onFaviconChange }: FaviconUploaderProps) => {
-  const [isUploading, setIsUploading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(currentFaviconUrl || null);
+const FaviconUploader: React.FC<FaviconUploaderProps> = ({ 
+  userId, 
+  currentFavicon, 
+  onFaviconUpload 
+}) => {
+  const [uploading, setUploading] = useState(false);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    // Check file type
-    if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file.");
-      return;
-    }
-    
-    // Check file size (max 200KB)
-    if (file.size > 200 * 1024) {
-      alert("Favicon should be less than 200KB.");
-      return;
-    }
-    
+  const uploadFavicon = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
-      setIsUploading(true);
+      setUploading(true);
       
-      // Create a preview
-      const objectUrl = URL.createObjectURL(file);
-      setPreview(objectUrl);
-      
-      // Upload to Supabase storage
+      if (!event.target.files || event.target.files.length === 0) {
+        throw new Error('You must select an image to upload.');
+      }
+
+      const file = event.target.files[0];
       const fileExt = file.name.split('.').pop();
-      const filePath = `${userId}_favicon.${fileExt}`;
+      const fileSize = file.size / 1024 / 1024; // in MB
       
-      const { error: uploadError, data } = await supabase.storage
-        .from('favicons')
-        .upload(filePath, file, { upsert: true });
-        
-      if (uploadError) {
-        throw uploadError;
+      // Check file size (limit to 2MB)
+      if (fileSize > 2) {
+        throw new Error('File size must be less than 2MB');
       }
       
-      // Get the public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('favicons')
-        .getPublicUrl(filePath);
+      // Check file type
+      const allowedExtensions = ['ico', 'png', 'jpg', 'jpeg', 'svg'];
+      if (!allowedExtensions.includes(fileExt?.toLowerCase() || '')) {
+        throw new Error('File type not supported. Please upload ico, png, jpg, jpeg or svg file.');
+      }
       
-      onFaviconChange(publicUrl);
-    } catch (error) {
-      console.error("Error uploading favicon:", error);
-      alert("Failed to upload favicon. Please try again.");
+      // Create a unique file name
+      const fileName = `${userId}_favicon_${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { data, error } = await supabase.storage
+        .from('favicons')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      // Get the public URL
+      const { data: publicUrlData } = supabase.storage
+        .from('favicons')
+        .getPublicUrl(data.path);
+
+      onFaviconUpload(publicUrlData.publicUrl);
+      toast.success('Favicon uploaded successfully!');
+    } catch (error: any) {
+      toast.error(`Error uploading favicon: ${error.message}`);
     } finally {
-      setIsUploading(false);
+      setUploading(false);
     }
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-4">
-        <div className="flex-shrink-0">
-          {preview && (
-            <div className="relative h-10 w-10 rounded-md border overflow-hidden">
-              <img 
-                src={preview} 
-                alt="Favicon Preview" 
-                className="h-full w-full object-cover"
-              />
-            </div>
-          )}
-          {!preview && (
-            <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center">
-              <span className="text-xs text-muted-foreground">No icon</span>
-            </div>
-          )}
-        </div>
-        
-        <div className="flex-1">
-          <Input
-            type="file"
-            accept=".ico,.png,.jpg,.jpeg,.svg"
-            onChange={handleFileChange}
-            className="hidden"
-            id="favicon-upload"
+    <div className="flex flex-col gap-4">
+      <div className="flex gap-4 items-center">
+        {currentFavicon && (
+          <img 
+            src={currentFavicon} 
+            alt="Current favicon" 
+            className="w-8 h-8 object-contain bg-gray-100 border border-gray-200 rounded p-1" 
           />
-          <Button
+        )}
+        <div className="relative">
+          <Button 
+            variant="outline" 
+            className="relative cursor-pointer"
+            disabled={uploading}
             type="button"
-            variant="outline"
-            onClick={() => document.getElementById("favicon-upload")?.click()}
-            disabled={isUploading}
-            className="text-xs sm:text-sm w-full"
           >
-            <Upload className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-            {isUploading ? "Uploading..." : "Upload Custom Favicon"}
+            {uploading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Uploading...
+              </>
+            ) : (
+              <>
+                <Upload className="mr-2 h-4 w-4" />
+                Upload Favicon
+              </>
+            )}
+            <input
+              type="file"
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              accept=".ico,.png,.jpg,.jpeg,.svg"
+              onChange={uploadFavicon}
+              disabled={uploading}
+            />
           </Button>
         </div>
       </div>
       <p className="text-xs text-muted-foreground">
-        Recommended: 32x32 pixels, PNG or ICO format, less than 200KB
+        Recommended: Upload a square image (.ico, .png, .jpg, .svg) that will be used as the favicon 
+        for your profile page. Max size: 2MB.
       </p>
     </div>
   );
 };
+
+export default FaviconUploader;

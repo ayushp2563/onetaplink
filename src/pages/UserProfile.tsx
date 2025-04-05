@@ -1,11 +1,13 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { motion } from "framer-motion";
-import { useToast } from "@/components/ui/use-toast";
-import { ProfileContent } from "@/components/layouts/ProfileContent";
-import { LAYOUT_TYPES, LayoutType } from "@/constants/layouts";
+import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MixedLayout } from "@/components/layouts/MixedLayout";
+import { LinksLayout } from "@/components/layouts/LinksLayout";
+import { BentoLayout } from "@/components/layouts/BentoLayout";
+import { usePageMetadata } from "@/hooks/usePageMetadata";
 
 interface Profile {
   username: string;
@@ -73,6 +75,7 @@ export default function UserProfile() {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { metadata } = usePageMetadata();
 
   useEffect(() => {
     const loadProfile = async () => {

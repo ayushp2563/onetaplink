@@ -14,6 +14,7 @@ export type Database = {
           animation_type: string | null
           background_style: string | null
           created_at: string
+          favicon_url: string | null
           font_style: string | null
           id: string
           is_dark_mode: boolean | null
@@ -27,6 +28,7 @@ export type Database = {
           animation_type?: string | null
           background_style?: string | null
           created_at?: string
+          favicon_url?: string | null
           font_style?: string | null
           id: string
           is_dark_mode?: boolean | null
@@ -40,6 +42,7 @@ export type Database = {
           animation_type?: string | null
           background_style?: string | null
           created_at?: string
+          favicon_url?: string | null
           font_style?: string | null
           id?: string
           is_dark_mode?: boolean | null
@@ -64,6 +67,7 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string
+          custom_title: string | null
           full_name: string | null
           id: string
           updated_at: string
@@ -73,6 +77,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          custom_title?: string | null
           full_name?: string | null
           id: string
           updated_at?: string
@@ -82,6 +87,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          custom_title?: string | null
           full_name?: string | null
           id?: string
           updated_at?: string
