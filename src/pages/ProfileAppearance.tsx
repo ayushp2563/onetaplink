@@ -207,17 +207,24 @@ export default function ProfileAppearance() {
           setAvatarUrl(profile.avatar_url || "");
         }
 
-        const { data: settings } = await supabase
+        const { data: settings, error: settingsError } = await supabase
           .from('profile_settings')
           .select('links, theme_id, is_dark_mode, background_style, font_style, layout_type, animation_type, text_shadow')
           .eq('id', session.user.id)
           .single();
 
-        if (settings) {
+        if (settingsError) {
+          console.error("Error loading settings:", settingsError);
+          toast({
+            title: "Error loading settings",
+            description: "Using default appearance settings",
+          });
+          // Continue with defaults
+        } else if (settings) {
           setThemeId(settings.theme_id || "elegant");
           setIsDarkMode(settings.is_dark_mode || false);
           setFontStyle(settings.font_style || "sans");
-          setLayoutType(settings.layout_type as LayoutType || LAYOUT_TYPES.LINKS);
+          setLayoutType((settings.layout_type as LayoutType) || LAYOUT_TYPES.LINKS);
           setAnimationType(settings.animation_type || "fade");
           setTextShadow(settings.text_shadow || false);
           

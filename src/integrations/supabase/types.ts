@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       profile_settings: {
         Row: {
+          animation_type: string | null
           background_style: string | null
           created_at: string
           font_style: string | null
@@ -18,10 +19,12 @@ export type Database = {
           is_dark_mode: boolean | null
           layout_type: string | null
           links: Json | null
+          text_shadow: boolean | null
           theme_id: string
           updated_at: string
         }
         Insert: {
+          animation_type?: string | null
           background_style?: string | null
           created_at?: string
           font_style?: string | null
@@ -29,10 +32,12 @@ export type Database = {
           is_dark_mode?: boolean | null
           layout_type?: string | null
           links?: Json | null
+          text_shadow?: boolean | null
           theme_id?: string
           updated_at?: string
         }
         Update: {
+          animation_type?: string | null
           background_style?: string | null
           created_at?: string
           font_style?: string | null
@@ -40,6 +45,7 @@ export type Database = {
           is_dark_mode?: boolean | null
           layout_type?: string | null
           links?: Json | null
+          text_shadow?: boolean | null
           theme_id?: string
           updated_at?: string
         }
