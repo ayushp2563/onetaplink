@@ -12,6 +12,7 @@ import ProfileEditor from "./pages/ProfileEditor";
 import UserProfile from "./pages/UserProfile";
 import Landing from "./pages/Landing";
 import HowToUse from "./pages/HowToUse";
+import ProfileAppearance from "./pages/ProfileAppearance";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/dashboard" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/edit-profile" element={<ProfileEditor />} />
+            <Route path="/appearance" element={<ProfileAppearance />} />
             <Route path="/how-to-use" element={<HowToUse />} />
             <Route path="/:username" element={<UserProfile />} />
             <Route path="*" element={<NotFound />} />
