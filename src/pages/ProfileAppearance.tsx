@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -219,7 +218,6 @@ export default function ProfileAppearance() {
             title: "Error loading settings",
             description: "Using default appearance settings",
           });
-          // Continue with defaults
         } else if (settings) {
           setThemeId(settings.theme_id || "elegant");
           setIsDarkMode(settings.is_dark_mode || false);
@@ -228,7 +226,6 @@ export default function ProfileAppearance() {
           setAnimationType(settings.animation_type || "fade");
           setTextShadow(settings.text_shadow || false);
           
-          // Set the theme in the theme provider based on user preference
           setTheme(settings.is_dark_mode ? "dark" : "light");
           
           if (settings.background_style) {
@@ -334,12 +331,10 @@ export default function ProfileAppearance() {
     }
   };
   
-  // Effect for real-time theme preview
   useEffect(() => {
     document.documentElement.style.setProperty('--font-current', `var(--font-${fontStyle})`);
   }, [fontStyle]);
 
-  // Effect to toggle dark mode in real-time preview
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
@@ -348,7 +343,6 @@ export default function ProfileAppearance() {
     }
     
     return () => {
-      // Restore theme based on theme provider
       if (theme === "dark") {
         document.documentElement.classList.add('dark');
       } else {
@@ -486,7 +480,6 @@ export default function ProfileAppearance() {
                   </TabsTrigger>
                 </TabsList>
 
-                {/* Theme Tab */}
                 <TabsContent value="theme">
                   <div className="space-y-6">
                     <div className="flex items-center gap-2 justify-between">
@@ -536,7 +529,6 @@ export default function ProfileAppearance() {
                   </div>
                 </TabsContent>
                 
-                {/* Layout Tab */}
                 <TabsContent value="layout">
                   <div className="space-y-6">
                     <div className="space-y-2">
@@ -605,7 +597,6 @@ export default function ProfileAppearance() {
                   </div>
                 </TabsContent>
                 
-                {/* Background Tab */}
                 <TabsContent value="background">
                   <div className="space-y-6">
                     <div className="space-y-2">
@@ -675,7 +666,6 @@ export default function ProfileAppearance() {
                   </div>
                 </TabsContent>
                 
-                {/* Typography Tab */}
                 <TabsContent value="typography">
                   <div className="space-y-6">
                     <div className="space-y-2">
