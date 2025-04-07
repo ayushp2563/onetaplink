@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -295,15 +294,6 @@ export default function UserProfile() {
             {profile.bio && (
               <p className={`text-white/90 max-w-md mx-auto mb-8 ${textShadowClass}`}>{profile.bio}</p>
             )}
-            
-            {/* Add Edit Profile Button */}
-            <Button 
-              onClick={handleEditProfile}
-              variant="outline" 
-              className="mt-4 border-white/20 bg-white/10 text-white hover:bg-white/20"
-            >
-              Customize Profile
-            </Button>
           </motion.div>
 
           <ProfileContent 
