@@ -1,4 +1,3 @@
-
 import { LogOut, Share2, Copy, Link2, ExternalLink } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -185,6 +184,18 @@ const Index = () => {
     }
   };
 
+  const handleEditProfile = () => {
+    if (username) {
+      navigate(`/edit-profile/${username}`);
+    } else {
+      toast({
+        title: "No username found",
+        description: "Please create a profile first.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -195,7 +206,6 @@ const Index = () => {
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${theme.background}`}>
-      {/* Logo and Header */}
       <header className="w-full py-4 px-6 flex justify-center items-center">
         <div className="flex items-center">
           <img src="/main-logo-black-transparent.svg" alt="One Tap Link" className="w-48 h-48 text-primary mr-2" />
@@ -234,7 +244,7 @@ const Index = () => {
             <CardContent>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-4">
                 <Button 
-                  onClick={() => navigate('/edit-profile')} 
+                  onClick={handleEditProfile} 
                   className="w-full sm:w-auto bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
                 >
                   {hasProfile ? 'Edit Profile' : 'Create Profile'}
