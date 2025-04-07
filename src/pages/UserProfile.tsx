@@ -88,6 +88,18 @@ export default function UserProfile() {
     faviconUrl: settings?.favicon_url
   });
 
+  const handleEditProfile = () => {
+    if (profile?.username) {
+      navigate(`/edit-profile/${profile.username}`);
+    } else {
+      toast({
+        title: "Error",
+        description: "Cannot edit profile: username not found",
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
     const loadProfile = async () => {
       try {

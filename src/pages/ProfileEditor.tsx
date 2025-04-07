@@ -50,10 +50,22 @@ export default function ProfileEditor() {
     { title: "", url: "", icon: "Link" },
   ]);
 
+  // Check if we have a username parameter
+  useEffect(() => {
+    if (!username) {
+      toast.error("No username specified. Please go back and try again.");
+      navigate('/dashboard');
+    }
+  }, [username, navigate]);
+
   // Query to fetch user data
   const { data, isLoading, error } = useQuery({
     queryKey: ["user-profile", username],
     queryFn: async () => {
+      if (!username) {
+        throw new Error("Username is required");
+      }
+      
       // Get user id from username
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
@@ -86,6 +98,7 @@ export default function ProfileEditor() {
         settings: settingsError || !settingsData ? null : (settingsData as ProfileSettings),
       };
     },
+    enabled: !!username, // Only run query if username is available
   });
 
   useEffect(() => {
@@ -171,7 +184,7 @@ export default function ProfileEditor() {
       }
 
       toast.success("Profile updated successfully!");
-      navigate(`/u/${username}`);
+      navigate(`/${username}`);
     } catch (error: any) {
       toast.error(`Error updating profile: ${error.message}`);
     } finally {

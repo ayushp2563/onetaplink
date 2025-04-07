@@ -27,7 +27,7 @@ const App = () => (
             <Route path="/" element={<Landing />} />
             <Route path="/dashboard" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/edit-profile" element={<ProfileEditor />} />
+            <Route path="/edit-profile/:username" element={<ProfileEditor />} />
             <Route path="/appearance" element={<ProfileAppearance />} />
             <Route path="/how-to-use" element={<HowToUse />} />
             <Route path="/:username" element={<UserProfile />} />
