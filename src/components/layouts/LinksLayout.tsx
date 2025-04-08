@@ -1,6 +1,7 @@
 
 import { motion } from "framer-motion";
 import { LinkIcon } from "./LinkIcon";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Link {
   id: string;
@@ -16,6 +17,8 @@ interface LinksLayoutProps {
 }
 
 export const LinksLayout = ({ links, textShadowClass = "" }: LinksLayoutProps) => {
+  const isMobile = useIsMobile();
+  
   const container = {
     hidden: { opacity: 0 },
     show: {
@@ -36,7 +39,7 @@ export const LinksLayout = ({ links, textShadowClass = "" }: LinksLayoutProps) =
       variants={container}
       initial="hidden"
       animate="show"
-      className="space-y-3"
+      className="space-y-3 w-full max-w-lg mx-auto px-2 sm:px-0"
     >
       {links.map((link) => {
         const displayMode = link.display || "both";
@@ -54,7 +57,9 @@ export const LinksLayout = ({ links, textShadowClass = "" }: LinksLayoutProps) =
               <LinkIcon iconName={link.icon || "link"} className="text-white" />
             )}
             {(displayMode === "both" || displayMode === "title") && (
-              <span className={`flex-1 text-white truncate ${textShadowClass}`}>{link.title}</span>
+              <span className={`flex-1 text-white truncate ${textShadowClass} ${isMobile ? 'text-sm' : ''}`}>
+                {link.title}
+              </span>
             )}
           </motion.a>
         );

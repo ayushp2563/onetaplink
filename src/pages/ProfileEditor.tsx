@@ -5,12 +5,14 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import ProfileForm from "../components/ProfileForm";
 import { usePageMetadata } from "@/hooks/usePageMetadata";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const ProfileEditor = () => {
   const { username } = useParams<{ username: string }>();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const isMobile = useIsMobile();
   
   // Move the hook call to the top level - this must be called unconditionally
   usePageMetadata({ title: `Edit Profile - ${username || ''}` });
@@ -71,12 +73,12 @@ const ProfileEditor = () => {
   }
 
   return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">Edit Profile</h1>
+    <div className="container mx-auto py-6 md:py-10 px-4 md:px-6">
+      <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-center md:text-left">Edit Profile</h1>
       {username ? (
         <ProfileForm username={username} />
       ) : (
-        <p>No username provided.</p>
+        <p className="text-center">No username provided.</p>
       )}
     </div>
   );

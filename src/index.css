@@ -188,6 +188,18 @@
     padding-right: 1rem;
   }
   
+  h1 {
+    @apply text-2xl;
+  }
+  
+  h2 {
+    @apply text-xl;
+  }
+  
+  h3 {
+    @apply text-lg;
+  }
+  
   h1, h2, h3 {
     word-break: break-word;
   }
@@ -206,6 +218,30 @@ html {
   
   .form-row {
     flex-direction: column;
+  }
+  
+  .button-group {
+    @apply flex flex-col space-y-2;
+  }
+  
+  .button-group button {
+    @apply w-full;
+  }
+  
+  .mobile-stack {
+    @apply flex-col space-y-2;
+  }
+  
+  .mobile-full-width {
+    @apply w-full;
+  }
+  
+  .mobile-center {
+    @apply flex justify-center items-center;
+  }
+  
+  .mobile-text-center {
+    @apply text-center;
   }
 }
 
@@ -231,4 +267,38 @@ html {
 
 .card-description {
   @apply text-base text-muted-foreground;
+}
+
+/* Mobile menu adaptations */
+.mobile-menu {
+  @apply fixed inset-x-0 top-0 z-50 h-screen w-full transform bg-background;
+}
+
+/* Mobile padding utilties */
+.mobile-px {
+  @apply px-4 md:px-0;
+}
+
+.mobile-py {
+  @apply py-4 md:py-0;
+}
+
+/* Touch optimized interactive elements */
+.touch-target {
+  @apply min-h-[44px] min-w-[44px];
+}
+
+/* Card layouts for mobile */
+.card-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
+}
+
+/* Stacked on mobile, side by side on desktop */
+.responsive-flex {
+  @apply flex flex-col md:flex-row gap-4;
+}
+
+/* Better spacing for mobile forms */
+.input-group {
+  @apply space-y-1 mb-4;
 }

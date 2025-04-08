@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type ProfileFormProps = {
   username: string;
@@ -29,6 +30,7 @@ const ProfileForm = ({ username }: ProfileFormProps) => {
     full_name: "",
     bio: "",
   });
+  const isMobile = useIsMobile();
 
   // Fetch profile data
   useEffect(() => {
@@ -115,7 +117,7 @@ const ProfileForm = ({ username }: ProfileFormProps) => {
   }
 
   return (
-    <Card>
+    <Card className="w-full max-w-lg mx-auto">
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
@@ -126,6 +128,7 @@ const ProfileForm = ({ username }: ProfileFormProps) => {
               value={formData.full_name}
               onChange={handleChange}
               placeholder="Your display name"
+              className="w-full"
             />
           </div>
           
@@ -138,26 +141,33 @@ const ProfileForm = ({ username }: ProfileFormProps) => {
               onChange={handleChange}
               placeholder="A short bio about yourself"
               rows={4}
+              className="w-full"
             />
           </div>
           
-          <div className="flex justify-between space-x-2 mt-6">
+          <div className={`flex ${isMobile ? 'flex-col' : 'justify-between'} space-y-2 md:space-y-0 md:space-x-2 mt-6`}>
             <Button 
               type="button" 
               variant="outline"
               onClick={() => navigate("/appearance")}
+              className={`${isMobile ? 'w-full' : ''} mb-2 md:mb-0`}
             >
               Customize Appearance
             </Button>
-            <div className="flex space-x-2">
+            <div className={`flex ${isMobile ? 'w-full' : ''} space-x-2`}>
               <Button 
                 type="button" 
                 variant="outline" 
                 onClick={() => navigate("/dashboard")}
+                className={isMobile ? 'flex-1' : ''}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSaving}>
+              <Button 
+                type="submit" 
+                disabled={isSaving}
+                className={isMobile ? 'flex-1' : ''}
+              >
                 {isSaving ? "Saving..." : "Save Changes"}
               </Button>
             </div>

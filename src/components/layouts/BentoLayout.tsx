@@ -1,6 +1,7 @@
 
 import { motion } from "framer-motion";
 import { LinkIcon } from "./LinkIcon";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Link {
   id: string;
@@ -16,6 +17,8 @@ interface BentoLayoutProps {
 }
 
 export const BentoLayout = ({ links, textShadowClass = "" }: BentoLayoutProps) => {
+  const isMobile = useIsMobile();
+  
   const container = {
     hidden: { opacity: 0 },
     show: {
@@ -31,12 +34,14 @@ export const BentoLayout = ({ links, textShadowClass = "" }: BentoLayoutProps) =
     show: { opacity: 1, scale: 1 }
   };
 
+  const gridColumns = isMobile ? "grid-cols-2" : "grid-cols-3";
+
   return (
     <motion.div
       variants={container}
       initial="hidden"
       animate="show"
-      className="grid grid-cols-3 md:grid-cols-3 gap-2 max-w-lg mx-auto"
+      className={`grid ${gridColumns} gap-2 max-w-lg mx-auto`}
     >
       {links.map((link) => {
         const displayMode = link.display || "both";

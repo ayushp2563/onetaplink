@@ -1,6 +1,7 @@
 
 import { motion } from "framer-motion";
 import { LinkIcon } from "./LinkIcon";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Link {
   id: string;
@@ -16,6 +17,8 @@ interface MixedLayoutProps {
 }
 
 export const MixedLayout = ({ links, textShadowClass = "" }: MixedLayoutProps) => {
+  const isMobile = useIsMobile();
+  
   const container = {
     hidden: { opacity: 0 },
     show: {
@@ -41,15 +44,17 @@ export const MixedLayout = ({ links, textShadowClass = "" }: MixedLayoutProps) =
   // Rest of the links are displayed in a list
   const regularLinks = links.slice(2);
 
+  const gridColumns = isMobile ? "grid-cols-2" : "grid-cols-3";
+
   return (
     <motion.div
       variants={container}
       initial="hidden"
       animate="show"
-      className="space-y-3"
+      className="space-y-3 w-full max-w-lg mx-auto px-2 sm:px-0"
     >
       {featuredLinks.length > 0 && (
-        <div className="grid grid-cols-3 md:grid-cols-3 gap-2 max-w-lg mx-auto">
+        <div className={`grid ${gridColumns} gap-2 max-w-lg mx-auto`}>
           {featuredLinks.map((link) => {
             const displayMode = link.display || "both";
             
@@ -96,7 +101,7 @@ export const MixedLayout = ({ links, textShadowClass = "" }: MixedLayoutProps) =
                   <LinkIcon iconName={link.icon || "link"} className="text-white" />
                 )}
                 {(displayMode === "both" || displayMode === "title") && (
-                  <span className={`flex-1 text-white truncate ${textShadowClass} font-medium`}>
+                  <span className={`flex-1 text-white truncate ${textShadowClass} font-medium ${isMobile ? 'text-sm' : ''}`}>
                     {link.title}
                   </span>
                 )}
