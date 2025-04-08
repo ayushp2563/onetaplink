@@ -12,6 +12,9 @@ const ProfileEditor = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
   
+  // Move the hook call to the top level - this must be called unconditionally
+  usePageMetadata({ title: `Edit Profile - ${username || ''}` });
+  
   // Check authentication and authorization
   useEffect(() => {
     const checkAuth = async () => {
@@ -66,8 +69,6 @@ const ProfileEditor = () => {
   if (!isAuthorized) {
     return null; // Component will navigate away in useEffect, this prevents flash of unauthorized content
   }
-
-  usePageMetadata({ title: `Edit Profile - ${username}` });
 
   return (
     <div className="container mx-auto py-10">
