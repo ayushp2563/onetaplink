@@ -51,10 +51,10 @@ export const LinksLayout = ({ links, textShadowClass = "" }: LinksLayoutProps) =
             target="_blank"
             rel="noopener noreferrer"
             variants={item}
-            className="flex items-center gap-3 p-4 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors shadow-md"
+            className="flex items-center gap-3 p-4 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors shadow-md w-full"
           >
             {(displayMode === "both" || displayMode === "icon") && (
-              <LinkIcon iconName={link.icon || "link"} className="text-white" />
+              <LinkIcon iconName={link.icon || "link"} className="text-white flex-shrink-0" />
             )}
             {(displayMode === "both" || displayMode === "title") && (
               <span className={`flex-1 text-white truncate ${textShadowClass} ${isMobile ? 'text-sm' : ''}`}>

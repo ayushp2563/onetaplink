@@ -18,6 +18,7 @@ import { ProfileContent } from "@/components/layouts/ProfileContent";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Theme {
   id: string;
@@ -172,6 +173,7 @@ export default function ProfileAppearance() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -382,23 +384,25 @@ export default function ProfileAppearance() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted p-4">
       <div className="container max-w-5xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-6 flex-col sm:flex-row gap-2">
           <Button
             variant="ghost"
             onClick={() => navigate("/dashboard")}
+            className="w-full sm:w-auto"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
           </Button>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <Button 
               variant={previewMode ? "default" : "outline"}
               onClick={() => setPreviewMode(!previewMode)}
+              className="flex-1 sm:flex-none"
             >
               {previewMode ? "Exit Preview" : "Preview"}
             </Button>
-            <ThemeToggle />
+            <ThemeToggle className="flex-none" />
           </div>
         </div>
 
@@ -444,8 +448,12 @@ export default function ProfileAppearance() {
               </div>
             </div>
             
-            <div className="flex justify-end mt-4">
-              <Button onClick={handleSave} disabled={saving}>
+            <div className="flex justify-center mt-4 w-full">
+              <Button 
+                onClick={handleSave} 
+                disabled={saving} 
+                className="w-full sm:w-auto"
+              >
                 {saving ? "Saving..." : "Save These Settings"}
               </Button>
             </div>
@@ -701,11 +709,19 @@ export default function ProfileAppearance() {
                 </TabsContent>
               </Tabs>
               
-              <div className="mt-6 pt-6 border-t flex justify-between items-center">
-                <Button variant="outline" onClick={() => navigate("/edit-profile")}>
+              <div className="mt-6 pt-6 border-t flex flex-col sm:flex-row justify-between items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate("/edit-profile")}
+                  className="w-full sm:w-auto"
+                >
                   Edit Profile Content
                 </Button>
-                <Button onClick={handleSave} disabled={saving}>
+                <Button 
+                  onClick={handleSave} 
+                  disabled={saving}
+                  className="w-full sm:w-auto"
+                >
                   {saving ? "Saving..." : "Save Settings"}
                 </Button>
               </div>
