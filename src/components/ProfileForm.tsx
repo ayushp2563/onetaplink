@@ -96,7 +96,8 @@ const ProfileForm = ({ username }: ProfileFormProps) => {
       }
       
       toast.success("Profile updated successfully");
-      navigate(`/${username}`);
+      // Navigate to dashboard instead of profile page
+      navigate("/dashboard");
     } catch (error) {
       console.error("Error in profile update:", error);
       toast.error("An error occurred while saving");
@@ -140,17 +141,26 @@ const ProfileForm = ({ username }: ProfileFormProps) => {
             />
           </div>
           
-          <div className="flex justify-end space-x-2">
+          <div className="flex justify-between space-x-2 mt-6">
             <Button 
               type="button" 
-              variant="outline" 
-              onClick={() => navigate(`/${username}`)}
+              variant="outline"
+              onClick={() => navigate("/appearance")}
             >
-              Cancel
+              Customize Appearance
             </Button>
-            <Button type="submit" disabled={isSaving}>
-              {isSaving ? "Saving..." : "Save Changes"}
-            </Button>
+            <div className="flex space-x-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => navigate("/dashboard")}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSaving}>
+                {isSaving ? "Saving..." : "Save Changes"}
+              </Button>
+            </div>
           </div>
         </form>
       </CardContent>
