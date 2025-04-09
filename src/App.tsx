@@ -13,6 +13,7 @@ import UserProfile from "./pages/UserProfile";
 import Landing from "./pages/Landing";
 import HowToUse from "./pages/HowToUse";
 import ProfileAppearance from "./pages/ProfileAppearance";
+import LinkEditorPage from "./pages/LinkEditorPage";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/edit-profile/:username" element={<ProfileEditor />} />
             <Route path="/appearance" element={<ProfileAppearance />} />
+            <Route path="/edit-links" element={<LinkEditorPage />} />
             <Route path="/how-to-use" element={<HowToUse />} />
             <Route path="/:username" element={<UserProfile />} />
             <Route path="*" element={<NotFound />} />

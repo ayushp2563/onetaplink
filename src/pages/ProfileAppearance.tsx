@@ -737,7 +737,17 @@ export default function ProfileAppearance() {
               <div className="mt-6 pt-6 border-t flex flex-col sm:flex-row justify-between items-center gap-2">
                 <Button 
                   variant="outline" 
-                  onClick={() => navigate("/edit-profile")}
+                  onClick={() => {
+                    if (username) {
+                      navigate(`/edit-profile/${username}`);
+                    } else {
+                      toast({
+                        title: "Error",
+                        description: "Username not available",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
                   className="w-full sm:w-auto"
                 >
                   Edit Profile Content

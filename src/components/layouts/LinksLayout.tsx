@@ -14,9 +14,18 @@ interface Link {
 interface LinksLayoutProps {
   links: Link[];
   textShadowClass?: string;
+  editable?: boolean;
+  onEdit?: (link: Link) => void;
+  onDelete?: (id: string) => void;
 }
 
-export const LinksLayout = ({ links, textShadowClass = "" }: LinksLayoutProps) => {
+export const LinksLayout = ({ 
+  links, 
+  textShadowClass = "",
+  editable = false,
+  onEdit,
+  onDelete
+}: LinksLayoutProps) => {
   const isMobile = useIsMobile();
   
   const container = {
@@ -45,23 +54,56 @@ export const LinksLayout = ({ links, textShadowClass = "" }: LinksLayoutProps) =
         const displayMode = link.display || "both";
         
         return (
-          <motion.a
+          <motion.div
             key={link.id}
-            href={link.url}
-            target="_blank"
-            rel="noopener noreferrer"
             variants={item}
-            className="flex items-center gap-3 p-4 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors shadow-md w-full"
+            className="relative"
           >
-            {(displayMode === "both" || displayMode === "icon") && (
-              <LinkIcon iconName={link.icon || "link"} className="text-white flex-shrink-0" />
+            {editable && (
+              <div className="absolute right-2 top-2 flex gap-2 z-10">
+                {onEdit && (
+                  <button
+                    onClick={() => onEdit(link)}
+                    className="p-2 rounded-full bg-slate-700/80 hover:bg-slate-600/80 text-white transition-colors"
+                    aria-label="Edit link"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                      <path d="m15 5 4 4"/>
+                    </svg>
+                  </button>
+                )}
+                {onDelete && (
+                  <button
+                    onClick={() => onDelete(link.id)}
+                    className="p-2 rounded-full bg-red-600/80 hover:bg-red-500/80 text-white transition-colors"
+                    aria-label="Delete link"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                      <path d="M3 6h18"/>
+                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                    </svg>
+                  </button>
+                )}
+              </div>
             )}
-            {(displayMode === "both" || displayMode === "title") && (
-              <span className={`flex-1 text-white truncate ${textShadowClass} ${isMobile ? 'text-sm' : ''}`}>
-                {link.title}
-              </span>
-            )}
-          </motion.a>
+            <motion.a
+              href={editable ? "#" : link.url}
+              target={editable ? "_self" : "_blank"}
+              rel="noopener noreferrer"
+              className={`flex items-center gap-3 p-4 rounded-lg bg-white/10 backdrop-blur-sm ${!editable ? 'hover:bg-white/20' : ''} transition-colors shadow-md w-full`}
+            >
+              {(displayMode === "both" || displayMode === "icon") && (
+                <LinkIcon iconName={link.icon || "link"} className="text-white flex-shrink-0" />
+              )}
+              {(displayMode === "both" || displayMode === "title") && (
+                <span className={`flex-1 text-white truncate ${textShadowClass} ${isMobile ? 'text-sm' : ''}`}>
+                  {link.title}
+                </span>
+              )}
+            </motion.a>
+          </motion.div>
         );
       })}
     </motion.div>
