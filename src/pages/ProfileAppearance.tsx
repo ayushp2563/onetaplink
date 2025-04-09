@@ -42,14 +42,6 @@ interface FontStyle {
   description: string;
 }
 
-interface Link {
-  id: string;
-  title: string;
-  url: string;
-  icon?: string;
-  display?: "title" | "icon" | "both";
-}
-
 const THEMES: Theme[] = [
   {
     id: "elegant",
@@ -254,7 +246,8 @@ export default function ProfileAppearance() {
                   title: link.title || "",
                   url: link.url || "",
                   icon: link.icon || "link",
-                  display: link.display || "both"
+                  display: link.display || "both",
+                  ...link
                 }));
                 setLinks(validLinks);
               }
