@@ -21,7 +21,8 @@ const LinkEditor = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [editingLink, setEditingLink] = useState<Link | null>(null);
-  const [formData, setFormData] = useState<Omit<Link, 'id'>>({
+  const [formData, setFormData] = useState<Link>({
+    id: "",
     title: "",
     url: "",
     icon: "link",
@@ -115,6 +116,7 @@ const LinkEditor = () => {
     }
 
     setFormData({
+      id: "",
       title: "",
       url: "",
       icon: "link",
@@ -125,6 +127,7 @@ const LinkEditor = () => {
   const handleEditLink = (link: Link) => {
     setEditingLink(link);
     setFormData({
+      id: link.id,
       title: link.title,
       url: link.url,
       icon: link.icon || "link",
@@ -139,6 +142,7 @@ const LinkEditor = () => {
     if (editingLink?.id === id) {
       setEditingLink(null);
       setFormData({
+        id: "",
         title: "",
         url: "",
         icon: "link",
@@ -158,6 +162,7 @@ const LinkEditor = () => {
         return;
       }
 
+      // Cast links array to Json type for Supabase
       const linksJson = links as unknown as Json;
 
       const { error } = await supabase
