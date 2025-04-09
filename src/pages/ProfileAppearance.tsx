@@ -247,7 +247,7 @@ export default function ProfileAppearance() {
           
           if (settings.links) {
             try {
-              const linksData = settings.links as unknown as any[];
+              const linksData = settings.links as unknown as Link[];
               if (Array.isArray(linksData)) {
                 const validLinks = linksData.map(link => ({
                   id: link.id || crypto.randomUUID(),
@@ -737,20 +737,10 @@ export default function ProfileAppearance() {
               <div className="mt-6 pt-6 border-t flex flex-col sm:flex-row justify-between items-center gap-2">
                 <Button 
                   variant="outline" 
-                  onClick={() => {
-                    if (username) {
-                      navigate(`/edit-profile/${username}`);
-                    } else {
-                      toast({
-                        title: "Error",
-                        description: "Username not available",
-                        variant: "destructive",
-                      });
-                    }
-                  }}
+                  onClick={() => navigate("/edit-links")}
                   className="w-full sm:w-auto"
                 >
-                  Edit Profile Content
+                  Edit Links
                 </Button>
                 <Button 
                   onClick={handleSave} 

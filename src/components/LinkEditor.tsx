@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -96,6 +97,7 @@ const LinkEditor = () => {
     }
 
     if (editingLink) {
+      // Update existing link
       const updatedLinks = links.map(link => 
         link.id === editingLink.id ? { ...formData, id: link.id } : link
       );
@@ -103,7 +105,8 @@ const LinkEditor = () => {
       toast.success("Link updated successfully");
       setEditingLink(null);
     } else {
-      const newLink = {
+      // Add new link
+      const newLink: Link = {
         ...formData,
         id: crypto.randomUUID()
       };
