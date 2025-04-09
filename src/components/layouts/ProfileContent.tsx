@@ -3,6 +3,7 @@ import { LinksLayout } from "./LinksLayout";
 import { BentoLayout } from "./BentoLayout";
 import { MixedLayout } from "./MixedLayout";
 import { LAYOUT_TYPES, LayoutType } from "@/constants/layouts";
+import { Json } from "@/integrations/supabase/types";
 
 // Define the Link interface to match what we're using in Supabase
 export interface Link {
@@ -11,6 +12,7 @@ export interface Link {
   url: string;
   icon?: string;
   display?: "title" | "icon" | "both";
+  [key: string]: Json | undefined; // Add index signature to make it compatible with Json type
 }
 
 interface ProfileContentProps {

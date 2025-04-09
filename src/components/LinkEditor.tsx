@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,14 +12,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
-
-export interface Link {
-  id: string;
-  title: string;
-  url: string;
-  icon?: string;
-  display?: "title" | "icon" | "both";
-}
+import { Link } from "@/components/layouts/ProfileContent";
+import { Json } from "@/integrations/supabase/types";
 
 const LinkEditor = () => {
   const [links, setLinks] = useState<Link[]>([]);
@@ -162,10 +155,12 @@ const LinkEditor = () => {
         return;
       }
 
+      const linksJson = links as unknown as Json;
+
       const { error } = await supabase
         .from('profile_settings')
         .update({
-          links,
+          links: linksJson,
           updated_at: new Date().toISOString()
         })
         .eq('id', session.user.id);
