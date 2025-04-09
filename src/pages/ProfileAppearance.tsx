@@ -19,6 +19,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useIsMobile } from "@/hooks/use-mobile";
+import FaviconUploader from "@/components/FaviconUploader";
 
 interface Theme {
   id: string;
@@ -169,6 +170,7 @@ export default function ProfileAppearance() {
   const [links, setLinks] = useState<Link[]>([]);
   const [activeTab, setActiveTab] = useState("theme");
   const [previewMode, setPreviewMode] = useState(false);
+  const [faviconUrl, setFaviconUrl] = useState<string | null>(null);
   
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -210,7 +212,7 @@ export default function ProfileAppearance() {
 
         const { data: settings, error: settingsError } = await supabase
           .from('profile_settings')
-          .select('links, theme_id, is_dark_mode, background_style, font_style, layout_type, animation_type, text_shadow')
+          .select('links, theme_id, is_dark_mode, background_style, font_style, layout_type, animation_type, text_shadow, favicon_url')
           .eq('id', session.user.id)
           .single();
 
@@ -227,6 +229,7 @@ export default function ProfileAppearance() {
           setLayoutType((settings.layout_type as LayoutType) || LAYOUT_TYPES.LINKS);
           setAnimationType(settings.animation_type || "fade");
           setTextShadow(settings.text_shadow || false);
+          setFaviconUrl(settings.favicon_url || null);
           
           setTheme(settings.is_dark_mode ? "dark" : "light");
           
@@ -294,6 +297,10 @@ export default function ProfileAppearance() {
     };
   };
 
+  const handleFaviconUpload = (url: string) => {
+    setFaviconUrl(url);
+  };
+
   const handleSave = async () => {
     try {
       setSaving(true);
@@ -312,6 +319,7 @@ export default function ProfileAppearance() {
           layout_type: layoutType,
           animation_type: animationType,
           text_shadow: textShadow,
+          favicon_url: faviconUrl,
           updated_at: new Date().toISOString(),
         })
         .eq('id', session.user.id);
@@ -533,6 +541,23 @@ export default function ProfileAppearance() {
                           </div>
                         ))}
                       </RadioGroup>
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div className="space-y-2">
+                      <Label className="text-lg">Favicon</Label>
+                      <p className="text-muted-foreground text-sm mb-4">
+                        Upload a custom favicon for your profile page
+                      </p>
+                      
+                      {profile && profile.id && (
+                        <FaviconUploader 
+                          userId={profile.id}
+                          currentFavicon={faviconUrl}
+                          onFaviconUpload={handleFaviconUpload}
+                        />
+                      )}
                     </div>
                   </div>
                 </TabsContent>
