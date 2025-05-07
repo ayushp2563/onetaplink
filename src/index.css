@@ -44,11 +44,11 @@
   }
 
   .dark {
-    --background: 240 10% 3.9%;
+    --background: 240 10% 4%;
     --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
+    --card: 240 10% 6%;
     --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
+    --popover: 240 10% 6%;
     --popover-foreground: 0 0% 98%;
     --primary: 142.1 70.6% 45.3%;
     --primary-foreground: 144.9 80.4% 10%;
@@ -58,7 +58,9 @@
     --muted-foreground: 240 5% 64.9%;
     --accent: 240 3.7% 15.9%;
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --link: 221.2 83.2% 65%;
+    --link-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 50.6%;
     --destructive-foreground: 0 0% 98%;
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
@@ -77,35 +79,69 @@
   * {
     @apply border-border;
   }
+  
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+    height: 100%;
+  }
+  
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-current);
+    height: 100%;
+    transition-property: color, background-color, border-color;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
   }
+  
   h1, h2, h3, h4, h5, h6 {
     color: hsl(var(--heading-color));
     @apply font-medium tracking-tight;
   }
+  
   p {
     color: hsl(var(--text-base));
   }
+  
   .text-muted {
     color: hsl(var(--text-muted));
   }
+  
   a {
     color: hsl(var(--text-link));
     @apply hover:underline transition-colors;
   }
 }
 
-/* Add text shadow utility class for better text visibility on image backgrounds */
+/* Improved text shadow for better text visibility on image backgrounds */
 .text-shadow {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 0.6);
 }
 
-.glass-card {
-  @apply bg-white/10 dark:bg-white/5 backdrop-blur-lg border border-white/20 shadow-lg;
+.text-shadow-sm {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
+/* Glass and card UI effects */
+.glass-card {
+  @apply bg-white/10 dark:bg-black/20 backdrop-blur-lg border border-white/20 dark:border-black/20 shadow-lg;
+}
+
+.card-highlight {
+  @apply relative overflow-hidden;
+}
+
+.card-highlight::before {
+  content: '';
+  @apply absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 transition-opacity duration-300 pointer-events-none;
+}
+
+.card-highlight:hover::before {
+  @apply opacity-100;
+}
+
+/* Enhanced link card styling */
 .link-card {
   @apply relative overflow-hidden rounded-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-lg;
 }
@@ -119,6 +155,7 @@
   @apply opacity-100;
 }
 
+/* Theme classes */
 .theme-elegant {
   --primary: 262 83.3% 57.8%;
   --primary-foreground: 210 40% 98%;
@@ -181,7 +218,26 @@
   @apply font-medium;
 }
 
-/* New responsive utility classes */
+/* Gradient text effects */
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
+}
+
+/* New animation utilities */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-gentle {
+  animation: pulse-gentle 4s ease-in-out infinite;
+}
+
+.animate-gradient-flow {
+  background-size: 200% 200%;
+  animation: gradient-flow 15s ease infinite;
+}
+
+/* Responsive utilities */
 @media (max-width: 640px) {
   .container {
     padding-left: 1rem;
@@ -203,11 +259,6 @@
   h1, h2, h3 {
     word-break: break-word;
   }
-}
-
-/* Add smooth scrolling */
-html {
-  scroll-behavior: smooth;
 }
 
 /* Improve form elements on small screens */
@@ -260,45 +311,46 @@ html {
   text-decoration: underline;
 }
 
-/* Card text improvements */
-.card-title {
-  @apply text-xl font-medium text-heading mb-2;
-}
-
-.card-description {
-  @apply text-base text-muted-foreground;
-}
-
-/* Mobile menu adaptations */
-.mobile-menu {
-  @apply fixed inset-x-0 top-0 z-50 h-screen w-full transform bg-background;
-}
-
-/* Mobile padding utilties */
-.mobile-px {
-  @apply px-4 md:px-0;
-}
-
-.mobile-py {
-  @apply py-4 md:py-0;
-}
-
 /* Touch optimized interactive elements */
 .touch-target {
   @apply min-h-[44px] min-w-[44px];
 }
 
-/* Card layouts for mobile */
-.card-grid {
-  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
-}
-
-/* Stacked on mobile, side by side on desktop */
+/* Responsive layout helpers */
 .responsive-flex {
   @apply flex flex-col md:flex-row gap-4;
 }
 
-/* Better spacing for mobile forms */
 .input-group {
   @apply space-y-1 mb-4;
+}
+
+/* Three-dimensional card effect */
+.card-3d {
+  transform-style: preserve-3d;
+  transform: perspective(1000px);
+  transition: all 0.3s ease;
+}
+
+.card-3d:hover {
+  transform: perspective(1000px) rotateX(2deg) rotateY(2deg) scale(1.01);
+}
+
+/* Spotlight effect */
+.spotlight {
+  @apply relative overflow-hidden;
+}
+
+.spotlight::before {
+  content: '';
+  @apply absolute inset-0 bg-gradient-radial from-white/20 to-transparent opacity-0 transition-opacity duration-300;
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  transform: translate(50%, 50%);
+}
+
+.spotlight:hover::before {
+  @apply opacity-100;
 }

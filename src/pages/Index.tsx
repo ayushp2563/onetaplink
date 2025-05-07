@@ -1,19 +1,14 @@
-import { LogOut, Share2, Copy, Link2, ExternalLink } from "lucide-react";
+
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-
-interface Link {
-  id: string;
-  title: string;
-  url: string;
-  icon?: JSX.Element;
-}
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Share2, Copy, Link2, PenSquare, LayoutPanelTop, ExternalLink, ArrowUpRight, BarChart2 } from "lucide-react";
+import { usePageMetadata } from "@/hooks/usePageMetadata";
 
 interface Theme {
   id: string;
@@ -49,281 +44,313 @@ const THEMES: Theme[] = [
   },
 ];
 
-const Index = () => {
+const DashboardPage = () => {
   const [theme, setTheme] = useState<Theme>(THEMES[0]);
-  const [isDark, setIsDark] = useState(false);
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState("");
+  const [fullName, setFullName] = useState("");
   const [hasProfile, setHasProfile] = useState(false);
-  const [fontStyle, setFontStyle] = useState("sans");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [linkCount, setLinkCount] = useState(0);
   const navigate = useNavigate();
-  const { toast } = useToast();
+  
+  usePageMetadata({ title: "Dashboard" });
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (!session) {
-        navigate('/auth');
-      }
-      setLoading(false);
-    });
+    const fetchUser = async () => {
+      try {
+        setLoading(true);
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (!session) {
-        navigate('/auth');
-      }
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
-  useEffect(() => {
-    if (session?.user) {
-      const fetchProfileData = async () => {
-        try {
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('username, full_name')
-            .eq('id', session.user.id)
-            .single();
-
-          if (profileError) {
-            console.error('Error fetching profile:', profileError);
-            if (profileError.code === 'PGRST116') {
-              setHasProfile(false);
-              return;
-            }
-          }
-
-          if (profile?.username) {
-            setUsername(profile.username);
-            setHasProfile(true);
-          } else {
-            setHasProfile(false);
-            return;
-          }
-
-          const { data: settings, error: settingsError } = await supabase
-            .from('profile_settings')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-
-          if (settingsError) {
-            console.error('Error fetching profile settings:', settingsError);
-            return;
-          }
-
-          if (settings) {
-            setTheme(THEMES.find(t => t.id === settings.theme_id) || THEMES[0]);
-            setIsDark(settings.is_dark_mode);
-            setFontStyle(settings.font_style || 'sans');
-          }
-        } catch (error) {
-          console.error('Error in fetchProfileData:', error);
+        if (!session) {
+          navigate('/auth');
+          return;
         }
-      };
 
-      fetchProfileData();
-    }
-  }, [session, navigate]);
+        // Fetch profile data
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('username, full_name, avatar_url')
+          .eq('id', session.user.id)
+          .single();
 
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDark]);
+        if (profileError) {
+          console.error('Error fetching profile:', profileError);
+          if (profileError.code === 'PGRST116') {
+            setHasProfile(false);
+          }
+          return;
+        }
 
-  useEffect(() => {
-    document.documentElement.className = theme.class;
-  }, [theme]);
+        if (profile?.username) {
+          setUsername(profile.username);
+          setFullName(profile.full_name || '');
+          setAvatarUrl(profile.avatar_url || '');
+          setHasProfile(true);
+        } else {
+          setHasProfile(false);
+          return;
+        }
 
-  useEffect(() => {
-    document.documentElement.style.setProperty('--font-current', `var(--font-${fontStyle})`);
+        // Fetch profile settings
+        const { data: settings, error: settingsError } = await supabase
+          .from('profile_settings')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
 
-    return () => {
-      document.documentElement.style.removeProperty('--font-current');
+        if (settingsError) {
+          console.error('Error fetching profile settings:', settingsError);
+          return;
+        }
+
+        if (settings) {
+          setTheme(THEMES.find(t => t.id === settings.theme_id) || THEMES[0]);
+          
+          // Count links
+          if (settings.links && Array.isArray(settings.links)) {
+            setLinkCount(settings.links.length);
+          }
+        }
+
+      } catch (error) {
+        console.error('Error in fetching user data:', error);
+      } finally {
+        setLoading(false);
+      }
     };
-  }, [fontStyle]);
 
-  const handleSignOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      navigate('/');
-    } catch (error: any) {
-      toast({
-        title: "Error signing out",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
+    fetchUser();
+  }, [navigate]);
 
   const handleShareProfile = () => {
     if (username) {
       const profileUrl = `${window.location.origin}/${username}`;
       navigator.clipboard.writeText(profileUrl);
-      toast({
-        title: "Profile link copied!",
-        description: "Share your profile link with others.",
-      });
+      toast.success("Profile link copied to clipboard");
     } else {
-      toast({
-        title: "No username found",
-        description: "Please create a profile first.",
-        variant: "destructive",
-      });
+      toast.error("No username found. Please create a profile first.");
     }
   };
 
   const handleEditProfile = () => {
-    if (username) {
+    if (hasProfile) {
       navigate(`/edit-profile/${username}`);
     } else {
-      toast({
-        title: "No username found",
-        description: "Please create a profile first.",
-        variant: "destructive",
-      });
+      navigate(`/edit-profile/${username || 'new'}`);
     }
   };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent"></div>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${theme.background}`}>
-      <header className="w-full py-4 px-6 flex justify-center items-center">
-        <div className="flex items-center">
-          <img src="/main-logo-black-transparent.svg" alt="One Tap Link" className="w-48 h-48 text-primary mr-2" />
-        </div>
-      </header>
-
-      <div className="container max-w-4xl px-4 py-6 mx-auto">
+    <div className="py-8 px-4 md:px-6">
+      <div className="container max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <Card className="border-none shadow-xl bg-white/5 backdrop-blur-sm">
-            <CardHeader className="text-center pb-2">
-              <div className="relative w-40 h-40 mx-auto mb-4">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary to-purple-400 rounded-full animate-pulse opacity-80" />
-                <Avatar className="w-full h-full border-4 border-white/50 dark:border-black/20 shadow-lg">
+          <Card className="border-none shadow-lg bg-card/80 backdrop-blur-sm overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 rounded-lg"></div>
+            <CardHeader className="relative text-center md:text-left md:flex md:flex-row md:items-center md:justify-between pb-4">
+              <div className="flex flex-col md:flex-row items-center gap-4">
+                <Avatar className="w-20 h-20 border-4 border-background shadow-xl">
                   <AvatarImage
-                    src="/placeholder.svg"
-                    alt="Profile"
+                    src={avatarUrl || "/placeholder.svg"}
+                    alt={fullName || "Profile"}
                     className="object-cover"
                   />
-                  <AvatarFallback className="text-3xl font-bold">
-                    {session?.user?.user_metadata?.full_name?.charAt(0) || '?'}
+                  <AvatarFallback className="text-2xl font-bold">
+                    {fullName?.charAt(0) || username?.charAt(0) || '?'}
                   </AvatarFallback>
                 </Avatar>
+                <div>
+                  <CardTitle className="text-2xl font-bold mt-2 md:mt-0">
+                    {hasProfile ? `Welcome back, ${fullName || username}!` : 'Welcome to One Tap Link!'}
+                  </CardTitle>
+                  <CardDescription className="text-muted-foreground">
+                    {hasProfile ? 'Manage your personalized profile page' : 'Create your personalized profile page'}
+                  </CardDescription>
+                </div>
               </div>
-              <CardTitle className="text-2xl font-bold">
-                {session ? session.user.user_metadata.full_name || 'Your Profile' : 'Welcome to One Tap Link'}
-              </CardTitle>
-              <CardDescription className="text-muted-foreground">
-                {hasProfile ? 'Your personalized profile page' : 'Create your personalized profile page'}
-              </CardDescription>
-            </CardHeader>
-            
-            <CardContent>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-4">
+              <div className="mt-4 md:mt-0 flex flex-col sm:flex-row gap-3">
                 <Button 
-                  onClick={handleEditProfile} 
-                  className="w-full sm:w-auto bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
+                  onClick={handleEditProfile}
+                  variant="default"
+                  className="gap-2"
                 >
+                  <PenSquare className="w-4 h-4" />
                   {hasProfile ? 'Edit Profile' : 'Create Profile'}
                 </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={handleSignOut} 
-                  className="w-full sm:w-auto border-primary/20 hover:bg-primary/5"
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
-                </Button>
+                {hasProfile && (
+                  <Button 
+                    variant="outline" 
+                    onClick={() => window.open(`/${username}`, '_blank')}
+                    className="gap-2"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    View Public Profile
+                  </Button>
+                )}
               </div>
-            </CardContent>
+            </CardHeader>
           </Card>
         </motion.div>
 
-        {session && username && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="grid gap-6 grid-cols-1 sm:grid-cols-2"
-          >
-            <Card className="overflow-hidden border-none shadow-lg glass-card">
-              <CardHeader className="pb-2">
-                <div className="flex items-center text-primary mb-1">
-                  <Share2 className="w-5 h-5 mr-2" />
-                  <CardTitle className="text-lg">Share Your Profile</CardTitle>
-                </div>
-                <CardDescription>
-                  Let others discover your links and content
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-2">
-                <div className="flex items-center justify-between bg-white/10 dark:bg-black/20 p-2 rounded-md">
-                  <code className="text-sm truncate">
-                    {`${window.location.origin}/${username}`}
-                  </code>
-                  <Button size="sm" variant="ghost" onClick={handleShareProfile} className="ml-2 flex-shrink-0">
-                    <Copy className="h-4 w-4" />
+        {hasProfile ? (
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="col-span-1"
+            >
+              <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="flex items-center text-primary mb-1">
+                    <Share2 className="w-5 h-5 mr-2" />
+                    <CardTitle className="text-lg">Share Your Profile</CardTitle>
+                  </div>
+                  <CardDescription>
+                    Let others discover your content
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between bg-muted/50 p-2 rounded-md">
+                    <code className="text-sm truncate">
+                      {`${window.location.origin}/${username}`}
+                    </code>
+                    <Button size="sm" variant="ghost" onClick={handleShareProfile} className="ml-2 flex-shrink-0">
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+                <CardFooter className="pt-0">
+                  <Button 
+                    variant="default" 
+                    onClick={() => window.open(`/${username}`, '_blank')}
+                    className="w-full gap-2"
+                  >
+                    <ArrowUpRight className="w-4 h-4" />
+                    Open Your Profile
                   </Button>
-                </div>
-              </CardContent>
-              <CardFooter className="pt-0">
-                <Button 
-                  variant="secondary" 
-                  onClick={() => window.open(`/${username}`, '_blank')}
-                  className="w-full"
-                >
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  View Public Profile
-                </Button>
-              </CardFooter>
-            </Card>
+                </CardFooter>
+              </Card>
+            </motion.div>
 
-            <Card className="overflow-hidden border-none shadow-lg glass-card">
-              <CardHeader className="pb-2">
-                <div className="flex items-center text-primary mb-1">
-                  <Link2 className="w-5 h-5 mr-2" />
-                  <CardTitle className="text-lg">Manage Your Links</CardTitle>
-                </div>
-                <CardDescription>
-                  Add, edit, or remove links from your profile
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-2">
-                <p className="text-sm text-muted-foreground">
-                  Customize your profile with links to your social media, websites, and more.
-                </p>
-              </CardContent>
-              <CardFooter className="pt-2">
-                <Button 
-                  onClick={() => navigate('/edit-profile')}
-                  className="w-full bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
-                >
-                  Customize Profile
-                </Button>
-              </CardFooter>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="col-span-1"
+            >
+              <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="flex items-center text-primary mb-1">
+                    <Link2 className="w-5 h-5 mr-2" />
+                    <CardTitle className="text-lg">Manage Links</CardTitle>
+                  </div>
+                  <CardDescription>
+                    Add, edit, or remove links from your profile
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-sm mb-2 flex items-center gap-2">
+                    <span className="inline-flex items-center justify-center w-6 h-6 bg-primary/10 rounded-full text-primary font-medium">
+                      {linkCount}
+                    </span>
+                    <span>
+                      {linkCount === 0 
+                        ? "No links added yet" 
+                        : linkCount === 1 
+                          ? "Link added to your profile" 
+                          : "Links added to your profile"
+                      }
+                    </span>
+                  </div>
+                </CardContent>
+                <CardFooter className="pt-0">
+                  <Button 
+                    onClick={() => navigate('/edit-links')}
+                    className="w-full gap-2"
+                  >
+                    <PenSquare className="w-4 h-4" />
+                    Edit Links
+                  </Button>
+                </CardFooter>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="col-span-1"
+            >
+              <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="flex items-center text-primary mb-1">
+                    <LayoutPanelTop className="w-5 h-5 mr-2" />
+                    <CardTitle className="text-lg">Appearance</CardTitle>
+                  </div>
+                  <CardDescription>
+                    Customize the look and feel of your profile
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Choose themes, colors, and layout options to match your style.
+                  </p>
+                  <div className="flex gap-2 mt-3">
+                    {THEMES.map((t) => (
+                      <div 
+                        key={t.id}
+                        className={`w-6 h-6 rounded-full cursor-pointer border ${
+                          theme.id === t.id ? 'border-primary ring-2 ring-primary/30' : 'border-border'
+                        } ${t.id === 'elegant' ? 'bg-purple-500' : 
+                            t.id === 'nature' ? 'bg-green-500' : 
+                            t.id === 'ocean' ? 'bg-blue-500' : 
+                            'bg-orange-500'}`}
+                      />
+                    ))}
+                  </div>
+                </CardContent>
+                <CardFooter className="pt-0">
+                  <Button 
+                    onClick={() => navigate('/appearance')}
+                    className="w-full gap-2"
+                  >
+                    <Palette className="w-4 h-4" />
+                    Customize Appearance
+                  </Button>
+                </CardFooter>
+              </Card>
+            </motion.div>
+          </div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <Card className="border border-dashed p-8 text-center">
+              <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <UserIcon className="w-8 h-8 text-primary/70" />
+              </div>
+              <CardTitle className="text-xl mb-2">Create Your Profile</CardTitle>
+              <CardDescription className="mb-6">
+                You haven't set up your profile yet. Create one to start sharing your links with the world.
+              </CardDescription>
+              <Button onClick={handleEditProfile}>Get Started</Button>
             </Card>
           </motion.div>
         )}
@@ -332,4 +359,21 @@ const Index = () => {
   );
 };
 
-export default Index;
+// Icon component
+const UserIcon = ({ className }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+);
+
+export default DashboardPage;

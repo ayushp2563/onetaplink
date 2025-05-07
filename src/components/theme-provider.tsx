@@ -37,20 +37,22 @@ export function ThemeProvider({
   // Effect to handle theme changes and system preference
   useEffect(() => {
     const root = window.document.documentElement;
-    root.classList.remove("light", "dark");
-
+    
+    const applyTheme = (newTheme: "dark" | "light") => {
+      root.classList.remove("light", "dark");
+      root.classList.add(newTheme);
+      setResolvedTheme(newTheme);
+    };
+    
     if (theme === "system") {
       const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
         .matches
         ? "dark"
         : "light";
-      root.classList.add(systemTheme);
-      setResolvedTheme(systemTheme);
-      return;
+      applyTheme(systemTheme);
+    } else {
+      applyTheme(theme as "dark" | "light");
     }
-
-    root.classList.add(theme);
-    setResolvedTheme(theme as "dark" | "light");
   }, [theme]);
 
   // Effect to listen for system preference changes
@@ -72,9 +74,9 @@ export function ThemeProvider({
 
   const value = {
     theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme);
-      setTheme(theme);
+    setTheme: (newTheme: Theme) => {
+      localStorage.setItem(storageKey, newTheme);
+      setTheme(newTheme);
     },
     resolvedTheme,
   };
