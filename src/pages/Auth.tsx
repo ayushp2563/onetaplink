@@ -20,12 +20,17 @@ export default function Auth() {
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
   
-  // If user is already authenticated, redirect to dashboard
+  // Check if user is already authenticated
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate('/dashboard');
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          console.log("User already authenticated, redirecting to dashboard");
+          navigate('/dashboard');
+        }
+      } catch (error) {
+        console.error("Error checking authentication:", error);
       }
     };
     
@@ -35,34 +40,47 @@ export default function Auth() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
-    
-    if (password.length < 6) {
-      setErrorMessage("Password must be at least 6 characters long");
-      toast.error("Password must be at least 6 characters long");
-      return;
-    }
+    setLoading(true);
     
     try {
-      setLoading(true);
+      console.log("Starting signup process...");
+      
+      // Basic validation
+      if (!email || !password || !username || !fullName) {
+        throw new Error("Please fill in all fields");
+      }
+      
+      if (password.length < 6) {
+        throw new Error("Password must be at least 6 characters long");
+      }
       
       // Validate username format
       if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
         throw new Error("Username can only contain letters, numbers, underscores and hyphens");
       }
       
+      console.log("Checking if username is available...");
+      
       // Check if username is already taken
       const { data: existingUser, error: checkError } = await supabase
         .from('profiles')
         .select('username')
         .eq('username', username)
-        .single();
+        .maybeSingle();
+      
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error("Error checking username:", checkError);
+        throw new Error("Error checking username availability");
+      }
       
       if (existingUser) {
         throw new Error("Username already taken. Please choose a different username.");
       }
       
-      // Proceed with signup
-      const { data, error } = await supabase.auth.signUp({
+      console.log("Username available, proceeding with signup...");
+      
+      // Sign up with Supabase
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -73,27 +91,31 @@ export default function Auth() {
         },
       });
 
-      if (error) throw error;
+      if (signUpError) {
+        console.error("Signup error:", signUpError);
+        throw signUpError;
+      }
       
-      // Try to sign in immediately after successful signup
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      console.log("Signup successful:", signUpData);
       
-      if (signInError) {
-        // If sign-in fails, show confirmation message
+      // Check if user needs email confirmation
+      if (signUpData.user && !signUpData.session) {
         toast.success("Account created! Please check your email for confirmation.");
-      } else {
-        // If sign-in succeeds, redirect to dashboard
+        return;
+      }
+      
+      // If we have a session, user is automatically logged in
+      if (signUpData.session) {
+        console.log("User automatically logged in after signup");
         toast.success("Account created successfully!");
         navigate("/dashboard");
       }
       
     } catch (error: any) {
       console.error("Signup error:", error);
-      setErrorMessage(error.message || "An error occurred during signup");
-      toast.error(error.message || "An error occurred during signup");
+      const errorMsg = error.message || "An error occurred during signup";
+      setErrorMessage(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -102,46 +124,60 @@ export default function Auth() {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
+    setLoading(true);
     
     try {
-      setLoading(true);
+      console.log("Starting signin process...");
       
-      // Try to sign in with the provided credentials
+      // Basic validation
+      if (!email || !password) {
+        throw new Error("Please enter both email and password");
+      }
+      
+      // Sign in with Supabase
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        // Special handling for email not confirmed error
+        console.error("Login error:", error);
+        
+        // Handle specific error cases
+        if (error.message.toLowerCase().includes("invalid login credentials")) {
+          throw new Error("Invalid email or password. Please check your credentials and try again.");
+        }
+        
         if (error.message.toLowerCase().includes("email not confirmed")) {
           try {
-            // Try to send another confirmation email
+            // Try to resend confirmation email
             await supabase.auth.resend({
               type: 'signup',
               email,
             });
-            
             throw new Error("Your email is not confirmed. We've sent a new confirmation link to your email.");
           } catch (resendError) {
-            throw error; // If resend fails, throw original error
+            console.error("Error resending confirmation:", resendError);
+            throw new Error("Your email is not confirmed. Please check your email for the confirmation link.");
           }
         }
+        
         throw error;
       }
       
-      // Log the successful sign in for debugging
-      console.log("Successfully signed in");
-      
-      // Redirect to dashboard after successful signin
-      navigate("/dashboard");
-      
-      toast.success("Welcome back!");
+      if (data.session) {
+        console.log("Successfully signed in:", data.session.user.email);
+        toast.success("Welcome back!");
+        navigate("/dashboard");
+      } else {
+        throw new Error("Sign in failed - no session created");
+      }
       
     } catch (error: any) {
       console.error("Login error:", error);
-      setErrorMessage(error.message || "Invalid email or password");
-      toast.error(error.message || "Invalid email or password");
+      const errorMsg = error.message || "Invalid email or password";
+      setErrorMessage(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -149,22 +185,30 @@ export default function Auth() {
 
   const handlePasswordReset = async () => {
     if (!email) {
-      setErrorMessage("Please enter your email address");
-      toast.error("Please enter your email address");
+      const errorMsg = "Please enter your email address";
+      setErrorMessage(errorMsg);
+      toast.error(errorMsg);
       return;
     }
     
     try {
       setLoading(true);
+      console.log("Sending password reset email to:", email);
+      
       const { error } = await supabase.auth.resetPasswordForEmail(email);
       
-      if (error) throw error;
+      if (error) {
+        console.error("Password reset error:", error);
+        throw error;
+      }
       
       toast.success("Password reset email sent. Check your inbox.");
+      setErrorMessage("");
     } catch (error: any) {
       console.error("Password reset error:", error);
-      setErrorMessage(error.message || "Failed to send reset email");
-      toast.error(error.message || "Failed to send reset email");
+      const errorMsg = error.message || "Failed to send reset email";
+      setErrorMessage(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -220,6 +264,7 @@ export default function Auth() {
                       onChange={(e) => setEmail(e.target.value)}
                       className="pl-10"
                       required
+                      disabled={loading}
                     />
                   </div>
                 </div>
@@ -248,6 +293,7 @@ export default function Auth() {
                       onChange={(e) => setPassword(e.target.value)}
                       className="pl-10"
                       required
+                      disabled={loading}
                     />
                   </div>
                 </div>
@@ -272,6 +318,7 @@ export default function Auth() {
                       onChange={(e) => setUsername(e.target.value)}
                       className="pl-10"
                       required
+                      disabled={loading}
                     />
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -291,6 +338,7 @@ export default function Auth() {
                       onChange={(e) => setFullName(e.target.value)}
                       className="pl-10"
                       required
+                      disabled={loading}
                     />
                   </div>
                 </div>
@@ -307,6 +355,7 @@ export default function Auth() {
                       onChange={(e) => setEmail(e.target.value)}
                       className="pl-10"
                       required
+                      disabled={loading}
                     />
                   </div>
                 </div>
@@ -323,6 +372,7 @@ export default function Auth() {
                       onChange={(e) => setPassword(e.target.value)}
                       className="pl-10"
                       required
+                      disabled={loading}
                     />
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
