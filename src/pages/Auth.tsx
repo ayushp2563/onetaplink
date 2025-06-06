@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ArrowLeft, AlertCircle, Mail, Key, User, UserCircle } from "lucide-react";
+import { ArrowLeft, AlertCircle, Mail, Key, User, Shield } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 
@@ -227,11 +226,11 @@ export default function Auth() {
       <Card className="w-full max-w-md shadow-card-hover animate-fade-in">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 rounded-full bg-primary/10 p-3 w-16 h-16 flex items-center justify-center">
-            <UserCircle className="w-8 h-8 text-primary" />
+            <Shield className="w-8 h-8 text-primary" />
           </div>
-          <CardTitle className="text-2xl">Welcome to One Tap Link</CardTitle>
+          <CardTitle className="text-2xl">Personal Digital Identity</CardTitle>
           <CardDescription>
-            Sign in to your account or create a new one
+            Sign in to your identity management system or create a new account
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -329,7 +328,7 @@ export default function Auth() {
                 <div className="space-y-1">
                   <Label htmlFor="signup-fullname">Full Name</Label>
                   <div className="relative">
-                    <UserCircle className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="signup-fullname"
                       type="text"
@@ -381,7 +380,7 @@ export default function Auth() {
                 </div>
                 
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Signing up..." : "Sign Up"}
+                  {loading ? "Signing up..." : "Create Account"}
                 </Button>
               </form>
             </TabsContent>

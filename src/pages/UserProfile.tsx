@@ -84,7 +84,7 @@ export default function UserProfile() {
   const { toast } = useToast();
   
   usePageMetadata({
-    title: profile?.custom_title || profile?.full_name || `${profile?.username}'s Profile`,
+    title: profile?.custom_title || profile?.full_name || `${profile?.username}'s Digital Identity`,
     faviconUrl: settings?.favicon_url
   });
 
@@ -139,7 +139,7 @@ export default function UserProfile() {
           setError("Profile not found");
           toast({
             title: "Not Found",
-            description: "This profile does not exist",
+            description: "This digital identity does not exist",
             variant: "destructive",
           });
           return;
@@ -214,7 +214,7 @@ export default function UserProfile() {
         setError((error as Error).message);
         toast({
           title: "Error",
-          description: "Failed to load profile",
+          description: "Failed to load digital identity",
           variant: "destructive",
         });
       } finally {
@@ -233,7 +233,10 @@ export default function UserProfile() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <p className="text-sm text-muted-foreground">Loading digital identity...</p>
+        </div>
       </div>
     );
   }
@@ -242,11 +245,11 @@ export default function UserProfile() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Profile Not Found</h1>
-          <p className="text-muted-foreground mb-4">{error || "This profile does not exist"}</p>
+          <h1 className="text-2xl font-bold mb-4">Digital Identity Not Found</h1>
+          <p className="text-muted-foreground mb-4">{error || "This digital identity does not exist"}</p>
           <button
             onClick={() => navigate('/')}
-            className="text-primary hover:underline"
+            className="text-primary hover:underline transition-colors"
           >
             Return Home
           </button>
@@ -272,14 +275,16 @@ export default function UserProfile() {
 
   return (
     <div 
-      className={`min-h-screen ${!hasBackgroundImage ? theme.background : ''}`}
+      className={`min-h-screen transition-all duration-500 ${!hasBackgroundImage ? theme.background : ''}`}
       style={backgroundStyle}
     >
-      <div className={`min-h-screen ${hasBackgroundImage ? 'bg-black/40 backdrop-blur-sm' : ''}`}>
+      <div className={`min-h-screen transition-all duration-300 ${hasBackgroundImage ?
+        'bg-black/40 backdrop-blur-sm' : ''}`}>
         <div className="container max-w-2xl px-4 py-8 mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
             className="text-center mb-12"
           >
             <div className="relative w-40 h-40 mx-auto mb-6">
@@ -296,11 +301,17 @@ export default function UserProfile() {
             )}
           </motion.div>
 
-          <ProfileContent 
-            layoutType={settings?.layout_type || LAYOUT_TYPES.LINKS}
-            links={settings?.links || []}
-            textShadowClass={textShadowClass}
-          />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <ProfileContent 
+              layoutType={settings?.layout_type || LAYOUT_TYPES.LINKS}
+              links={settings?.links || []}
+              textShadowClass={textShadowClass}
+            />
+          </motion.div>
         </div>
       </div>
     </div>
