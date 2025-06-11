@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
@@ -10,6 +9,9 @@ import { toast } from "sonner";
 import { ArrowLeft, AlertCircle, Mail, Key, User, UserCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
+
+
 
 export default function Auth() {
   const [email, setEmail] = useState("");
@@ -111,9 +113,9 @@ export default function Auth() {
         navigate("/dashboard");
       }
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Signup error:", error);
-      const errorMsg = error.message || "An error occurred during signup";
+      const errorMsg = error instanceof Error ? error.message : "An error occurred during signup";
       setErrorMessage(errorMsg);
       toast.error(errorMsg);
     } finally {
@@ -173,9 +175,9 @@ export default function Auth() {
         throw new Error("Sign in failed - no session created");
       }
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Login error:", error);
-      const errorMsg = error.message || "Invalid email or password";
+      const errorMsg = error instanceof Error ? error.message : "Invalid email or password";
       setErrorMessage(errorMsg);
       toast.error(errorMsg);
     } finally {
@@ -204,9 +206,9 @@ export default function Auth() {
       
       toast.success("Password reset email sent. Check your inbox.");
       setErrorMessage("");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Password reset error:", error);
-      const errorMsg = error.message || "Failed to send reset email";
+      const errorMsg = error instanceof Error && error.message ? error.message : "Failed to send reset email";
       setErrorMessage(errorMsg);
       toast.error(errorMsg);
     } finally {

@@ -229,7 +229,7 @@ const Landing = () => {
                 <Button
                   size="lg"
                   variant="outline"
-                  onClick={() => window.open("https://example.com/demo", "_blank")}
+                  onClick={() => window.open("https://onetaplink.vercel.app/ap25", "_blank")}
                   className="w-full sm:w-auto gap-2"
                 >
                   <ExternalLink className="h-4 w-4" />

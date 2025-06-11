@@ -3,11 +3,18 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/_tests_/Auth.test.tsx', // if you use one
+    css: true, // optional if testing styles
   },
   plugins: [
     react(),

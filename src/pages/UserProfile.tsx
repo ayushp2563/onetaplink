@@ -174,13 +174,16 @@ export default function UserProfile() {
         
         let processedLinks: Link[] = [];
         if (settings.links && Array.isArray(settings.links)) {
-          processedLinks = settings.links.map((link: any) => ({
-            id: link.id || crypto.randomUUID(),
-            title: link.title || "",
-            url: link.url || "",
-            icon: link.icon || "link",
-            display: link.display || "both"
-          }));
+          processedLinks = settings.links.map((link) => {
+            const l = link as unknown as Link;
+            return {
+              id: l?.id || crypto.randomUUID(),
+              title: l?.title || "",
+              url: l?.url || "",
+              icon: l?.icon || "link",
+              display: l?.display || "both"
+            };
+          });
         }
         
         const typedSettings: ProfileSettings = {
