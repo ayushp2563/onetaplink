@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, CheckCircle, ExternalLink, Link as LinkIcon, Palette, Lock } from "lucide-react";
+import { ArrowRight, CheckCircle, ExternalLink, Link as LinkIcon, Palette, Lock, Shield, User, Database } from "lucide-react";
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -32,7 +32,7 @@ const Landing = () => {
               transition={{ duration: 0.5 }}
               className="bg-gradient-to-r from-primary/20 to-primary/5 p-6 rounded-full w-24 h-24 mx-auto flex items-center justify-center mb-4"
             >
-              <img src="/main-logo-black-transparent.svg" alt="One Tap Link" className="w-16 h-16" />
+              <Shield className="w-16 h-16 text-primary" />
             </motion.div>
             
             <motion.h1 
@@ -42,10 +42,10 @@ const Landing = () => {
               className="text-4xl md:text-6xl font-bold"
             >
               <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                One Link to Share
+                Personal Digital
               </span>
               <br />
-              <span>Everything About You</span>
+              <span>Identity Management System</span>
             </motion.h1>
             
             <motion.p 
@@ -54,8 +54,8 @@ const Landing = () => {
               transition={{ delay: 0.3, duration: 0.6 }}
               className="text-xl text-muted-foreground max-w-2xl mx-auto"
             >
-              Create a beautiful, customizable profile page with all your important links, 
-              ready to share anywhere online.
+              Take complete control of your digital identity with our comprehensive management platform. 
+              Secure, customizable, and professional digital presence made simple.
             </motion.p>
             
             <motion.div
@@ -78,7 +78,7 @@ const Landing = () => {
                 onClick={() => navigate("/how-to-use")}
                 className="w-full sm:w-auto"
               >
-                See How It Works
+                Learn More
               </Button>
             </motion.div>
           </div>
@@ -93,30 +93,30 @@ const Landing = () => {
       <section className="py-16 md:py-24">
         <div className="container px-4 mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Everything You Need in One Profile</h2>
+            <h2 className="text-3xl font-bold mb-4">Complete Digital Identity Control</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Our platform gives you all the tools to create a personalized online presence that represents you perfectly.
+              Our comprehensive platform provides all the tools you need to manage and showcase your digital identity professionally.
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
-                icon: <LinkIcon className="text-primary h-6 w-6" />,
-                title: "Unlimited Links",
-                description: "Add as many links as you want to your profile. Social media, websites, portfolios, and more.",
+                icon: <Database className="text-primary h-6 w-6" />,
+                title: "Centralized Management",
+                description: "Organize all your digital assets, links, and professional information in one secure platform.",
                 delay: 0
               },
               {
-                icon: <Palette className="text-primary h-6 w-6" />,
-                title: "Custom Themes",
-                description: "Choose from multiple beautiful themes or customize your own to match your personal style.",
+                icon: <Shield className="text-primary h-6 w-6" />,
+                title: "Privacy & Security",
+                description: "Advanced security measures ensure your digital identity remains protected and under your control.",
                 delay: 1
               },
               {
-                icon: <Lock className="text-primary h-6 w-6" />,
-                title: "Secure & Private",
-                description: "Your data is always safe. You control what information is shared on your profile.",
+                icon: <User className="text-primary h-6 w-6" />,
+                title: "Professional Presence",
+                description: "Create a polished, customizable digital identity that represents your personal or professional brand.",
                 delay: 2
               }
             ].map((feature, i) => (
@@ -153,14 +153,14 @@ const Landing = () => {
               viewport={{ once: true }}
               className="md:w-1/2"
             >
-              <h2 className="text-3xl font-bold mb-6">Why Choose One Tap Link?</h2>
+              <h2 className="text-3xl font-bold mb-6">Why Choose Our System?</h2>
               <div className="space-y-4">
                 {[
-                  "Easy to set up in just a few minutes",
-                  "Works perfectly on all devices",
-                  "Detailed analytics to track your visitors",
-                  "Customizable appearance to match your brand",
-                  "Free to use with premium options available"
+                  "Enterprise-grade security and privacy protection",
+                  "Comprehensive identity management tools",
+                  "Professional customization options",
+                  "Advanced analytics and insights",
+                  "Scalable for personal and business use"
                 ].map((benefit, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <CheckCircle className="text-primary h-5 w-5 mt-0.5 flex-shrink-0" />
@@ -214,9 +214,9 @@ const Landing = () => {
             className="text-center"
           >
             <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-2xl p-12 backdrop-blur-sm">
-              <h2 className="text-3xl font-bold mb-4">Ready to Create Your Profile?</h2>
+              <h2 className="text-3xl font-bold mb-4">Ready to Take Control?</h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-                Join thousands of creators, influencers, and professionals who are already sharing their links with style.
+                Join professionals and organizations who trust our platform to manage their digital identity securely and effectively.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Button
@@ -224,7 +224,7 @@ const Landing = () => {
                   onClick={() => navigate("/auth")}
                   className="w-full sm:w-auto"
                 >
-                  Create Your Profile
+                  Start Managing Your Identity
                 </Button>
                 <Button
                   size="lg"
@@ -246,15 +246,15 @@ const Landing = () => {
         <div className="container px-4 mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center">
-              <img src="/main-logo-black-transparent.svg" alt="One Tap Link" className="h-8 w-8 mr-2" />
-              <span className="font-semibold">One Tap Link</span>
+              <Shield className="h-8 w-8 mr-2 text-primary" />
+              <span className="font-semibold">Personal Digital Identity Management System</span>
             </div>
             <div className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} One Tap Link. All rights reserved.
+              © {new Date().getFullYear()} PDIMS. All rights reserved.
             </div>
             <div className="flex gap-4">
               <Button variant="ghost" size="sm" onClick={() => navigate("/how-to-use")}>
-                How It Works
+                Learn More
               </Button>
               <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>
                 Sign In

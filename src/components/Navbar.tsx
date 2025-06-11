@@ -1,7 +1,7 @@
 
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Menu, X, Home, Link as LinkIcon, Settings, LogOut, User, Palette } from "lucide-react";
+import { Menu, X, Home, Link as LinkIcon, Settings, LogOut, User, Palette, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -16,6 +16,9 @@ export default function Navbar() {
   const { theme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Check if we're on a user profile page (/:username route)
+  const isUserProfilePage = location.pathname.match(/^\/[a-zA-Z0-9_-]+$/);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -75,7 +78,7 @@ export default function Navbar() {
   };
 
   const navItems = [
-    { name: 'Home', path: '/dashboard', icon: <Home className="w-5 h-5" /> },
+    { name: 'Dashboard', path: '/dashboard', icon: <Home className="w-5 h-5" /> },
   ];
 
   const authNavItems = [
@@ -89,14 +92,20 @@ export default function Navbar() {
     return location.pathname === path;
   };
 
+  // Don't render navbar on user profile pages
+  if (isUserProfilePage) {
+    return null;
+  }
+
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
             <Link to="/" className="flex items-center space-x-2">
-              <img src="/main-logo-black-transparent.svg" alt="Logo" className="h-8 w-8" />
-              <span className="font-bold text-xl hidden sm:inline-block">One Tap Link</span>
+              <Shield className="h-8 w-8 text-primary" />
+              <span className="font-bold text-xl hidden lg:inline-block">PDIMS</span>
+              <span className="font-bold text-sm inline-block lg:hidden">PDIMS</span>
             </Link>
           </div>
 
@@ -174,7 +183,7 @@ export default function Navbar() {
                 key={item.name}
                 to={item.path}
                 onClick={closeNav}
-                className={`flex items-center gap-3 rounded-md py-2 px-3 text-sm font-medium ${
+                className={`flex items-center gap-3 rounded-md py-2 px-3 text-sm font-medium transition-all duration-200 ${
                   isActive(item.path)
                     ? "bg-primary/10 text-primary"
                     : "text-foreground hover:bg-accent"
@@ -193,7 +202,7 @@ export default function Navbar() {
                     key={item.name}
                     to={item.path}
                     onClick={closeNav}
-                    className={`flex items-center gap-3 rounded-md py-2 px-3 text-sm font-medium ${
+                    className={`flex items-center gap-3 rounded-md py-2 px-3 text-sm font-medium transition-all duration-200 ${
                       isActive(item.path)
                         ? "bg-primary/10 text-primary"
                         : "text-foreground hover:bg-accent"
@@ -210,7 +219,7 @@ export default function Navbar() {
                     handleSignOut();
                     closeNav();
                   }}
-                  className="flex justify-start gap-3 rounded-md py-2 px-3 text-sm font-medium text-foreground hover:bg-accent"
+                  className="flex justify-start gap-3 rounded-md py-2 px-3 text-sm font-medium text-foreground hover:bg-accent transition-all duration-200"
                 >
                   <LogOut className="h-5 w-5" />
                   <span>Sign Out</span>

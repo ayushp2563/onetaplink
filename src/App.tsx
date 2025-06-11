@@ -4,7 +4,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -28,9 +29,27 @@ const queryClient = new QueryClient({
   },
 });
 
+const PageTransition = ({ children }: { children: React.ReactNode }) => {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.3 }}
+        className="flex-1"
+      >
+        {children}
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="system" storageKey="oneTapLink-theme">
+    <ThemeProvider defaultTheme="system" storageKey="pdims-theme">
       <TooltipProvider>
         <Toaster />
         <Sonner position="top-right" closeButton richColors />
@@ -38,24 +57,26 @@ const App = () => (
           <div className="min-h-screen flex flex-col bg-background text-foreground antialiased">
             <Navbar />
             <main className="flex-1">
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<Landing />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/how-to-use" element={<HowToUse />} />
-                <Route path="/:username" element={<UserProfile />} />
-                
-                {/* Protected Routes */}
-                <Route element={<ProtectedRoute />}>
-                  <Route path="/dashboard" element={<Index />} />
-                  <Route path="/edit-profile/:username" element={<ProfileEditor />} />
-                  <Route path="/appearance" element={<ProfileAppearance />} />
-                  <Route path="/edit-links" element={<LinkEditorPage />} />
-                  <Route path="/settings" element={<SettingsPage />} />
-                </Route>
-                
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <PageTransition>
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/" element={<Landing />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/how-to-use" element={<HowToUse />} />
+                  <Route path="/:username" element={<UserProfile />} />
+                  
+                  {/* Protected Routes */}
+                  <Route element={<ProtectedRoute />}>
+                    <Route path="/dashboard" element={<Index />} />
+                    <Route path="/edit-profile/:username" element={<ProfileEditor />} />
+                    <Route path="/appearance" element={<ProfileAppearance />} />
+                    <Route path="/edit-links" element={<LinkEditorPage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
+                  </Route>
+                  
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </PageTransition>
             </main>
           </div>
         </BrowserRouter>
