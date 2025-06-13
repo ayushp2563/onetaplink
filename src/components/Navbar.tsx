@@ -1,7 +1,17 @@
 
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Menu, X, Home, Link as LinkIcon, Settings, LogOut, User, Palette, Shield } from "lucide-react";
+import {
+  Menu,
+  X,
+  Home,
+  Link as LinkIcon,
+  Settings,
+  LogOut,
+  User,
+  Palette,
+  Shield,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -17,39 +27,54 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Check if we're on a user profile page (/:username route)
   const isUserProfilePage = location.pathname.match(/^\/[a-zA-Z0-9_-]+$/);
 
   useEffect(() => {
     const fetchUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
-
-      if (session?.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('username')
-          .eq('id', session.user.id)
-          .single();
-        
-        setUsername(profile?.username || null);
+      if (!session || !session.user) {
+        await supabase.auth.signOut();
+        setSession(null);
+        setUsername(null);
+        return;
       }
+
+      setSession(session);
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', session.user.id)
+        .single();
+
+      if (error || !profile) {
+        setUsername(null);
+        setSession(null);
+        return;
+      }
+
+      setUsername(profile.username);
     };
 
     fetchUser();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
-        setSession(session);
         if (session?.user) {
-          const { data: profile } = await supabase
+          const { data: profile, error } = await supabase
             .from('profiles')
             .select('username')
             .eq('id', session.user.id)
             .single();
-          
-          setUsername(profile?.username || null);
+
+          if (!error && profile?.username) {
+            setSession(session);
+            setUsername(profile.username);
+          } else {
+            setSession(null);
+            setUsername(null);
+          }
         } else {
+          setSession(null);
           setUsername(null);
         }
       }
@@ -60,39 +85,55 @@ export default function Navbar() {
 
   const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut();
-      navigate('/');
-      toast.success('Successfully signed out');
-    } catch (error) {
-      toast.error('Failed to sign out');
-      console.error('Error signing out:', error);
+  //     await supabase.auth.signOut();
+  //     localStorage.setItem("logoutFlag", "true");
+  // navigate("/auth");
+  //     setSession(null);
+  //     setUsername(null);
+  //     navigate('/');
+  //     toast.success('Successfully signed out');
+  //   } catch (error) {
+  //     toast.error('Failed to sign out');
+      //     console.error('Error signing out:', error);
+       // Set explicit logout flag BEFORE signing out
+       localStorage.setItem("explicitLogout", "true");
+      
+       // Sign out from Supabase
+       const { error } = await supabase.auth.signOut();
+       
+       if (error) {
+         console.error("Logout error:", error);
+         // Remove the flag if logout failed
+         localStorage.removeItem("explicitLogout");
+         toast.error("Failed to sign out");
+         return;
+       }
+ 
+       toast.success("Signed out successfully");
+       navigate("/auth");
+     } catch (error) {
+       console.error("Logout error:", error);
+       // Remove the flag if logout failed
+       localStorage.removeItem("explicitLogout");
+       toast.error("Failed to sign out");
     }
   };
 
-  const toggleNav = () => {
-    setIsNavOpen(!isNavOpen);
-  };
-
-  const closeNav = () => {
-    setIsNavOpen(false);
-  };
+  const toggleNav = () => setIsNavOpen(!isNavOpen);
+  const closeNav = () => setIsNavOpen(false);
+  const isActive = (path: string) => location.pathname === path;
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: <Home className="w-5 h-5" /> },
   ];
 
   const authNavItems = [
-    { name: 'Profile', path: `/edit-profile/${username}`, icon: <User className="w-5 h-5" />, requiresAuth: true },
-    { name: 'Appearance', path: '/appearance', icon: <Palette className="w-5 h-5" />, requiresAuth: true },
-    { name: 'Edit Links', path: '/edit-links', icon: <LinkIcon className="w-5 h-5" />, requiresAuth: true },
-    { name: 'Settings', path: '/settings', icon: <Settings className="w-5 h-5" />, requiresAuth: true },
+    { name: 'Profile', path: `/edit-profile/${username}`, icon: <User className="w-5 h-5" /> },
+    { name: 'Appearance', path: '/appearance', icon: <Palette className="w-5 h-5" /> },
+    { name: 'Edit Links', path: '/edit-links', icon: <LinkIcon className="w-5 h-5" /> },
+    { name: 'Settings', path: '/settings', icon: <Settings className="w-5 h-5" /> },
   ];
 
-  const isActive = (path: string) => {
-    return location.pathname === path;
-  };
-
-  // Don't render navbar on user profile pages
   if (isUserProfilePage) {
     return null;
   }
@@ -109,15 +150,14 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
             {navItems.map((item) => (
               <Link
                 key={item.name}
                 to={item.path}
                 className={`flex items-center gap-1 text-sm font-medium transition-colors ${
-                  isActive(item.path) 
-                    ? "text-primary" 
+                  isActive(item.path)
+                    ? "text-primary"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -125,8 +165,8 @@ export default function Navbar() {
                 <span>{item.name}</span>
               </Link>
             ))}
-            
-            {session && authNavItems.map((item) => (
+
+            {session && username && authNavItems.map((item) => (
               <Link
                 key={item.name}
                 to={item.path}
@@ -144,16 +184,16 @@ export default function Navbar() {
 
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            
-            {!session ? (
+
+            {!session || !username ? (
               <Button size="sm" onClick={() => navigate('/auth')}>
                 Sign In
               </Button>
             ) : (
               <div className="flex items-center gap-2">
-                <Button 
-                  size="sm" 
-                  variant="ghost" 
+                <Button
+                  size="sm"
+                  variant="ghost"
                   onClick={handleSignOut}
                   className="hidden md:flex gap-1"
                 >
@@ -162,11 +202,11 @@ export default function Navbar() {
                 </Button>
                 <Avatar className="h-8 w-8 border border-border">
                   <AvatarImage src="/placeholder.svg" alt="User" />
-                  <AvatarFallback>{username?.charAt(0) || '?'}</AvatarFallback>
+                  <AvatarFallback>{username?.charAt(0).toUpperCase() || '?'}</AvatarFallback>
                 </Avatar>
               </div>
             )}
-            
+
             <Button variant="ghost" size="icon" onClick={toggleNav} className="md:hidden">
               {isNavOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
@@ -174,7 +214,6 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* Mobile Navigation */}
       {isNavOpen && (
         <div className="fixed inset-0 top-16 z-50 bg-background md:hidden animate-fade-in">
           <nav className="container flex flex-col gap-4 py-6">
@@ -193,8 +232,8 @@ export default function Navbar() {
                 <span>{item.name}</span>
               </Link>
             ))}
-            
-            {session && (
+
+            {session && username && (
               <>
                 <div className="h-px bg-border my-2"></div>
                 {authNavItems.map((item) => (
@@ -213,8 +252,8 @@ export default function Navbar() {
                   </Link>
                 ))}
                 <div className="h-px bg-border my-2"></div>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   onClick={() => {
                     handleSignOut();
                     closeNav();

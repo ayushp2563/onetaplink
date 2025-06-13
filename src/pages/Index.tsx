@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Share2, Copy, Link2, PenSquare, LayoutPanelTop, ExternalLink, ArrowUpRight, BarChart2, Palette } from "lucide-react";
+import { Share2, Copy, Link2, PenSquare, LayoutPanelTop, ExternalLink, ArrowUpRight, BarChart2, Palette, LogOut } from "lucide-react";
 import { usePageMetadata } from "@/hooks/usePageMetadata";
 
 interface Theme {
@@ -43,10 +43,13 @@ const THEMES: Theme[] = [
   },
 ];
 
+import type { Session } from "@supabase/supabase-js";
+
 const DashboardPage = () => {
   const [theme, setTheme] = useState<Theme>(THEMES[0]);
-  const [session, setSession] = useState<any>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false);
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
   const [hasProfile, setHasProfile] = useState(false);
@@ -56,30 +59,113 @@ const DashboardPage = () => {
   
   usePageMetadata({ title: "Dashboard" });
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        setLoading(true);
-        const { data: { session } } = await supabase.auth.getSession();
-        setSession(session);
+  // Logout function
+  const handleLogout = async () => {
+    try {
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error("Logout error:", error);
+        toast.error("Failed to sign out");
+        return;
+      }
 
-        if (!session) {
+      toast.success("Signed out successfully");
+      navigate("/auth");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Failed to sign out");
+    }
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const initializeAuth = async () => {
+      try {
+        // Get current session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (!isMounted) return;
+
+        if (sessionError) {
+          console.error('Session error:', sessionError);
+          // Clear invalid session
+          await supabase.auth.signOut();
+          setAuthChecked(true);
+          setLoading(false);
           navigate('/auth');
           return;
         }
+
+        if (!session) {
+          setAuthChecked(true);
+          setLoading(false);
+          navigate('/auth');
+          return;
+        }
+
+        // Validate the session
+        try {
+          const { data: { user }, error: userError } = await supabase.auth.getUser();
+          
+          if (!isMounted) return;
+          
+          if (userError || !user) {
+            console.error('User validation failed:', userError?.message);
+            await supabase.auth.signOut();
+            setAuthChecked(true);
+            setLoading(false);
+            navigate('/auth');
+            return;
+          }
+
+          // Session is valid
+          setSession(session);
+          setAuthChecked(true);
+          await fetchUserData(session);
+          
+        } catch (validationError) {
+          console.error('Session validation error:', validationError);
+          if (isMounted) {
+            await supabase.auth.signOut();
+            setAuthChecked(true);
+            setLoading(false);
+            navigate('/auth');
+          }
+        }
+        
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        if (isMounted) {
+          await supabase.auth.signOut();
+          setAuthChecked(true);
+          setLoading(false);
+          navigate('/auth');
+        }
+      }
+    };
+
+    const fetchUserData = async (userSession: Session) => {
+      try {
+        if (!isMounted) return;
 
         // Fetch profile data
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('username, full_name, avatar_url')
-          .eq('id', session.user.id)
+          .eq('id', userSession.user.id)
           .single();
+
+        if (!isMounted) return;
 
         if (profileError) {
           console.error('Error fetching profile:', profileError);
           if (profileError.code === 'PGRST116') {
             setHasProfile(false);
           }
+          setLoading(false);
           return;
         }
 
@@ -90,22 +176,20 @@ const DashboardPage = () => {
           setHasProfile(true);
         } else {
           setHasProfile(false);
-          return;
         }
 
         // Fetch profile settings
         const { data: settings, error: settingsError } = await supabase
           .from('profile_settings')
           .select('*')
-          .eq('id', session.user.id)
+          .eq('id', userSession.user.id)
           .single();
+
+        if (!isMounted) return;
 
         if (settingsError) {
           console.error('Error fetching profile settings:', settingsError);
-          return;
-        }
-
-        if (settings) {
+        } else if (settings) {
           setTheme(THEMES.find(t => t.id === settings.theme_id) || THEMES[0]);
           
           // Count links
@@ -115,13 +199,45 @@ const DashboardPage = () => {
         }
 
       } catch (error) {
-        console.error('Error in fetching user data:', error);
+        console.error('Error fetching user data:', error);
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchUser();
+    // Initialize authentication
+    initializeAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!isMounted) return;
+
+        console.log('Auth state changed:', event, session?.user?.id);
+        
+        if (event === 'SIGNED_OUT') {
+          setSession(null);
+          setUsername("");
+          setFullName("");
+          setHasProfile(false);
+          setAvatarUrl("");
+          setLinkCount(0);
+          navigate('/auth');
+        } else if (event === 'SIGNED_IN' && session) {
+          setSession(session);
+          await fetchUserData(session);
+        } else if (event === 'TOKEN_REFRESHED' && session) {
+          setSession(session);
+        }
+      }
+    );
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   const handleShareProfile = () => {
@@ -142,7 +258,8 @@ const DashboardPage = () => {
     }
   };
 
-  if (loading) {
+  // Show loading while checking auth
+  if (!authChecked || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent"></div>
@@ -150,9 +267,26 @@ const DashboardPage = () => {
     );
   }
 
+  // If no session after auth check, don't render (will redirect)
+  if (!session) {
+    return null;
+  }
+
   return (
     <div className="py-8 px-4 md:px-6">
       <div className="container max-w-6xl mx-auto">
+        {/* Add logout button in top right */}
+        <div className="flex justify-end mb-4">
+          <Button 
+            variant="outline" 
+            onClick={handleLogout}
+            className="gap-2"
+          >
+            <LogOut className="w-4 h-4" />
+            Sign Out
+          </Button>
+        </div>
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
