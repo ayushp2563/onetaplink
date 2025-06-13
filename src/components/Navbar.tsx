@@ -1,6 +1,6 @@
 
+import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useState } from "react";
 import {
   Menu,
   X,
@@ -17,6 +17,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/components/AuthProvider";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Navbar() {
   const [isNavOpen, setIsNavOpen] = useState(false);
