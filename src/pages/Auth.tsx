@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { ArrowLeft, AlertCircle, Mail, Key, User, Shield } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function Auth() {
   const [email, setEmail] = useState("");
@@ -18,78 +20,14 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
+  const { session } = useAuth();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        // Always check for a valid session first
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error("Session fetch error:", error.message);
-          // Clear any stale session data
-          await supabase.auth.signOut();
-          localStorage.removeItem("explicitLogout");
-          return;
-        }
-  
-        if (session) {
-          // Validate the session by checking if the user still exists
-          try {
-            const { data: { user }, error: userError } = await supabase.auth.getUser();
-            
-            if (userError || !user) {
-              console.error("User validation failed:", userError?.message);
-              // Session is invalid, clear it
-              await supabase.auth.signOut();
-              localStorage.removeItem("explicitLogout");
-              return;
-            }
-            
-            // Session is valid, navigate to dashboard
-            localStorage.removeItem("explicitLogout");
-            navigate('/dashboard');
-          } catch (validationError) {
-            console.error("Session validation error:", validationError);
-            // Clear invalid session
-            await supabase.auth.signOut();
-            localStorage.removeItem("explicitLogout");
-          }
-        } else {
-          // No session exists, clear the logout flag
-          localStorage.removeItem("explicitLogout");
-        }
-      } catch (error) {
-        console.error("Error checking authentication:", error);
-        // Clear everything on error
-        await supabase.auth.signOut();
-        localStorage.removeItem("explicitLogout");
-      }
-    };
-
-    checkAuth();
-
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === 'SIGNED_IN' && session) {
-          // Clear explicit logout flag on successful sign in
-          localStorage.removeItem("explicitLogout");
-          navigate('/dashboard');
-        } else if (event === 'SIGNED_OUT') {
-          // Only redirect to auth if it was an explicit logout
-          const explicitLogout = localStorage.getItem("explicitLogout");
-          if (explicitLogout === "true") {
-            navigate('/auth');
-          }
-        }
-      }
-    );
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [navigate]);
+    // If already authenticated, redirect to dashboard
+    if (session) {
+      navigate('/dashboard');
+    }
+  }, [session, navigate]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,6 +65,7 @@ export default function Auth() {
         email,
         password,
         options: {
+          emailRedirectTo: `${window.location.origin}/`,
           data: {
             username,
             full_name: fullName,
@@ -144,8 +83,6 @@ export default function Auth() {
       }
 
       if (signUpData.session) {
-        // Clear explicit logout flag on successful signup
-        localStorage.removeItem("explicitLogout");
         toast.success("Account created successfully!");
         navigate("/dashboard");
       }
@@ -168,6 +105,9 @@ export default function Auth() {
       if (!email || !password) {
         throw new Error("Please enter both email and password");
       }
+
+      // Clear any stale logout flags before signing in
+      localStorage.removeItem("explicitLogout");
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -195,8 +135,6 @@ export default function Auth() {
       }
 
       if (data.session) {
-        // Clear explicit logout flag on successful sign in
-        localStorage.removeItem("explicitLogout");
         toast.success("Welcome back!");
         navigate("/dashboard");
       } else {
@@ -222,7 +160,9 @@ export default function Auth() {
 
     try {
       setLoading(true);
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/`,
+      });
       if (error) throw error;
       toast.success("Password reset email sent. Check your inbox.");
       setErrorMessage("");

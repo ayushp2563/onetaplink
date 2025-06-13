@@ -1,6 +1,6 @@
 
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Menu,
   X,
@@ -12,112 +12,39 @@ import {
   Palette,
   Shield,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { toast } from "sonner";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function Navbar() {
   const [isNavOpen, setIsNavOpen] = useState(false);
-  const [session, setSession] = useState<any>(null);
+  const { session, user, signOut } = useAuth();
   const [username, setUsername] = useState<string | null>(null);
-  const { theme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
 
   const isUserProfilePage = location.pathname.match(/^\/[a-zA-Z0-9_-]+$/);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session || !session.user) {
-        await supabase.auth.signOut();
-        setSession(null);
+  // Fetch username when session changes
+  React.useEffect(() => {
+    const fetchUsername = async () => {
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', session.user.id)
+          .single();
+        
+        setUsername(profile?.username || null);
+      } else {
         setUsername(null);
-        return;
       }
-
-      setSession(session);
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('id', session.user.id)
-        .single();
-
-      if (error || !profile) {
-        setUsername(null);
-        setSession(null);
-        return;
-      }
-
-      setUsername(profile.username);
     };
 
-    fetchUser();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        if (session?.user) {
-          const { data: profile, error } = await supabase
-            .from('profiles')
-            .select('username')
-            .eq('id', session.user.id)
-            .single();
-
-          if (!error && profile?.username) {
-            setSession(session);
-            setUsername(profile.username);
-          } else {
-            setSession(null);
-            setUsername(null);
-          }
-        } else {
-          setSession(null);
-          setUsername(null);
-        }
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleSignOut = async () => {
-    try {
-  //     await supabase.auth.signOut();
-  //     localStorage.setItem("logoutFlag", "true");
-  // navigate("/auth");
-  //     setSession(null);
-  //     setUsername(null);
-  //     navigate('/');
-  //     toast.success('Successfully signed out');
-  //   } catch (error) {
-  //     toast.error('Failed to sign out');
-      //     console.error('Error signing out:', error);
-       // Set explicit logout flag BEFORE signing out
-       localStorage.setItem("explicitLogout", "true");
-      
-       // Sign out from Supabase
-       const { error } = await supabase.auth.signOut();
-       
-       if (error) {
-         console.error("Logout error:", error);
-         // Remove the flag if logout failed
-         localStorage.removeItem("explicitLogout");
-         toast.error("Failed to sign out");
-         return;
-       }
- 
-       toast.success("Signed out successfully");
-       navigate("/auth");
-     } catch (error) {
-       console.error("Logout error:", error);
-       // Remove the flag if logout failed
-       localStorage.removeItem("explicitLogout");
-       toast.error("Failed to sign out");
-    }
-  };
+    fetchUsername();
+  }, [session]);
 
   const toggleNav = () => setIsNavOpen(!isNavOpen);
   const closeNav = () => setIsNavOpen(false);
@@ -194,7 +121,7 @@ export default function Navbar() {
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={handleSignOut}
+                  onClick={signOut}
                   className="hidden md:flex gap-1"
                 >
                   <LogOut className="h-4 w-4" />
@@ -255,7 +182,7 @@ export default function Navbar() {
                 <Button
                   variant="ghost"
                   onClick={() => {
-                    handleSignOut();
+                    signOut();
                     closeNav();
                   }}
                   className="flex justify-start gap-3 rounded-md py-2 px-3 text-sm font-medium text-foreground hover:bg-accent transition-all duration-200"
