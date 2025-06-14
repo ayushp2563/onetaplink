@@ -27,6 +27,10 @@ export default function Navbar() {
   const location = useLocation();
 
   const isUserProfilePage = location.pathname.match(/^\/[a-zA-Z0-9_-]+$/);
+  
+  // Don't show navbar on landing, how to use, and auth pages
+  const hideNavbarPaths = ['/', '/how-to-use', '/auth'];
+  const shouldHideNavbar = hideNavbarPaths.includes(location.pathname) || isUserProfilePage;
 
   // Fetch username when session changes
   React.useEffect(() => {
@@ -62,7 +66,7 @@ export default function Navbar() {
     { name: 'Settings', path: '/settings', icon: <Settings className="w-5 h-5" /> },
   ];
 
-  if (isUserProfilePage) {
+  if (shouldHideNavbar) {
     return null;
   }
 

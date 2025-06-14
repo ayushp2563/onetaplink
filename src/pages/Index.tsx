@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Share2, Copy, Link2, PenSquare, LayoutPanelTop, ExternalLink, ArrowUpRight, Palette } from "lucide-react";
+import { Share2, Copy, Link2, PenSquare, LayoutPanelTop, ExternalLink, ArrowUpRight, Palette, User } from "lucide-react";
 import { usePageMetadata } from "@/hooks/usePageMetadata";
 import { useAuth } from "@/components/AuthProvider";
 import { DashboardHeader } from "@/components/DashboardHeader";
@@ -174,6 +174,39 @@ const DashboardPage = () => {
               <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <div className="flex items-center text-primary mb-1">
+                    <User className="w-5 h-5 mr-2" />
+                    <CardTitle className="text-lg">Edit Profile</CardTitle>
+                  </div>
+                  <CardDescription>
+                    Update your profile information and avatar
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Customize your profile with a photo, bio, and personal details.
+                  </p>
+                </CardContent>
+                <CardFooter className="pt-0">
+                  <Button 
+                    onClick={handleEditProfile}
+                    className="w-full gap-2"
+                  >
+                    <PenSquare className="w-4 h-4" />
+                    Edit Profile
+                  </Button>
+                </CardFooter>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="col-span-1"
+            >
+              <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="flex items-center text-primary mb-1">
                     <Share2 className="w-5 h-5 mr-2" />
                     <CardTitle className="text-lg">Share Your Profile</CardTitle>
                   </div>
@@ -207,7 +240,7 @@ const DashboardPage = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.3 }}
               className="col-span-1"
             >
               <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
@@ -250,8 +283,8 @@ const DashboardPage = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="col-span-1"
+              transition={{ delay: 0.4 }}
+              className="col-span-1 md:col-start-2"
             >
               <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
                 <CardHeader>
