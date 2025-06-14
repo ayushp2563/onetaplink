@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { LinkIcon } from "@/components/layouts/LinkIcon";
 import { PlusCircle } from "lucide-react";
 import { LinksLayout } from "@/components/layouts/LinksLayout";
+import { LinkPhotoUploader } from "@/components/LinkPhotoUploader";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -26,7 +27,8 @@ const LinkEditor = () => {
     title: "",
     url: "",
     icon: "link",
-    display: "both"
+    display: "both",
+    photo_url: ""
   });
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -91,6 +93,20 @@ const LinkEditor = () => {
     }));
   };
 
+  const handlePhotoUploaded = (url: string) => {
+    setFormData(prev => ({
+      ...prev,
+      photo_url: url
+    }));
+  };
+
+  const handlePhotoRemoved = () => {
+    setFormData(prev => ({
+      ...prev,
+      photo_url: ""
+    }));
+  };
+
   const handleAddLink = () => {
     if (!formData.title || !formData.url) {
       toast.error("Title and URL are required");
@@ -120,7 +136,8 @@ const LinkEditor = () => {
       title: "",
       url: "",
       icon: "link",
-      display: "both"
+      display: "both",
+      photo_url: ""
     });
   };
 
@@ -131,7 +148,8 @@ const LinkEditor = () => {
       title: link.title,
       url: link.url,
       icon: link.icon || "link",
-      display: link.display || "both"
+      display: link.display || "both",
+      photo_url: link.photo_url || ""
     });
   };
 
@@ -146,7 +164,8 @@ const LinkEditor = () => {
         title: "",
         url: "",
         icon: "link",
-        display: "both"
+        display: "both",
+        photo_url: ""
       });
     }
   };
@@ -209,7 +228,7 @@ const LinkEditor = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="title">Link Title</Label>
                 <Input
@@ -231,9 +250,11 @@ const LinkEditor = () => {
                   onChange={handleInputChange}
                 />
               </div>
-              
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Icon</Label>
+                <Label>Icon & Display</Label>
                 <div className="flex items-center gap-2">
                   <IconSelector
                     selectedIcon={formData.icon || "link"}
@@ -255,6 +276,14 @@ const LinkEditor = () => {
                     </Select>
                   </div>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <LinkPhotoUploader
+                  onPhotoUploaded={handlePhotoUploaded}
+                  currentPhotoUrl={formData.photo_url}
+                  onPhotoRemoved={handlePhotoRemoved}
+                />
               </div>
             </div>
             

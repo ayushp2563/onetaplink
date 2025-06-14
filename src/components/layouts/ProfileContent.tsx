@@ -12,6 +12,7 @@ export interface Link {
   url: string;
   icon?: string;
   display?: "title" | "icon" | "both";
+  photo_url?: string;
   [key: string]: Json | undefined; // Add index signature to make it compatible with Json type
 }
 

@@ -9,6 +9,7 @@ interface Link {
   url: string;
   icon?: string;
   display?: "title" | "icon" | "both";
+  photo_url?: string;
 }
 
 interface MixedLayoutProps {
@@ -67,7 +68,15 @@ export const MixedLayout = ({ links, textShadowClass = "" }: MixedLayoutProps) =
                 variants={gridItem}
                 className="flex flex-col items-center gap-2 p-3 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors shadow-md aspect-square"
               >
-                {(displayMode === "both" || displayMode === "icon") && (
+                {link.photo_url ? (
+                  <div className="w-10 h-10 rounded-lg overflow-hidden">
+                    <img 
+                      src={link.photo_url} 
+                      alt={link.title} 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (displayMode === "both" || displayMode === "icon") && (
                   <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
                     <LinkIcon iconName={link.icon || "link"} className="text-white w-5 h-5" />
                   </div>
@@ -97,8 +106,16 @@ export const MixedLayout = ({ links, textShadowClass = "" }: MixedLayoutProps) =
                 variants={item}
                 className="flex items-center gap-3 p-4 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors shadow-md"
               >
-                {(displayMode === "both" || displayMode === "icon") && (
-                  <LinkIcon iconName={link.icon || "link"} className="text-white" />
+                {link.photo_url ? (
+                  <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                    <img 
+                      src={link.photo_url} 
+                      alt={link.title} 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (displayMode === "both" || displayMode === "icon") && (
+                  <LinkIcon iconName={link.icon || "link"} className="text-white flex-shrink-0" />
                 )}
                 {(displayMode === "both" || displayMode === "title") && (
                   <span className={`flex-1 text-white truncate ${textShadowClass} font-medium ${isMobile ? 'text-sm' : ''}`}>
