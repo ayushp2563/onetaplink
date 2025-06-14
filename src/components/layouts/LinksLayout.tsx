@@ -9,6 +9,7 @@ interface Link {
   url: string;
   icon?: string;
   display?: "title" | "icon" | "both";
+  photo_url?: string;
 }
 
 interface LinksLayoutProps {
@@ -94,7 +95,15 @@ export const LinksLayout = ({
               rel="noopener noreferrer"
               className={`flex items-center gap-3 p-4 rounded-lg bg-white/10 backdrop-blur-sm ${!editable ? 'hover:bg-white/20' : ''} transition-colors shadow-md w-full`}
             >
-              {(displayMode === "both" || displayMode === "icon") && (
+              {link.photo_url ? (
+                <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                  <img 
+                    src={link.photo_url} 
+                    alt={link.title} 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (displayMode === "both" || displayMode === "icon") && (
                 <LinkIcon iconName={link.icon || "link"} className="text-white flex-shrink-0" />
               )}
               {(displayMode === "both" || displayMode === "title") && (

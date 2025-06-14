@@ -53,6 +53,7 @@ interface Link {
   url: string;
   icon?: string;
   display?: "title" | "icon" | "both";
+  photo_url?: string;
 }
 
 const THEMES: { [key: string]: Theme } = {
@@ -181,7 +182,8 @@ export default function UserProfile() {
               title: l?.title || "",
               url: l?.url || "",
               icon: l?.icon || "link",
-              display: l?.display || "both"
+              display: l?.display || "both",
+              photo_url: l?.photo_url || ""
             };
           });
         }

@@ -1,72 +1,83 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { AvatarUploader } from "@/components/AvatarUploader";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-type ProfileFormProps = {
+interface ProfileFormProps {
   username: string;
-};
+}
 
-type ProfileData = {
-  id: string;
-  full_name: string | null;
-  bio: string | null;
-  avatar_url: string | null;
-};
+interface ProfileData {
+  full_name: string;
+  bio: string;
+  avatar_url: string;
+  custom_title: string;
+}
 
 const ProfileForm = ({ username }: ProfileFormProps) => {
-  const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ProfileData>({
     full_name: "",
     bio: "",
+    avatar_url: "",
+    custom_title: ""
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
 
-  // Fetch profile data
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         setIsLoading(true);
         
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, full_name, bio, avatar_url')
-          .eq('username', username)
-          .single();
-          
-        if (error) {
-          toast.error("Error fetching profile");
-          console.error("Error fetching profile:", error);
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          toast.error("You must be logged in");
+          navigate("/auth");
           return;
         }
-        
-        setProfile(data);
-        setFormData({
-          full_name: data.full_name || "",
-          bio: data.bio || "",
-        });
+
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('username', username)
+          .single();
+
+        if (error) {
+          console.error("Error fetching profile:", error);
+          toast.error("Failed to load profile");
+          return;
+        }
+
+        if (profile) {
+          setFormData({
+            full_name: profile.full_name || "",
+            bio: profile.bio || "",
+            avatar_url: profile.avatar_url || "",
+            custom_title: profile.custom_title || ""
+          });
+        }
       } catch (error) {
         console.error("Error in profile fetch:", error);
-        toast.error("Could not load profile data");
+        toast.error("Failed to load profile");
       } finally {
         setIsLoading(false);
       }
     };
-    
-    fetchProfile();
-  }, [username]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    fetchProfile();
+  }, [username, navigate]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -74,38 +85,60 @@ const ProfileForm = ({ username }: ProfileFormProps) => {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!profile) return;
-    
+  const handleAvatarUploaded = (url: string) => {
+    setFormData(prev => ({
+      ...prev,
+      avatar_url: url
+    }));
+  };
+
+  const handleAvatarRemoved = () => {
+    setFormData(prev => ({
+      ...prev,
+      avatar_url: ""
+    }));
+  };
+
+  const handleSave = async () => {
     try {
       setIsSaving(true);
       
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("You must be logged in");
+        navigate("/auth");
+        return;
+      }
+
       const { error } = await supabase
         .from('profiles')
         .update({
           full_name: formData.full_name,
           bio: formData.bio,
+          avatar_url: formData.avatar_url,
+          custom_title: formData.custom_title,
           updated_at: new Date().toISOString()
         })
-        .eq('id', profile.id);
-        
+        .eq('id', session.user.id);
+
       if (error) {
-        toast.error("Failed to update profile");
-        console.error("Update error:", error);
+        console.error("Error updating profile:", error);
+        toast.error("Failed to save profile");
         return;
       }
-      
+
       toast.success("Profile updated successfully");
-      // Navigate to dashboard instead of profile page
-      navigate("/dashboard");
+      navigate(`/${username}`);
     } catch (error) {
-      console.error("Error in profile update:", error);
-      toast.error("An error occurred while saving");
+      console.error("Error in save operation:", error);
+      toast.error("Something went wrong");
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleCancel = () => {
+    navigate(`/${username}`);
   };
 
   if (isLoading) {
@@ -116,65 +149,81 @@ const ProfileForm = ({ username }: ProfileFormProps) => {
     );
   }
 
+  const fallbackText = formData.full_name?.charAt(0) || username?.charAt(0) || "?";
+
   return (
-    <Card className="w-full max-w-lg mx-auto">
-      <CardContent className="pt-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="full_name">Display Name</Label>
-            <Input
-              id="full_name"
-              name="full_name"
-              value={formData.full_name}
-              onChange={handleChange}
-              placeholder="Your display name"
-              className="w-full"
+    <div className="space-y-8 max-w-2xl mx-auto">
+      <Card>
+        <CardHeader>
+          <CardTitle>Edit Profile</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <AvatarUploader
+              currentAvatarUrl={formData.avatar_url}
+              onAvatarUploaded={handleAvatarUploaded}
+              onAvatarRemoved={handleAvatarRemoved}
+              fallbackText={fallbackText}
             />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="bio">Bio</Label>
-            <Textarea
-              id="bio"
-              name="bio"
-              value={formData.bio || ""}
-              onChange={handleChange}
-              placeholder="A short bio about yourself"
-              rows={4}
-              className="w-full"
-            />
-          </div>
-          
-          <div className={`flex ${isMobile ? 'flex-col' : 'justify-between'} space-y-2 md:space-y-0 md:space-x-2 mt-6`}>
-            <Button 
-              type="button" 
-              variant="outline"
-              onClick={() => navigate("/appearance")}
-              className={`${isMobile ? 'w-full' : ''} mb-2 md:mb-0`}
-            >
-              Customize Appearance
-            </Button>
-            <div className={`flex ${isMobile ? 'w-full' : ''} space-x-2`}>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => navigate("/dashboard")}
-                className={isMobile ? 'flex-1' : ''}
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={isSaving}
-                className={isMobile ? 'flex-1' : ''}
-              >
-                {isSaving ? "Saving..." : "Save Changes"}
-              </Button>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="full_name">Full Name</Label>
+                <Input
+                  id="full_name"
+                  name="full_name"
+                  placeholder="Enter your full name"
+                  value={formData.full_name}
+                  onChange={handleInputChange}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="custom_title">Custom Page Title</Label>
+                <Input
+                  id="custom_title"
+                  name="custom_title"
+                  placeholder="Your Digital Identity"
+                  value={formData.custom_title}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="bio">Bio</Label>
+              <Textarea
+                id="bio"
+                name="bio"
+                placeholder="Tell people about yourself..."
+                value={formData.bio}
+                onChange={handleInputChange}
+                rows={4}
+              />
             </div>
           </div>
-        </form>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+      
+      <div className={`flex ${isMobile ? 'flex-col' : 'justify-end'} gap-4`}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleCancel}
+          className={isMobile ? 'w-full' : ''}
+        >
+          Cancel
+        </Button>
+        <Button
+          type="button"
+          onClick={handleSave}
+          disabled={isSaving}
+          className={isMobile ? 'w-full' : ''}
+        >
+          {isSaving ? "Saving..." : "Save Profile"}
+        </Button>
+      </div>
+    </div>
   );
 };
 
