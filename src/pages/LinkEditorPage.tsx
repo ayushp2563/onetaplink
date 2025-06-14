@@ -53,16 +53,16 @@ export default function LinkEditorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted p-4">
+    <div className="py-8 px-4 md:px-6">
       <div className="container max-w-2xl mx-auto">
         <div className="flex justify-start mb-6">
           <Button
             variant="ghost"
-            onClick={() => navigate("/appearance")}
+            onClick={() => navigate("/dashboard")}
             className="gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Appearance
+            Back to Dashboard
           </Button>
         </div>
         
