@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Upload, X, Image } from "lucide-react";
+import { Upload, X } from "lucide-react";
 
 interface LinkPhotoUploaderProps {
   onPhotoUploaded: (url: string) => void;
@@ -101,6 +101,13 @@ export const LinkPhotoUploader = ({
     }
   };
 
+  const handleUploadClick = () => {
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    if (input) {
+      input.click();
+    }
+  };
+
   return (
     <div className="space-y-2">
       <Label>Link Photo (Optional)</Label>
@@ -133,27 +140,37 @@ export const LinkPhotoUploader = ({
               onChange={handleFileUpload}
               disabled={isUploading}
               className="flex-1"
+              style={{ display: 'none' }}
+              id="photo-upload"
             />
             <Button
               type="button"
               variant="outline"
               size="sm"
               disabled={isUploading}
-              onClick={() => document.querySelector('input[type="file"]')?.click()}
+              onClick={handleUploadClick}
+              className="w-full"
             >
               {isUploading ? (
                 <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full" />
               ) : (
                 <>
-                  <Upload className="w-4 h-4 mr-1" />
-                  Upload
+                  <Upload className="w-4 h-4 mr-2" />
+                  Upload Photo
                 </>
               )}
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground">
-            PNG, JPG up to 5MB
-          </p>
+          <label htmlFor="photo-upload" className="cursor-pointer">
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors">
+              <p className="text-sm text-muted-foreground">
+                Click to upload or drag and drop
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                PNG, JPG up to 5MB
+              </p>
+            </div>
+          </label>
         </div>
       )}
     </div>

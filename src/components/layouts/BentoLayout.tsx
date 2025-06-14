@@ -57,7 +57,7 @@ export const BentoLayout = ({ links, textShadowClass = "" }: BentoLayoutProps) =
             className="flex flex-col items-center justify-center gap-2 p-3 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors shadow-md aspect-square"
           >
             {link.photo_url ? (
-              <div className="w-10 h-10 rounded-lg overflow-hidden">
+              <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
                 <img 
                   src={link.photo_url} 
                   alt={link.title} 
