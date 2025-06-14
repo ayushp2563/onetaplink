@@ -139,7 +139,7 @@ export const LinkPhotoUploader = ({
               variant="outline"
               size="sm"
               disabled={isUploading}
-              onClick={() => (document.querySelector('input[type="file"]') as HTMLInputElement)?.click()}
+              onClick={() => document.querySelector('input[type="file"]')?.click()}
             >
               {isUploading ? (
                 <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full" />
