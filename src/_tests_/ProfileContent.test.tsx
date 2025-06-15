@@ -5,22 +5,22 @@ import { ProfileContent, Link } from '../components/layouts/ProfileContent';
 import { LAYOUT_TYPES } from '../constants/layouts';
 import { vi } from 'vitest';
 
-// Mock layout components (must be default exports)
+// Mock layout components (must be named exports to match import)
 vi.mock('@/components/layouts/LinksLayout', () => ({
   __esModule: true,
-  default: ({ links }: { links: any[] }) => (
+  LinksLayout: ({ links }: { links: any[] }) => (
     <div data-testid="links-layout">Links Layout - {links.length} links</div>
   ),
 }));
 vi.mock('@/components/layouts/BentoLayout', () => ({
   __esModule: true,
-  default: ({ links }: { links: any[] }) => (
+  BentoLayout: ({ links }: { links: any[] }) => (
     <div data-testid="bento-layout">Bento Layout - {links.length} links</div>
   ),
 }));
 vi.mock('@/components/layouts/MixedLayout', () => ({
   __esModule: true,
-  default: ({ links }: { links: any[] }) => (
+  MixedLayout: ({ links }: { links: any[] }) => (
     <div data-testid="mixed-layout">Mixed Layout - {links.length} links</div>
   ),
 }));

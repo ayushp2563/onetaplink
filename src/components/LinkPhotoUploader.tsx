@@ -125,6 +125,7 @@ export const LinkPhotoUploader = ({
               size="sm"
               className="absolute top-1 right-1 w-6 h-6 p-0"
               onClick={handleRemovePhoto}
+              aria-label="Remove"
             >
               <X className="w-3 h-3" />
             </Button>

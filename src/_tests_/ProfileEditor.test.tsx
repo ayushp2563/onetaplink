@@ -1,3 +1,4 @@
+
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ProfileEditor from '../pages/ProfileEditor';
@@ -27,10 +28,11 @@ vi.mock('../components/ProfileForm', () => ({
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
+  const useParams = vi.fn(() => ({ username: 'testuser' }));
   return {
     ...actual,
     useNavigate: () => mockNavigate,
-    useParams: () => ({ username: 'testuser' }),
+    useParams
   };
 });
 
@@ -61,8 +63,9 @@ describe('ProfileEditor', () => {
   });
 
   it('handles missing username', async () => {
-    // patch useParams return value for this test
-    vi.mocked(require('react-router-dom').useParams).mockReturnValue({});
+    // Patch global useParams to return {}
+    const reactRouterDom = require('react-router-dom');
+    reactRouterDom.useParams.mockReturnValue({});
     render(
       <BrowserRouter>
         <ProfileEditor />
