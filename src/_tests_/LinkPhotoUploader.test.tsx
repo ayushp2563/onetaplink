@@ -16,7 +16,7 @@ vi.mock('sonner', () => ({
 
 const mockProps = {
   onPhotoUploaded: vi.fn(),
-  linkId: 'test-link-id',
+  onPhotoRemoved: vi.fn(),
   currentPhotoUrl: null,
 };
 
@@ -28,7 +28,8 @@ describe('LinkPhotoUploader', () => {
   it('renders upload button', () => {
     render(<LinkPhotoUploader {...mockProps} />);
     
-    expect(screen.getByText('Upload Photo')).toBeInTheDocument();
+    const uploadLabel = screen.getByText(/click to upload/i);
+    expect(uploadLabel).toBeInTheDocument();
   });
 
   it('shows current photo when provided', () => {
