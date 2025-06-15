@@ -11,8 +11,15 @@ describe('IconSelector', () => {
     vi.clearAllMocks();
   });
 
+  function openPopover() {
+    // Click the trigger button (button with aria-label="Select icon")
+    const triggerBtn = screen.getByRole('button', { name: 'Select icon' });
+    fireEvent.click(triggerBtn);
+  }
+
   it('renders icon grid', () => {
     render(<IconSelector onSelectIcon={mockOnSelectIcon} selectedIcon="" />);
+    openPopover();
     expect(screen.getByText('Select an Icon')).toBeInTheDocument();
     expect(screen.getByTitle('link')).toBeInTheDocument();
     expect(screen.getByTitle('user')).toBeInTheDocument();
@@ -20,6 +27,7 @@ describe('IconSelector', () => {
 
   it('calls onSelectIcon when icon is clicked', () => {
     render(<IconSelector onSelectIcon={mockOnSelectIcon} selectedIcon="" />);
+    openPopover();
     const linkIcon = screen.getByTitle('link');
     fireEvent.click(linkIcon);
     expect(mockOnSelectIcon).toHaveBeenCalledWith('link');
@@ -27,12 +35,14 @@ describe('IconSelector', () => {
 
   it('highlights selected icon', () => {
     render(<IconSelector onSelectIcon={mockOnSelectIcon} selectedIcon="user" />);
+    openPopover();
     const userIconButton = screen.getByTitle('user');
     expect(userIconButton).toHaveClass('bg-primary');
   });
 
   it('shows search functionality', () => {
     render(<IconSelector onSelectIcon={mockOnSelectIcon} selectedIcon="" />);
+    openPopover();
     const searchInput = screen.getByPlaceholderText('Search icons...');
     expect(searchInput).toBeInTheDocument();
     fireEvent.change(searchInput, { target: { value: 'user' } });

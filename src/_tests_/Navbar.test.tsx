@@ -60,11 +60,13 @@ describe('Navbar', () => {
         <Navbar />
       </BrowserRouter>
     );
-    const signOutButton = await waitFor(() =>
-      screen.getByRole('button', { name: /sign out/i })
-    );
+    // Avatar Fallback should show first char of username ("T")
+    expect(await screen.findByText('T')).toBeInTheDocument();
+    // Find the Sign Out button by role button and name
+    const signOutButton = await screen.findByRole('button', { name: /sign out/i });
     expect(signOutButton).toBeInTheDocument();
     fireEvent.click(signOutButton);
     expect(mockSignOut).toHaveBeenCalled();
   });
 });
+

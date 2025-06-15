@@ -40,9 +40,8 @@ describe('LinkPhotoUploader', () => {
 
   it('handles file selection', () => {
     render(<LinkPhotoUploader {...mockProps} />);
-    // The input comes before the label (see shadcn/ui file upload pattern)
-    const uploadLabel = screen.getByText(/click to upload/i);
-    const fileInput = uploadLabel.previousSibling as HTMLInputElement;
+    // Find file input by id since input is hidden and linked by label's htmlFor
+    const fileInput = screen.getByLabelText(/link photo/i);
     const file = new File(['test'], 'photo.jpg', { type: 'image/jpeg' });
     fireEvent.change(fileInput, { target: { files: [file] } });
     expect(fileInput.files).toHaveLength(1);
@@ -51,8 +50,7 @@ describe('LinkPhotoUploader', () => {
 
   it('shows uploading state', async () => {
     render(<LinkPhotoUploader {...mockProps} />);
-    const uploadLabel = screen.getByText(/click to upload/i);
-    const fileInput = uploadLabel.previousSibling as HTMLInputElement;
+    const fileInput = screen.getByLabelText(/link photo/i);
     const file = new File(['test'], 'photo.jpg', { type: 'image/jpeg' });
     fireEvent.change(fileInput, { target: { files: [file] } });
     await waitFor(() => {
