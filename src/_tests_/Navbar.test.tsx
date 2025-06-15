@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -68,9 +69,17 @@ describe('Navbar', () => {
         <Navbar />
       </BrowserRouter>
     );
-    // Avatar Fallback should show first char of username ("T")
-    expect(await screen.findByText('T')).toBeInTheDocument();
-    // Find the Sign Out button by role button and name
+
+    // Wait for the AvatarFallback to display the initial of the username (T)
+    await waitFor(() => {
+      expect(
+        screen.getByText((content, el) => {
+          return el?.tagName.toLowerCase() === 'span' && content.trim() === 'T';
+        })
+      ).toBeInTheDocument();
+    });
+
+    // Find the Sign Out button by role button and name (case-insensitive, partial match)
     const signOutButton = await screen.findByRole('button', { name: /sign out/i });
     expect(signOutButton).toBeInTheDocument();
     fireEvent.click(signOutButton);
