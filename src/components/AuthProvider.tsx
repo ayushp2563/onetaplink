@@ -142,8 +142,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-
-export function useAuth(useAuth: any) {
-  throw new Error('Function not implemented.');
+// Correctly implement useAuth as a context hook
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider.");
+  }
+  return context;
 }
-// useAuth hook moved to a separate file for Fast Refresh compatibility.
