@@ -1,4 +1,3 @@
-
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Index from '../pages/Index';
@@ -53,7 +52,6 @@ describe('Index (Dashboard)', () => {
         <Index />
       </BrowserRouter>
     );
-
     await waitFor(() => {
       expect(screen.getByText(/Welcome/)).toBeInTheDocument();
     });
@@ -65,7 +63,6 @@ describe('Index (Dashboard)', () => {
         <Index />
       </BrowserRouter>
     );
-
     expect(screen.getByRole('status')).toBeInTheDocument();
   });
 
@@ -75,7 +72,6 @@ describe('Index (Dashboard)', () => {
         <Index />
       </BrowserRouter>
     );
-
     await waitFor(() => {
       const editButton = screen.getByText('Edit Profile');
       fireEvent.click(editButton);

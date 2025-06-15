@@ -16,7 +16,10 @@ vi.mock('sonner', () => ({
 vi.mock('@/hooks/usePageMetadata', () => ({
   usePageMetadata: vi.fn(),
 }));
+
+// Mock LinkEditor (should be default)
 vi.mock('@/components/LinkEditor', () => ({
+  __esModule: true,
   default: () => <div data-testid="link-editor">Link Editor Component</div>,
 }));
 
@@ -40,7 +43,6 @@ describe('LinkEditorPage', () => {
         <LinkEditorPage />
       </BrowserRouter>
     );
-
     expect(screen.getByRole('status')).toBeInTheDocument();
   });
 
@@ -50,7 +52,6 @@ describe('LinkEditorPage', () => {
         <LinkEditorPage />
       </BrowserRouter>
     );
-
     await waitFor(() => {
       expect(screen.getByText('Edit Your Links')).toBeInTheDocument();
       expect(screen.getByText('Add, edit, or remove links that will appear on your profile')).toBeInTheDocument();
@@ -64,7 +65,6 @@ describe('LinkEditorPage', () => {
         <LinkEditorPage />
       </BrowserRouter>
     );
-
     await waitFor(() => {
       expect(screen.getByText('Back to Dashboard')).toBeInTheDocument();
     });

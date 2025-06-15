@@ -1,3 +1,4 @@
+
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { LinkPhotoUploader } from '../components/LinkPhotoUploader';
@@ -5,8 +6,6 @@ import { vi } from 'vitest';
 
 // Mock Supabase
 vi.mock('@/integrations/supabase/client', () => import('../../__mocks__/supabase'));
-
-// Mock sonner
 vi.mock('sonner', () => ({
   toast: {
     success: vi.fn(),
@@ -27,19 +26,13 @@ describe('LinkPhotoUploader', () => {
 
   it('renders upload button', () => {
     render(<LinkPhotoUploader {...mockProps} />);
-    
     const uploadLabel = screen.getByText(/click to upload/i);
     expect(uploadLabel).toBeInTheDocument();
   });
 
   it('shows current photo when provided', () => {
-    const propsWithPhoto = {
-      ...mockProps,
-      currentPhotoUrl: 'https://example.com/photo.jpg',
-    };
-    
+    const propsWithPhoto = { ...mockProps, currentPhotoUrl: 'https://example.com/photo.jpg' };
     render(<LinkPhotoUploader {...propsWithPhoto} />);
-    
     const photoImage = screen.getByAltText('Link photo');
     expect(photoImage).toBeInTheDocument();
     expect(photoImage).toHaveAttribute('src', 'https://example.com/photo.jpg');
@@ -47,41 +40,31 @@ describe('LinkPhotoUploader', () => {
 
   it('handles file selection', () => {
     render(<LinkPhotoUploader {...mockProps} />);
-    
-    const fileInput = screen.getByLabelText(/click to upload/i).previousSibling as HTMLInputElement;
+    // The input comes before the label (see shadcn/ui file upload pattern)
+    const uploadLabel = screen.getByText(/click to upload/i);
+    const fileInput = uploadLabel.previousSibling as HTMLInputElement;
     const file = new File(['test'], 'photo.jpg', { type: 'image/jpeg' });
-    
     fireEvent.change(fileInput, { target: { files: [file] } });
-    
     expect(fileInput.files).toHaveLength(1);
     expect(fileInput.files?.[0]).toBe(file);
   });
 
   it('shows uploading state', async () => {
     render(<LinkPhotoUploader {...mockProps} />);
-    
-    const fileInput = screen.getByLabelText(/click to upload/i).previousSibling as HTMLInputElement;
+    const uploadLabel = screen.getByText(/click to upload/i);
+    const fileInput = uploadLabel.previousSibling as HTMLInputElement;
     const file = new File(['test'], 'photo.jpg', { type: 'image/jpeg' });
-    
     fireEvent.change(fileInput, { target: { files: [file] } });
-    
     await waitFor(() => {
       expect(screen.getByText(/uploading/i)).toBeInTheDocument();
     });
   });
 
   it('can remove current photo', () => {
-    const propsWithPhoto = {
-      ...mockProps,
-      currentPhotoUrl: 'https://example.com/photo.jpg',
-      onPhotoRemoved: vi.fn(),
-    };
-    
+    const propsWithPhoto = { ...mockProps, currentPhotoUrl: 'https://example.com/photo.jpg', onPhotoRemoved: vi.fn() };
     render(<LinkPhotoUploader {...propsWithPhoto} />);
-    
     const removeButton = screen.getByRole('button', { name: /remove/i });
     fireEvent.click(removeButton);
-    
     expect(propsWithPhoto.onPhotoRemoved).toHaveBeenCalled();
   });
 });

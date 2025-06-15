@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -6,7 +7,7 @@ import { vi } from 'vitest';
 
 const mockSignOut = vi.fn();
 
-// ✅ Mock Supabase
+// Fix Supabase mock for from (syntax error: add closing parenthesis)
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     from: () => ({
@@ -17,11 +18,10 @@ vi.mock('@/integrations/supabase/client', () => ({
           }),
         }),
       }),
-    }
-)} // <-- Add closing parenthesis for 'from' function
+    }),
+  },
 }));
 
-// ✅ Mock AuthProvider
 vi.mock('@/components/AuthProvider', () => ({
   useAuth: () => ({
     session: { user: { id: 'test-user-id' } },
@@ -31,7 +31,6 @@ vi.mock('@/components/AuthProvider', () => ({
   }),
 }));
 
-// ✅ Mock Theme Provider
 vi.mock('@/components/theme-provider', () => ({
   useTheme: () => ({
     theme: 'light',
@@ -39,7 +38,6 @@ vi.mock('@/components/theme-provider', () => ({
   }),
 }));
 
-// ✅ Mock react-router-dom navigate
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
@@ -49,7 +47,6 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-// Import component AFTER mocks
 import Navbar from '../components/Navbar';
 
 describe('Navbar', () => {
@@ -63,15 +60,10 @@ describe('Navbar', () => {
         <Navbar />
       </BrowserRouter>
     );
-
-    // ✅ Wait for Sign Out button to appear (matching partial text to avoid element splitting issues)
     const signOutButton = await waitFor(() =>
       screen.getByRole('button', { name: /sign out/i })
     );
-
     expect(signOutButton).toBeInTheDocument();
-
-    // ✅ Click and check if mockSignOut was called
     fireEvent.click(signOutButton);
     expect(mockSignOut).toHaveBeenCalled();
   });

@@ -1,4 +1,3 @@
-
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ProfileEditor from '../pages/ProfileEditor';
@@ -46,7 +45,6 @@ describe('ProfileEditor', () => {
         <ProfileEditor />
       </BrowserRouter>
     );
-
     expect(screen.getByRole('status')).toBeInTheDocument();
   });
 
@@ -56,7 +54,6 @@ describe('ProfileEditor', () => {
         <ProfileEditor />
       </BrowserRouter>
     );
-
     await waitFor(() => {
       expect(screen.getByText('Edit Profile')).toBeInTheDocument();
       expect(screen.getByTestId('profile-form')).toBeInTheDocument();
@@ -64,14 +61,13 @@ describe('ProfileEditor', () => {
   });
 
   it('handles missing username', async () => {
+    // patch useParams return value for this test
     vi.mocked(require('react-router-dom').useParams).mockReturnValue({});
-    
     render(
       <BrowserRouter>
         <ProfileEditor />
       </BrowserRouter>
     );
-
     await waitFor(() => {
       expect(screen.getByText('No username provided.')).toBeInTheDocument();
     });

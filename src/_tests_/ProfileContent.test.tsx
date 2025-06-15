@@ -1,22 +1,26 @@
+
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ProfileContent, Link } from '../components/layouts/ProfileContent';
 import { LAYOUT_TYPES } from '../constants/layouts';
 import { vi } from 'vitest';
 
-// Mock layout components
+// Mock layout components (must be default exports)
 vi.mock('@/components/layouts/LinksLayout', () => ({
-  LinksLayout: ({ links }: { links: any[] }) => (
+  __esModule: true,
+  default: ({ links }: { links: any[] }) => (
     <div data-testid="links-layout">Links Layout - {links.length} links</div>
   ),
 }));
 vi.mock('@/components/layouts/BentoLayout', () => ({
-  BentoLayout: ({ links }: { links: any[] }) => (
+  __esModule: true,
+  default: ({ links }: { links: any[] }) => (
     <div data-testid="bento-layout">Bento Layout - {links.length} links</div>
   ),
 }));
 vi.mock('@/components/layouts/MixedLayout', () => ({
-  MixedLayout: ({ links }: { links: any[] }) => (
+  __esModule: true,
+  default: ({ links }: { links: any[] }) => (
     <div data-testid="mixed-layout">Mixed Layout - {links.length} links</div>
   ),
 }));
@@ -35,7 +39,6 @@ describe('ProfileContent', () => {
         textShadowClass=""
       />
     );
-
     expect(screen.getByTestId('links-layout')).toBeInTheDocument();
     expect(screen.getByText('Links Layout - 2 links')).toBeInTheDocument();
   });
@@ -48,7 +51,6 @@ describe('ProfileContent', () => {
         textShadowClass=""
       />
     );
-
     expect(screen.getByTestId('bento-layout')).toBeInTheDocument();
     expect(screen.getByText('Bento Layout - 2 links')).toBeInTheDocument();
   });
@@ -61,7 +63,6 @@ describe('ProfileContent', () => {
         textShadowClass=""
       />
     );
-
     expect(screen.getByTestId('mixed-layout')).toBeInTheDocument();
     expect(screen.getByText('Mixed Layout - 2 links')).toBeInTheDocument();
   });
@@ -74,7 +75,6 @@ describe('ProfileContent', () => {
         textShadowClass=""
       />
     );
-
     expect(screen.getByText('Links Layout - 0 links')).toBeInTheDocument();
   });
 });

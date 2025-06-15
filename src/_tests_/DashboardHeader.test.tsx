@@ -5,7 +5,7 @@ import { DashboardHeader } from '../components/DashboardHeader';
 import { BrowserRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 
-// Mock framer-motion
+// Mock framer-motion (div signature fix)
 vi.mock('framer-motion', () => ({
   motion: {
     div: ({ children, ...props }: React.PropsWithChildren<React.HTMLAttributes<HTMLDivElement>>) => <div {...props}>{children}</div>,
@@ -26,7 +26,6 @@ describe('DashboardHeader', () => {
         <DashboardHeader {...defaultProps} />
       </BrowserRouter>
     );
-
     expect(screen.getByText(/Welcome back, Test User!/)).toBeInTheDocument();
   });
 
@@ -36,31 +35,26 @@ describe('DashboardHeader', () => {
         <DashboardHeader {...defaultProps} />
       </BrowserRouter>
     );
-
     expect(screen.getByText('@testuser')).toBeInTheDocument();
   });
 
   it('handles missing full name', () => {
     const props = { ...defaultProps, fullName: '' };
-    
     render(
       <BrowserRouter>
         <DashboardHeader {...props} />
       </BrowserRouter>
     );
-
     expect(screen.getByText(/Welcome back!/)).toBeInTheDocument();
   });
 
   it('shows create profile message when no profile exists', () => {
     const props = { ...defaultProps, hasProfile: false, username: '' };
-    
     render(
       <BrowserRouter>
         <DashboardHeader {...props} />
       </BrowserRouter>
     );
-
     expect(screen.getByText(/Get started by creating your profile/)).toBeInTheDocument();
   });
 });
