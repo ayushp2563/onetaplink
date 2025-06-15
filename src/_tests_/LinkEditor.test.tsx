@@ -1,7 +1,22 @@
+
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import LinkEditor from '../components/LinkEditor';
 import { vi } from 'vitest';
+
+// --- MOCK window.matchMedia for JSDOM tests ---
+if (!window.matchMedia) {
+  window.matchMedia = vi.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    addListener: vi.fn(), // deprecated
+    removeListener: vi.fn(), // deprecated
+    dispatchEvent: vi.fn(),
+  }));
+}
 
 // Patch named export for IconSelector and LinkPhotoUploader
 vi.mock('@/components/IconSelector', () => ({
@@ -72,3 +87,4 @@ describe('LinkEditor', () => {
     });
   });
 });
+
