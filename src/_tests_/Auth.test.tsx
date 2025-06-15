@@ -6,14 +6,15 @@ import Auth from '../pages/Auth';
 import { BrowserRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 
-// Mock the useAuth hook
+// Mock the entire AuthProvider module and export useAuth as a named export
 vi.mock('@/components/AuthProvider', () => ({
-  useAuth: vi.fn(() => ({
+  AuthProvider: ({ children }: { children: React.ReactNode }) => children,
+  useAuth: () => ({
     session: null,
     user: null,
     loading: false,
     signOut: vi.fn(),
-  })),
+  }),
 }));
 
 vi.mock('@/integrations/supabase/client', () => import('../../__mocks__/supabase'));
