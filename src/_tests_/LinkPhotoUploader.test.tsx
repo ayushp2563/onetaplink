@@ -12,6 +12,10 @@ vi.mock('sonner', () => ({
   },
 }));
 
+vi.mock('@/components/ui/button', () => ({
+  Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+}));
+
 const mockProps = {
   onPhotoUploaded: vi.fn(),
   onPhotoRemoved: vi.fn(),

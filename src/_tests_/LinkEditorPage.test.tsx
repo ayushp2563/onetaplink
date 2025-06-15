@@ -1,4 +1,3 @@
-
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import LinkEditorPage from '../pages/LinkEditorPage';
@@ -21,6 +20,11 @@ vi.mock('@/hooks/usePageMetadata', () => ({
 vi.mock('@/components/LinkEditor', () => ({
   __esModule: true,
   default: () => <div data-testid="link-editor">Link Editor Component</div>,
+}));
+
+// Mock Button component
+vi.mock('@/components/ui/button', () => ({
+  Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
 }));
 
 const mockNavigate = vi.fn();

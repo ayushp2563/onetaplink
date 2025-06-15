@@ -1,4 +1,3 @@
-
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import LinkEditor from '../components/LinkEditor';
@@ -23,6 +22,12 @@ vi.mock('sonner', () => ({
     success: vi.fn(),
     error: vi.fn(),
   },
+}));
+vi.mock('@/components/ui/button', () => ({
+  Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+}));
+vi.mock('@/components/ui/input', () => ({
+  Input: ({ ...props }: any) => <input {...props} />,
 }));
 
 describe('LinkEditor', () => {

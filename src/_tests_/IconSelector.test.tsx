@@ -1,8 +1,22 @@
-
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { IconSelector } from '../components/IconSelector';
 import { vi } from 'vitest';
+
+vi.mock('@/components/ui/popover', () => ({
+    Popover: ({ children }: any) => <div>{children}</div>,
+    PopoverContent: ({ children }: any) => <div>{children}</div>,
+    PopoverTrigger: ({ children }: any) => <div>{children}</div>,
+}));
+vi.mock('@/components/ui/button', () => ({
+    Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+}));
+vi.mock('@/components/ui/input', () => ({
+    Input: ({ ...props }: any) => <input {...props} />,
+}));
+vi.mock('@/components/ui/scroll-area', () => ({
+    ScrollArea: ({ children }: any) => <div>{children}</div>,
+}));
 
 const mockOnSelectIcon = vi.fn();
 

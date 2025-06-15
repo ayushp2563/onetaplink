@@ -1,4 +1,3 @@
-
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ProfileEditor from '../pages/ProfileEditor';
@@ -23,6 +22,20 @@ vi.mock('../components/ProfileForm', () => ({
   default: ({ username }: { username: string }) => (
     <div data-testid="profile-form">Profile Form for {username}</div>
   ),
+}));
+vi.mock('@/components/ui/button', () => ({
+  Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+}));
+vi.mock('@/components/ui/card', () => ({
+  Card: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  CardHeader: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  CardTitle: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  CardDescription: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+}));
+vi.mock('@/components/ui/avatar', () => ({
+  Avatar: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  AvatarImage: ({ ...props }: any) => <img {...props} />,
+  AvatarFallback: ({ children, ...props }: any) => <span {...props}>{children}</span>,
 }));
 
 const mockNavigate = vi.fn();
