@@ -49,7 +49,7 @@ describe('FaviconUploader', () => {
   it('handles file input change', () => {
     render(<FaviconUploader {...mockProps} />);
     
-    const fileInput = screen.getByDisplayValue('');
+    const fileInput = screen.getByLabelText('Upload Favicon').querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['test'], 'favicon.ico', { type: 'image/x-icon' });
     
     fireEvent.change(fileInput, { target: { files: [file] } });
@@ -61,7 +61,7 @@ describe('FaviconUploader', () => {
   it('shows uploading state', async () => {
     render(<FaviconUploader {...mockProps} />);
     
-    const fileInput = screen.getByDisplayValue('');
+    const fileInput = screen.getByLabelText('Upload Favicon').querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['test'], 'favicon.ico', { type: 'image/x-icon' });
     
     fireEvent.change(fileInput, { target: { files: [file] } });

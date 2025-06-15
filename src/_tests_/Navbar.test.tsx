@@ -1,7 +1,7 @@
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { Navbar } from '../components/Navbar';
+import Navbar from '../components/Navbar';
 import { BrowserRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 

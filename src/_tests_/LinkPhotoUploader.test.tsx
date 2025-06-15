@@ -1,7 +1,6 @@
-
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import LinkPhotoUploader from '../components/LinkPhotoUploader';
+import { LinkPhotoUploader } from '../components/LinkPhotoUploader';
 import { vi } from 'vitest';
 
 // Mock Supabase
@@ -48,7 +47,7 @@ describe('LinkPhotoUploader', () => {
   it('handles file selection', () => {
     render(<LinkPhotoUploader {...mockProps} />);
     
-    const fileInput = screen.getByDisplayValue('');
+    const fileInput = screen.getByLabelText(/click to upload/i).previousSibling as HTMLInputElement;
     const file = new File(['test'], 'photo.jpg', { type: 'image/jpeg' });
     
     fireEvent.change(fileInput, { target: { files: [file] } });
@@ -60,13 +59,13 @@ describe('LinkPhotoUploader', () => {
   it('shows uploading state', async () => {
     render(<LinkPhotoUploader {...mockProps} />);
     
-    const fileInput = screen.getByDisplayValue('');
+    const fileInput = screen.getByLabelText(/click to upload/i).previousSibling as HTMLInputElement;
     const file = new File(['test'], 'photo.jpg', { type: 'image/jpeg' });
     
     fireEvent.change(fileInput, { target: { files: [file] } });
     
     await waitFor(() => {
-      expect(screen.getByText('Uploading...')).toBeInTheDocument();
+      expect(screen.getByText(/uploading/i)).toBeInTheDocument();
     });
   });
 
@@ -74,13 +73,14 @@ describe('LinkPhotoUploader', () => {
     const propsWithPhoto = {
       ...mockProps,
       currentPhotoUrl: 'https://example.com/photo.jpg',
+      onPhotoRemoved: vi.fn(),
     };
     
     render(<LinkPhotoUploader {...propsWithPhoto} />);
     
-    const removeButton = screen.getByText('Remove Photo');
+    const removeButton = screen.getByRole('button', { name: /remove/i });
     fireEvent.click(removeButton);
     
-    expect(mockProps.onPhotoUploaded).toHaveBeenCalledWith('');
+    expect(propsWithPhoto.onPhotoRemoved).toHaveBeenCalled();
   });
 });

@@ -1,19 +1,10 @@
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import IconSelector from '../components/IconSelector';
+import { IconSelector } from '../components/IconSelector';
 import { vi } from 'vitest';
 
-// Mock DynamicIcon component
-vi.mock('@/components/DynamicIcon', () => ({
-  default: ({ name, className }: { name: string; className?: string }) => (
-    <div className={className} data-testid={`icon-${name.toLowerCase()}`}>
-      {name} Icon
-    </div>
-  ),
-}));
-
-const mockOnIconSelect = vi.fn();
+const mockOnSelectIcon = vi.fn();
 
 describe('IconSelector', () => {
   beforeEach(() => {
@@ -21,37 +12,37 @@ describe('IconSelector', () => {
   });
 
   it('renders icon grid', () => {
-    render(<IconSelector onIconSelect={mockOnIconSelect} />);
+    render(<IconSelector onSelectIcon={mockOnSelectIcon} selectedIcon="" />);
     
     expect(screen.getByText('Select an Icon')).toBeInTheDocument();
-    expect(screen.getByTestId('icon-link')).toBeInTheDocument();
-    expect(screen.getByTestId('icon-home')).toBeInTheDocument();
+    expect(screen.getByTitle('link')).toBeInTheDocument();
+    expect(screen.getByTitle('home')).toBeInTheDocument();
   });
 
-  it('calls onIconSelect when icon is clicked', () => {
-    render(<IconSelector onIconSelect={mockOnIconSelect} />);
+  it('calls onSelectIcon when icon is clicked', () => {
+    render(<IconSelector onSelectIcon={mockOnSelectIcon} selectedIcon="" />);
     
-    const linkIcon = screen.getByTestId('icon-link').closest('button');
+    const linkIcon = screen.getByTitle('link');
     if (linkIcon) {
       fireEvent.click(linkIcon);
-      expect(mockOnIconSelect).toHaveBeenCalledWith('Link');
+      expect(mockOnSelectIcon).toHaveBeenCalledWith('link');
     }
   });
 
   it('highlights selected icon', () => {
-    render(<IconSelector onIconSelect={mockOnIconSelect} selectedIcon="Home" />);
+    render(<IconSelector onSelectIcon={mockOnSelectIcon} selectedIcon="home" />);
     
-    const homeIconButton = screen.getByTestId('icon-home').closest('button');
+    const homeIconButton = screen.getByTitle('home');
     expect(homeIconButton).toHaveClass('bg-primary');
   });
 
   it('shows search functionality', () => {
-    render(<IconSelector onIconSelect={mockOnIconSelect} />);
+    render(<IconSelector onSelectIcon={mockOnSelectIcon} selectedIcon="" />);
     
     const searchInput = screen.getByPlaceholderText('Search icons...');
     expect(searchInput).toBeInTheDocument();
     
     fireEvent.change(searchInput, { target: { value: 'home' } });
-    expect(screen.getByTestId('icon-home')).toBeInTheDocument();
+    expect(screen.getByTitle('home')).toBeInTheDocument();
   });
 });

@@ -1,7 +1,7 @@
 
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import DynamicIcon from '../components/DynamicIcon';
+import { DynamicIcon } from '../components/DynamicIcon';
 import { vi } from 'vitest';
 
 // Mock lucide-react icons

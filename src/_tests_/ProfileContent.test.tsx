@@ -1,7 +1,6 @@
-
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { ProfileContent } from '../components/layouts/ProfileContent';
+import { ProfileContent, Link } from '../components/layouts/ProfileContent';
 import { LAYOUT_TYPES } from '../constants/layouts';
 import { vi } from 'vitest';
 
@@ -22,7 +21,7 @@ vi.mock('@/components/layouts/MixedLayout', () => ({
   ),
 }));
 
-const mockLinks = [
+const mockLinks: Link[] = [
   { id: '1', title: 'Test Link', url: 'https://test.com', icon: 'link', display: 'both' },
   { id: '2', title: 'Another Link', url: 'https://example.com', icon: 'external-link', display: 'title' },
 ];
