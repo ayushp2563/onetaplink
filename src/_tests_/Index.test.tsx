@@ -1,4 +1,3 @@
-
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Index from '../pages/Index';
@@ -96,4 +95,3 @@ describe('Index (Dashboard)', () => {
     });
   });
 });
-
