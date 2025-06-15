@@ -1,3 +1,4 @@
+
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Index from '../pages/Index';
@@ -40,6 +41,7 @@ vi.mock('@/components/ui/card', () => ({
   CardHeader: ({ children, ...props }: any) => <div {...props}>{children}</div>,
   CardTitle: ({ children, ...props }: any) => <div {...props}>{children}</div>,
   CardDescription: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  CardContent: ({ children, ...props }: any) => <div {...props}>{children}</div>,
 }));
 vi.mock('@/components/ui/avatar', () => ({
   Avatar: ({ children, ...props }: any) => <div {...props}>{children}</div>,
@@ -94,3 +96,4 @@ describe('Index (Dashboard)', () => {
     });
   });
 });
+
