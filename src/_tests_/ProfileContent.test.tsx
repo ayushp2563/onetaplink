@@ -1,4 +1,3 @@
-
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ProfileContent, Link } from '../components/layouts/ProfileContent';
@@ -23,6 +22,22 @@ vi.mock('@/components/layouts/MixedLayout', () => ({
   MixedLayout: ({ links }: { links: any[] }) => (
     <div data-testid="mixed-layout">Mixed Layout - {links.length} links</div>
   ),
+}));
+
+// Add mock for card if used in layouts (to avoid errors in all layouts)
+vi.mock('@/components/ui/card', () => ({
+  Card: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  CardHeader: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  CardTitle: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  CardDescription: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+}));
+vi.mock('@/components/ui/button', () => ({
+  Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+}));
+vi.mock('@/components/ui/avatar', () => ({
+  Avatar: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  AvatarImage: ({ ...props }: any) => <img {...props} />,
+  AvatarFallback: ({ children, ...props }: any) => <span {...props}>{children}</span>,
 }));
 
 const mockLinks: Link[] = [

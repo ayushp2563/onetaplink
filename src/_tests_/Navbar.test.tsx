@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -38,6 +37,15 @@ vi.mock('@/components/theme-provider', () => ({
   }),
 }));
 
+vi.mock('@/components/ui/button', () => ({
+  Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+}));
+vi.mock('@/components/ui/avatar', () => ({
+  Avatar: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  AvatarImage: ({ ...props }: any) => <img {...props} />,
+  AvatarFallback: ({ children, ...props }: any) => <span {...props}>{children}</span>,
+}));
+
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
@@ -69,4 +77,3 @@ describe('Navbar', () => {
     expect(mockSignOut).toHaveBeenCalled();
   });
 });
-

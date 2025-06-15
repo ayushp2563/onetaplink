@@ -13,6 +13,10 @@ vi.mock('sonner', () => ({
     error: vi.fn(),
   },
 }));
+// Mock UI button
+vi.mock('@/components/ui/button', () => ({
+  Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+}));
 
 const mockProps = {
   userId: 'test-user-id',
@@ -42,10 +46,7 @@ describe('FaviconUploader', () => {
 
   it('handles file input change', () => {
     render(<FaviconUploader {...mockProps} />);
-    // The file input is hidden but is a child of the button, find it by label text
-    // Instead, since it's not a real label, find the input in the DOM via querySelector
     const uploadBtn = screen.getByText('Upload Favicon').closest('button');
-    // the file input should be inside the button, find input element
     const fileInput = uploadBtn?.querySelector('input[type="file"]') as HTMLInputElement;
     expect(fileInput).toBeInTheDocument();
     const file = new File(['test'], 'favicon.ico', { type: 'image/x-icon' });
