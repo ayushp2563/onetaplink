@@ -1,4 +1,3 @@
-
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { LinkPhotoUploader } from '../components/LinkPhotoUploader';
@@ -44,8 +43,11 @@ describe('LinkPhotoUploader', () => {
     const fileInput = screen.getByLabelText(/link photo/i);
     const file = new File(['test'], 'photo.jpg', { type: 'image/jpeg' });
     fireEvent.change(fileInput, { target: { files: [file] } });
-    expect(fileInput.files).toHaveLength(1);
-    expect(fileInput.files?.[0]).toBe(file);
+
+    // Cast fileInput as HTMLInputElement for TypeScript
+    const input = fileInput as HTMLInputElement;
+    expect(input.files).toHaveLength(1);
+    expect(input.files?.[0]).toBe(file);
   });
 
   it('shows uploading state', async () => {
