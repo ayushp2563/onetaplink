@@ -14,7 +14,10 @@ export default defineConfig(({ mode }) => ({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/_tests_/Auth.test.tsx', // if you use one
-    css: true, // optional if testing styles
+    css: true, // optional if testing styles,
+    coverage: {
+      reporter: ['text', 'html'],
+    },
   },
   plugins: [
     react(),

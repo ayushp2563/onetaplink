@@ -4,18 +4,18 @@ import { IconSelector } from '../components/IconSelector';
 import { vi } from 'vitest';
 
 vi.mock('@/components/ui/popover', () => ({
-    Popover: ({ children }: any) => <div>{children}</div>,
-    PopoverContent: ({ children }: any) => <div>{children}</div>,
-    PopoverTrigger: ({ children }: any) => <div>{children}</div>,
+    Popover: ({ children }: React.PropsWithChildren<unknown>) => <div>{children}</div>,
+    PopoverContent: ({ children }: React.PropsWithChildren<unknown>) => <div>{children}</div>,
+    PopoverTrigger: ({ children }: React.PropsWithChildren<object>) => <div>{children}</div>,
 }));
 vi.mock('@/components/ui/button', () => ({
-    Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+    Button: ({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => <button {...props}>{children}</button>,
 }));
 vi.mock('@/components/ui/input', () => ({
-    Input: ({ ...props }: any) => <input {...props} />,
+    Input: ({ ...props }: React.InputHTMLAttributes<HTMLInputElement>) => <input {...props} />,
 }));
 vi.mock('@/components/ui/scroll-area', () => ({
-    ScrollArea: ({ children }: any) => <div>{children}</div>,
+    ScrollArea: ({ children }: React.PropsWithChildren<unknown>) => <div>{children}</div>,
 }));
 
 const mockOnSelectIcon = vi.fn();

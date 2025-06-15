@@ -15,7 +15,7 @@ vi.mock('sonner', () => ({
 }));
 // Mock UI button
 vi.mock('@/components/ui/button', () => ({
-  Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+  Button: ({ children, ...props }: React.PropsWithChildren<React.ButtonHTMLAttributes<HTMLButtonElement>>) => <button {...props}>{children}</button>,
 }));
 
 const mockProps = {

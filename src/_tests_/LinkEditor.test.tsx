@@ -24,10 +24,10 @@ vi.mock('sonner', () => ({
   },
 }));
 vi.mock('@/components/ui/button', () => ({
-  Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+  Button: ({ children, ...props }: React.PropsWithChildren<React.ButtonHTMLAttributes<HTMLButtonElement>>) => <button {...props}>{children}</button>,
 }));
 vi.mock('@/components/ui/input', () => ({
-  Input: ({ ...props }: any) => <input {...props} />,
+  Input: ({ ...props }: React.InputHTMLAttributes<HTMLInputElement>) => <input {...props} />,
 }));
 
 describe('LinkEditor', () => {
