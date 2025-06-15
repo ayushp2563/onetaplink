@@ -4,6 +4,7 @@ import '@testing-library/jest-dom';
 import ProfileEditor from '../pages/ProfileEditor';
 import { BrowserRouter } from 'react-router-dom';
 import { vi } from 'vitest';
+import * as reactRouterDom from 'react-router-dom';
 
 // Mock dependencies
 vi.mock('@/integrations/supabase/client', () => import('../../__mocks__/supabase'));
@@ -61,11 +62,9 @@ describe('ProfileEditor', () => {
       expect(screen.getByTestId('profile-form')).toBeInTheDocument();
     });
   });
-
   it('handles missing username', async () => {
     // Patch global useParams to return {}
-    const reactRouterDom = require('react-router-dom');
-    reactRouterDom.useParams.mockReturnValue({});
+    (reactRouterDom.useParams as jest.Mock).mockReturnValue({});
     render(
       <BrowserRouter>
         <ProfileEditor />
@@ -75,4 +74,5 @@ describe('ProfileEditor', () => {
       expect(screen.getByText('No username provided.')).toBeInTheDocument();
     });
   });
-});
+  });
+
