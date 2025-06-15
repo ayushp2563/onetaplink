@@ -1,9 +1,20 @@
+
 // src/_tests_/Auth.test.tsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Auth from '../pages/Auth';
 import { BrowserRouter } from 'react-router-dom';
 import { vi } from 'vitest';
+
+// Mock the useAuth hook
+vi.mock('@/components/AuthProvider', () => ({
+  useAuth: vi.fn(() => ({
+    session: null,
+    user: null,
+    loading: false,
+    signOut: vi.fn(),
+  })),
+}));
 
 vi.mock('@/integrations/supabase/client', () => import('../../__mocks__/supabase'));
 vi.mock('sonner', () => ({
@@ -21,10 +32,6 @@ vi.mock('react-router-dom', async () => {
 });
 
 describe('Auth', () => {
-//   it('renders sign in form', () => {
-//     render(<BrowserRouter><Auth /></BrowserRouter>);
-//     expect(screen.getByText(/sign in/i)).toBeInTheDocument();
-    //   });
     it('renders sign in tab by default', () => {
         render(
           <BrowserRouter>
