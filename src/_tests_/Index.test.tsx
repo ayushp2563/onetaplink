@@ -26,7 +26,7 @@ vi.mock('sonner', () => ({
 }));
 vi.mock('framer-motion', () => ({
   motion: {
-    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+    div: ({ children, ...props }: React.PropsWithChildren<React.HTMLAttributes<HTMLDivElement>>) => <div {...props}>{children}</div>,
   },
 }));
 vi.mock('@/hooks/usePageMetadata', () => ({

@@ -6,10 +6,10 @@ import { vi } from 'vitest';
 
 // Mock lucide-react icons
 vi.mock('lucide-react', () => ({
-  Link: ({ className }: any) => <div className={className} data-testid="link-icon">Link Icon</div>,
-  Home: ({ className }: any) => <div className={className} data-testid="home-icon">Home Icon</div>,
-  User: ({ className }: any) => <div className={className} data-testid="user-icon">User Icon</div>,
-  Mail: ({ className }: any) => <div className={className} data-testid="mail-icon">Mail Icon</div>,
+  Link: ({ className }: React.ComponentProps<'div'>) => <div className={className} data-testid="link-icon">Link Icon</div>,
+  Home: ({ className }: React.ComponentProps<'div'>) => <div className={className} data-testid="home-icon">Home Icon</div>,
+  User: ({ className }: React.ComponentProps<'div'>) => <div className={className} data-testid="user-icon">User Icon</div>,
+  Mail: ({ className }: React.ComponentProps<'div'>) => <div className={className} data-testid="mail-icon">Mail Icon</div>,
 }));
 
 describe('DynamicIcon', () => {
