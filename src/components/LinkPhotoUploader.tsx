@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -109,7 +110,7 @@ export const LinkPhotoUploader = ({
 
   return (
     <div className="space-y-2">
-      <Label>Link Photo (Optional)</Label>
+      <Label htmlFor="photo-upload-input">Link Photo (Optional)</Label>
       
       {currentPhotoUrl ? (
         <div className="space-y-2">
