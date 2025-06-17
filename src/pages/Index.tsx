@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Share2, Copy, Link2, PenSquare, LayoutPanelTop, ExternalLink, ArrowUpRight, Palette } from "lucide-react";
+import { Share2, Copy, Link2, PenSquare, LayoutPanelTop, ExternalLink, ArrowUpRight, Palette, User } from "lucide-react";
 import { usePageMetadata } from "@/hooks/usePageMetadata";
 import { useAuth } from "@/components/AuthProvider";
 import { DashboardHeader } from "@/components/DashboardHeader";
@@ -53,6 +53,7 @@ const DashboardPage = () => {
   const [hasProfile, setHasProfile] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState("");
   const [linkCount, setLinkCount] = useState(0);
+  const [bio, setBio] = useState("");
   const navigate = useNavigate();
   const { session, user } = useAuth();
   
@@ -71,7 +72,7 @@ const DashboardPage = () => {
         // Fetch profile data
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('username, full_name, avatar_url')
+          .select('username, full_name, avatar_url, bio')
           .eq('id', user.id)
           .single();
 
@@ -87,6 +88,7 @@ const DashboardPage = () => {
           setUsername(profile.username);
           setFullName(profile.full_name || '');
           setAvatarUrl(profile.avatar_url || '');
+          setBio(profile.bio || '');
           setHasProfile(true);
         } else {
           setHasProfile(false);
@@ -164,11 +166,61 @@ const DashboardPage = () => {
         </motion.div>
 
         {hasProfile ? (
-          <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
+              className="col-span-1"
+            >
+              <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="flex items-center text-primary mb-1">
+                    <User className="w-5 h-5 mr-2" />
+                    <CardTitle className="text-lg">Edit Profile</CardTitle>
+                  </div>
+                  <CardDescription>
+                    Update your name, bio, and profile picture
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 text-sm">
+                    <div>
+                      <span className="font-medium">Name:</span>
+                      <span className="ml-2 text-muted-foreground">
+                        {fullName || "Not set"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-medium">Bio:</span>
+                      <span className="ml-2 text-muted-foreground">
+                        {bio ? (bio.length > 30 ? `${bio.substring(0, 30)}...` : bio) : "Not set"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-medium">Avatar:</span>
+                      <span className="ml-2 text-muted-foreground">
+                        {avatarUrl ? "Uploaded" : "Not set"}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="pt-0">
+                  <Button 
+                    onClick={handleEditProfile}
+                    className="w-full gap-2"
+                  >
+                    <PenSquare className="w-4 h-4" />
+                    Edit Profile
+                  </Button>
+                </CardFooter>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
               className="col-span-1"
             >
               <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
@@ -207,7 +259,7 @@ const DashboardPage = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.3 }}
               className="col-span-1"
             >
               <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
@@ -250,7 +302,7 @@ const DashboardPage = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
+              transition={{ delay: 0.4 }}
               className="col-span-1"
             >
               <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
