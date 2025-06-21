@@ -16,6 +16,7 @@ export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -39,6 +40,17 @@ export default function SettingsPage() {
         
         setUser(session.user);
         setEmail(session.user.email || "");
+
+        // Fetch username from profiles table
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', session.user.id)
+          .single();
+        
+        if (profile) {
+          setUsername(profile.username || "");
+        }
       } catch (error) {
         console.error("Error fetching user data:", error);
         toast.error("Failed to load account information");
@@ -49,6 +61,56 @@ export default function SettingsPage() {
     
     getUserData();
   }, [navigate]);
+
+  const handleUsernameUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage("");
+    
+    if (!username || username.trim().length < 3) {
+      setErrorMessage("Username must be at least 3 characters long");
+      return;
+    }
+
+    // Basic username validation
+    if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+      setErrorMessage("Username can only contain letters, numbers, underscores, and hyphens");
+      return;
+    }
+    
+    try {
+      setIsUpdating(true);
+      
+      // Check if username is already taken
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('username', username.trim())
+        .neq('id', user.id)
+        .single();
+      
+      if (existingProfile) {
+        setErrorMessage("Username is already taken");
+        return;
+      }
+
+      // Update username in profiles table
+      const { error } = await supabase
+        .from('profiles')
+        .update({ username: username.trim() })
+        .eq('id', user.id);
+      
+      if (error) throw error;
+      
+      toast.success("Username updated successfully");
+      
+    } catch (error: any) {
+      console.error("Error updating username:", error);
+      setErrorMessage(error.message || "Failed to update username");
+      toast.error("Failed to update username");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
   
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,6 +217,52 @@ export default function SettingsPage() {
         <TabsContent value="account" className="space-y-6">
           <Card>
             <CardHeader>
+              <CardTitle>Username</CardTitle>
+              <CardDescription>
+                Update your username. This will change your profile URL.
+              </CardDescription>
+            </CardHeader>
+            
+            {errorMessage && (
+              <div className="px-6 -mt-2">
+                <Alert variant="destructive" className="mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{errorMessage}</AlertDescription>
+                </Alert>
+              </div>
+            )}
+            
+            <CardContent>
+              <form id="username-form" onSubmit={handleUsernameUpdate} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="username">Username</Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="your-username"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Your profile will be available at: /{username || 'your-username'}
+                  </p>
+                </div>
+              </form>
+            </CardContent>
+            <CardFooter>
+              <Button 
+                type="submit" 
+                form="username-form" 
+                disabled={isUpdating || !username}
+              >
+                {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Update Username
+              </Button>
+            </CardFooter>
+          </Card>
+
+          <Card>
+            <CardHeader>
               <CardTitle>Email Address</CardTitle>
               <CardDescription>
                 Update your email address. A verification email will be sent.
@@ -195,8 +303,9 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent>
               <Button 
-                onClick={() => navigate(`/edit-profile/${user?.user_metadata?.username}`)} 
+                onClick={() => navigate(`/edit-profile/${username}`)} 
                 className="flex items-center gap-2"
+                disabled={!username}
               >
                 <User className="h-4 w-4" />
                 Edit Profile
