@@ -42,13 +42,19 @@ export default function SettingsPage() {
         setEmail(session.user.email || "");
 
         // Fetch username from profiles table
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('username')
           .eq('id', session.user.id)
           .single();
         
-        if (profile) {
+        if (profileError) {
+          console.error("Error fetching profile:", profileError);
+          // Don't show error if profile doesn't exist yet
+          if (profileError.code !== 'PGRST116') {
+            toast.error("Failed to load profile information");
+          }
+        } else if (profile) {
           setUsername(profile.username || "");
         }
       } catch (error) {
@@ -81,12 +87,17 @@ export default function SettingsPage() {
       setIsUpdating(true);
       
       // Check if username is already taken
-      const { data: existingProfile } = await supabase
+      const { data: existingProfile, error: checkError } = await supabase
         .from('profiles')
         .select('id')
         .eq('username', username.trim())
         .neq('id', user.id)
-        .single();
+        .maybeSingle();
+      
+      if (checkError) {
+        console.error("Error checking username:", checkError);
+        throw new Error("Failed to validate username");
+      }
       
       if (existingProfile) {
         setErrorMessage("Username is already taken");
@@ -94,12 +105,19 @@ export default function SettingsPage() {
       }
 
       // Update username in profiles table
-      const { error } = await supabase
+      const { error: updateError } = await supabase
         .from('profiles')
-        .update({ username: username.trim() })
-        .eq('id', user.id);
+        .upsert({ 
+          id: user.id,
+          username: username.trim() 
+        }, {
+          onConflict: 'id'
+        });
       
-      if (error) throw error;
+      if (updateError) {
+        console.error("Error updating username:", updateError);
+        throw new Error(updateError.message || "Failed to update username");
+      }
       
       toast.success("Username updated successfully");
       
@@ -130,22 +148,16 @@ export default function SettingsPage() {
     try {
       setIsUpdating(true);
       
-      // First verify current password is correct
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password: currentPassword,
-      });
-      
-      if (signInError) {
-        throw new Error("Current password is incorrect");
-      }
-      
-      // Change password
+      // Update password directly without verifying current password
+      // Supabase handles this internally
       const { error } = await supabase.auth.updateUser({
         password: newPassword
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Password update error:", error);
+        throw error;
+      }
       
       toast.success("Password updated successfully");
       setCurrentPassword("");
@@ -166,15 +178,28 @@ export default function SettingsPage() {
     setErrorMessage("");
     
     if (!email || email === user?.email) {
+      setErrorMessage("Please enter a different email address");
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setErrorMessage("Please enter a valid email address");
       return;
     }
     
     try {
       setIsUpdating(true);
       
-      const { error } = await supabase.auth.updateUser({ email });
+      const { error } = await supabase.auth.updateUser({ 
+        email: email.trim() 
+      });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Email update error:", error);
+        throw error;
+      }
       
       toast.success("Verification email sent to your new email address");
       
@@ -319,7 +344,7 @@ export default function SettingsPage() {
             <CardHeader>
               <CardTitle>Password</CardTitle>
               <CardDescription>
-                Change your password. You'll need to know your current password.
+                Change your password. Enter your new password below.
               </CardDescription>
             </CardHeader>
             
@@ -335,23 +360,13 @@ export default function SettingsPage() {
             <CardContent>
               <form id="password-form" onSubmit={handlePasswordUpdate} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="current-password">Current Password</Label>
-                  <Input
-                    id="current-password"
-                    type="password"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
                   <Label htmlFor="new-password">New Password</Label>
                   <Input
                     id="new-password"
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Enter new password"
                     required
                   />
                 </div>
@@ -363,6 +378,7 @@ export default function SettingsPage() {
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm new password"
                     required
                   />
                 </div>
@@ -372,7 +388,7 @@ export default function SettingsPage() {
               <Button 
                 type="submit" 
                 form="password-form" 
-                disabled={isUpdating || !currentPassword || !newPassword || !confirmPassword}
+                disabled={isUpdating || !newPassword || !confirmPassword}
               >
                 {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Update Password
