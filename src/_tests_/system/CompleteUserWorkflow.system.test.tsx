@@ -1,3 +1,4 @@
+
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -15,21 +16,7 @@ const mockSupabase = {
     onAuthStateChange: vi.fn(),
     updateUser: vi.fn(),
   },
-  from: vi.fn(() => ({
-    select: vi.fn(() => ({
-      eq: vi.fn(() => ({
-        single: vi.fn(),
-        maybeSingle: vi.fn(),
-        neq: vi.fn(() => ({
-          single: vi.fn(),
-        })),
-      })),
-    })),
-    update: vi.fn(() => ({
-      eq: vi.fn(),
-    })),
-    insert: vi.fn(),
-  })),
+  from: vi.fn(),
   storage: {
     from: vi.fn(() => ({
       upload: vi.fn(),
@@ -85,6 +72,23 @@ describe('Complete User Workflow System Tests', () => {
 
     mockSupabase.auth.onAuthStateChange.mockReturnValue({
       data: { subscription: { unsubscribe: vi.fn() } },
+    });
+
+    // Reset the from mock for each test
+    mockSupabase.from.mockReturnValue({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          single: vi.fn(),
+          maybeSingle: vi.fn(),
+          neq: vi.fn(() => ({
+            single: vi.fn(),
+          })),
+        })),
+      })),
+      update: vi.fn(() => ({
+        eq: vi.fn(),
+      })),
+      insert: vi.fn(),
     });
 
     // Mock window.location for navigation tests
@@ -229,8 +233,7 @@ describe('Complete User Workflow System Tests', () => {
       error: null,
     });
 
-    // Mock database queries
-    let queryCount = 0;
+    // Mock database queries with proper implementation
     mockSupabase.from.mockImplementation((table) => {
       if (table === 'profiles') {
         return {

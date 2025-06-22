@@ -1,3 +1,4 @@
+
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
@@ -39,8 +40,10 @@ const localStorageMock = {
     setItem: vi.fn(),
     removeItem: vi.fn(),
     clear: vi.fn(),
+    length: 0,
+    key: vi.fn().mockReturnValue(null),
 };
-global.localStorage = localStorageMock;
+global.localStorage = localStorageMock as Storage;
 
 // Mock sessionStorage
 const sessionStorageMock = {
@@ -48,8 +51,10 @@ const sessionStorageMock = {
     setItem: vi.fn(),
     removeItem: vi.fn(),
     clear: vi.fn(),
+    length: 0,
+    key: vi.fn().mockReturnValue(null),
 };
-global.sessionStorage = sessionStorageMock;
+global.sessionStorage = sessionStorageMock as Storage;
 
 // Mock URL.createObjectURL
 global.URL.createObjectURL = vi.fn(() => 'mocked-url');
