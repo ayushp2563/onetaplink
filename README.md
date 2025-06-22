@@ -143,29 +143,6 @@ src/_tests_/
 └── setup.ts        # Test configuration and mocks
 ```
 
-## 🚀 Deployment
-
-### Lovable Platform (Recommended)
-1. Click the "Publish" button in the Lovable editor
-2. Your app will be deployed automatically
-3. Get your custom URL and start sharing
-
-### Manual Deployment
-The application can be deployed to any static hosting service:
-
-```bash
-# Build for production
-npm run build
-
-# Deploy the dist/ folder to your hosting service
-```
-
-Popular deployment options:
-- Vercel
-- Netlify
-- GitHub Pages
-- AWS S3 + CloudFront
-
 ## 🔧 Development
 
 ### Project Structure
@@ -227,10 +204,6 @@ The application uses Supabase for:
 - Custom themes not applying: Verify theme configuration
 - Responsive design issues: Test on different screen sizes
 
-### Getting Help
-- Check the [Issues](https://github.com/your-username/your-repo/issues) page
-- Join our [Discord community](https://discord.com/channels/1119885301872070706/1280461670979993613)
-- Review the [Lovable documentation](https://docs.lovable.dev/)
 
 ## 📄 License
 
@@ -238,18 +211,14 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🙏 Acknowledgments
 
-- [Lovable](https://lovable.dev) - AI-powered development platform
 - [Supabase](https://supabase.com) - Backend infrastructure
 - [Shadcn/ui](https://ui.shadcn.com/) - Beautiful UI components
 - [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
 
 ## 🔗 Links
 
-- **Live Demo**: [View Demo Profile](https://onetaplink.vercel.app/ap25)
-- **Project URL**: https://lovable.dev/projects/197d65b6-a155-4425-adcc-2b1cee8248b5
-- **Documentation**: [Lovable Docs](https://docs.lovable.dev/)
-- **Support**: [Discord Community](https://discord.com/channels/1119885301872070706/1280461670979993613)
+- **Live Demo**: [View Demo Profile](https://pdims.vercel.app/)
+
 
 ---
 
-**Built with ❤️ using [Lovable](https://lovable.dev)**
