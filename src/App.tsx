@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,6 +5,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
+import { Analytics } from "@vercel/analytics/react";
+
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -66,7 +67,7 @@ const App = () => (
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/how-to-use" element={<HowToUse />} />
                     <Route path="/:username" element={<UserProfile />} />
-                    
+
                     {/* Protected Routes */}
                     <Route element={<ProtectedRoute />}>
                       <Route path="/dashboard" element={<Index />} />
@@ -75,7 +76,7 @@ const App = () => (
                       <Route path="/edit-links" element={<LinkEditorPage />} />
                       <Route path="/settings" element={<SettingsPage />} />
                     </Route>
-                    
+
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </PageTransition>
@@ -85,6 +86,7 @@ const App = () => (
         </TooltipProvider>
       </AuthProvider>
     </ThemeProvider>
+    <Analytics />
   </QueryClientProvider>
 );
 
