@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +15,24 @@ import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Link } from "@/components/layouts/ProfileContent";
 import { Json } from "@/integrations/supabase/types";
+
+// Helper function to ensure URL has proper protocol
+const formatUrl = (url: string): string => {
+  if (!url) return "";
+  
+  // If URL already has a protocol, return as is
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  
+  // If URL starts with //, add https:
+  if (url.startsWith('//')) {
+    return 'https:' + url;
+  }
+  
+  // Otherwise, add https://
+  return 'https://' + url;
+};
 
 const LinkEditor = () => {
   const [links, setLinks] = useState<Link[]>([]);
@@ -59,7 +76,12 @@ const LinkEditor = () => {
 
         if (settings?.links) {
           const linksData = settings.links as unknown as Link[];
-          setLinks(Array.isArray(linksData) ? linksData : []);
+          // Format URLs when loading links
+          const formattedLinks = Array.isArray(linksData) ? linksData.map(link => ({
+            ...link,
+            url: formatUrl(link.url)
+          })) : [];
+          setLinks(formattedLinks);
         }
       } catch (error) {
         console.error("Error in links fetch:", error);
@@ -113,10 +135,13 @@ const LinkEditor = () => {
       return;
     }
 
+    // Format the URL before saving
+    const formattedUrl = formatUrl(formData.url);
+
     if (editingLink) {
       // Update existing link
       const updatedLinks = links.map(link => 
-        link.id === editingLink.id ? { ...formData, id: link.id } : link
+        link.id === editingLink.id ? { ...formData, id: link.id, url: formattedUrl } : link
       );
       setLinks(updatedLinks);
       toast.success("Link updated successfully");
@@ -125,7 +150,8 @@ const LinkEditor = () => {
       // Add new link
       const newLink: Link = {
         ...formData,
-        id: crypto.randomUUID()
+        id: crypto.randomUUID(),
+        url: formattedUrl
       };
       setLinks(prev => [...prev, newLink]);
       toast.success("Link added successfully");
@@ -181,8 +207,14 @@ const LinkEditor = () => {
         return;
       }
 
+      // Ensure all URLs are properly formatted before saving
+      const formattedLinks = links.map(link => ({
+        ...link,
+        url: formatUrl(link.url)
+      }));
+
       // Cast links array to Json type for Supabase
-      const linksJson = links as unknown as Json;
+      const linksJson = formattedLinks as unknown as Json;
 
       const { error } = await supabase
         .from('profile_settings')
@@ -245,10 +277,13 @@ const LinkEditor = () => {
                 <Input
                   id="url"
                   name="url"
-                  placeholder="https://..."
+                  placeholder="https://example.com or example.com"
                   value={formData.url}
                   onChange={handleInputChange}
                 />
+                <p className="text-xs text-muted-foreground">
+                  You can enter with or without https:// - we'll add it automatically
+                </p>
               </div>
             </div>
 

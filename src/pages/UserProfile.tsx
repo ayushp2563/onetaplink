@@ -75,6 +75,24 @@ const THEMES: { [key: string]: Theme } = {
   },
 };
 
+// Helper function to ensure URL has proper protocol
+const formatUrl = (url: string): string => {
+  if (!url) return "";
+  
+  // If URL already has a protocol, return as is
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  
+  // If URL starts with //, add https:
+  if (url.startsWith('//')) {
+    return 'https:' + url;
+  }
+  
+  // Otherwise, add https://
+  return 'https://' + url;
+};
+
 export default function UserProfile() {
   const { username } = useParams<{ username: string }>();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -180,7 +198,7 @@ export default function UserProfile() {
             return {
               id: l?.id || crypto.randomUUID(),
               title: l?.title || "",
-              url: l?.url || "",
+              url: formatUrl(l?.url || ""), // Format URL here
               icon: l?.icon || "link",
               display: l?.display || "both",
               photo_url: l?.photo_url || ""
