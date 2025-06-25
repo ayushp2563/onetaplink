@@ -1,9 +1,24 @@
+
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react-swc';
 import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
+  server: {
+    port: 8080,
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-button'],
+        },
+      },
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',

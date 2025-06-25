@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -20,6 +21,7 @@ import Navbar from "./components/Navbar";
 import SettingsPage from "./pages/SettingsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./components/AuthProvider";
+import PWAInstallPrompt from "./components/PWAInstallPrompt";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -81,6 +83,7 @@ const App = () => (
                   </Routes>
                 </PageTransition>
               </main>
+              <PWAInstallPrompt />
             </div>
           </BrowserRouter>
         </TooltipProvider>

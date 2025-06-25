@@ -5,12 +5,38 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PDIMS</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Personal Digital Identity Management System - Manage and showcase your digital identity with customizable profiles and links" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="PDIMS" />
+    <meta name="msapplication-TileColor" content="#000000" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="PDIMS - Personal Digital Identity Management System" />
+    <meta property="og:description" content="Manage and showcase your digital identity with customizable profiles and links" />
     <meta property="og:image" content="/og-image.png" />
+    <meta property="og:url" content="https://pdims.vercel.app/" />
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="PDIMS - Personal Digital Identity Management System" />
+    <meta name="twitter:description" content="Manage and showcase your digital identity with customizable profiles and links" />
+    <meta name="twitter:image" content="/og-image.png" />
+    
+    <!-- Favicon and Icons -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
-    <!-- Default favicon - will be dynamically replaced when viewing a profile -->
+    
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   </head>
 
   <body>
@@ -18,5 +44,20 @@
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
   </body>
 </html>
