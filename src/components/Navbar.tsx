@@ -30,7 +30,8 @@ export default function Navbar() {
   
   // Don't show navbar on landing, how to use, and auth pages
   const hideNavbarPaths = ['/', '/how-to-use', '/auth'];
-  const shouldHideNavbar = hideNavbarPaths.includes(location.pathname);
+  const isPublicProfilePage = /^\/[a-zA-Z0-9_-]+$/.test(location.pathname);
+  const shouldHideNavbar = hideNavbarPaths.includes(location.pathname) || isPublicProfilePage;
   
 
   // Fetch username when session changes
