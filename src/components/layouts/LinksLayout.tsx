@@ -44,6 +44,14 @@ export const LinksLayout = ({
     show: { opacity: 1, y: 0 }
   };
 
+  const handleLinkClick = (e: React.MouseEvent, link: Link) => {
+    if (editable) {
+      e.preventDefault();
+      return;
+    }
+    // For non-editable mode, let the default behavior happen (navigate to the URL)
+  };
+
   return (
     <motion.div
       variants={container}
@@ -90,10 +98,11 @@ export const LinksLayout = ({
               </div>
             )}
             <motion.a
-              href={editable ? "#" : link.url}
-              target={editable ? "_self" : "_blank"}
+              href={link.url}
+              target="_blank"
               rel="noopener noreferrer"
-              className={`flex items-center gap-3 p-4 rounded-lg bg-white/10 backdrop-blur-sm ${!editable ? 'hover:bg-white/20' : ''} transition-colors shadow-md w-full`}
+              onClick={(e) => handleLinkClick(e, link)}
+              className={`flex items-center gap-3 p-4 rounded-lg bg-white/10 backdrop-blur-sm ${!editable ? 'hover:bg-white/20 cursor-pointer' : 'cursor-default'} transition-colors shadow-md w-full`}
             >
               {link.photo_url ? (
                 <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">

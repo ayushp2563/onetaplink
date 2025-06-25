@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { LinkIcon } from "./LinkIcon";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -65,7 +66,7 @@ export const MixedLayout = ({ links, textShadowClass = "" }: MixedLayoutProps) =
                 target="_blank"
                 rel="noopener noreferrer"
                 variants={gridItem}
-                className="flex flex-col items-center gap-2 p-3 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors shadow-md aspect-square"
+                className="flex flex-col items-center gap-2 p-3 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors shadow-md aspect-square cursor-pointer"
               >
                 {link.photo_url ? (
                   <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
@@ -103,7 +104,7 @@ export const MixedLayout = ({ links, textShadowClass = "" }: MixedLayoutProps) =
                 target="_blank"
                 rel="noopener noreferrer"
                 variants={item}
-                className="flex items-center gap-3 p-4 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors shadow-md"
+                className="flex items-center gap-3 p-4 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors shadow-md cursor-pointer"
               >
                 {link.photo_url ? (
                   <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
